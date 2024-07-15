@@ -1,10 +1,26 @@
-# PMLR Generation Code
+# PMLR 162
 
-Code for generation of the Proceedings of Machine Learning Research.
+To suggest fixes to this volume please make a pull request containing the changes requested and a justification for the changes.
 
-There are two parts to this code,
+To edit the details of this conference work edit the [_config.yml](./_config.yml) file and submit a pull request.
 
-1. an elegant [framework written in Haskell](https://github.com/mlresearch/papersite/blob/master/haskell/README.md) for releasing the original proceedings mainly written by Mark.
-2. a hacky framework written in Ruby for releasing the updated PMLR proceedings mainly written by Neil.
+To make changes to the individual paper details, edit the associated paper file in the [./_posts](./_posts) subdirectory.
 
-For creation of new proceedings please check the [Ruby Framework](https://github.com/mlresearch/papersite/blob/master/ruby/README.md) 
+For details of how to publish in PMLR please check https://proceedings.mlr.press/faq.html
+
+For details of what is required to submit a proceedings please check https://proceedings.mlr.press/spec.html
+
+
+
+Published as Volume 162 by the Proceedings of Machine Learning Research on 28 June 2022.
+
+Volume Edited by:
+  * Kamalika Chaudhuri
+  * Stefanie Jegelka
+  * Le Song
+  * Csaba Szepesvari
+  * Gang Niu
+  * Sivan Sabato
+
+Series Editors:
+  * Neil D. Lawrence
