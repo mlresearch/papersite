@@ -358,15 +358,16 @@ module MLResearch
         ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + ha['id'] + '.pdf'
       else
         if File.file?(ha['id'] + '.pdf')
-          Dir.mkdir(filestub) unless File.exists?(filestub)
+          Dir.mkdir('assets') unless File.exist?('assets')
+          Dir.mkdir('assets/' + filestub) unless File.exist?('assets/' + filestub)
           if not File.file?(filestub + '/' + filestub + '.pdf')
-            FileUtils.mv(ha['id'] + '.pdf', filestub + '/' + filestub + '.pdf')
+            FileUtils.mv(ha['id'] + '.pdf', 'assets/' + filestub + '/' + filestub + '.pdf')
           end
         end
-        if File.file?(filestub + '/' + filestub + '.pdf')
-          ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + filestub + '/' + filestub + '.pdf'
+        if File.file?('assets/' + filestub + '/' + filestub + '.pdf')
+          ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + filestub + '/' + filestub + '.pdf'
         else
-          raise "PDF " + filestub + '/' + filestub + '.pdf' + " file not present"
+          raise "PDF " + '/assets/' + filestub + '/' + filestub + '.pdf' + " file not present"
         end
       end
       
@@ -386,9 +387,9 @@ module MLResearch
       # Move all supplementary files to relevant directory
       Dir.glob(ha['id'] +'-supp.*') do |supp_file|
         newfilename =  supp_file.gsub(ha['id'], filestub)
-        Dir.mkdir(filestub) unless File.exists?(filestub)
-        if not File.file?(filestub + '/' + newfilename)
-          FileUtils.mv(supp_file, filestub + '/' + newfilename)
+        Dir.mkdir('assets/' + filestub) unless File.exist?('assets/' + filestub)
+        if not File.file?('assets/' + filestub + '/' + newfilename)
+          FileUtils.mv(supp_file, 'assets/' + filestub + '/' + newfilename)
         end
       end
       if ha.has_key?('supplementary')
@@ -399,11 +400,11 @@ module MLResearch
 
       # Link to all -supp files in directory
       if inc_layout
-        ha['supplementary'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + supple
+        ha['supplementary'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + supple
       else
         ha['extras'] = []
-        Dir.glob(filestub + '/' + filestub +'-supp.*') do |supp_file|
-          ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + supp_file}]
+        Dir.glob('assets/' + filestub + '/' + filestub +'-supp.*') do |supp_file|
+          ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + supp_file}]
         end
         # Add supp link if it is available.
         if not supp_data.nil? and supp_data.has_key?(ha['id'])

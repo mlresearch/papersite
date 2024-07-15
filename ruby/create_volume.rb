@@ -82,7 +82,7 @@ MLResearch.write_volume_files(volume_info)
 
 # Write the papers
 directory_name = "_posts"
-Dir.mkdir(directory_name) unless File.exists?(directory_name)
+Dir.mkdir(directory_name) unless File.exist?(directory_name)
 MLResearch.extractpapers(bib_file, volume_no, volume_info, software_file, video_file, supp_file, supp_name)  
 out = File.open('index.html', 'w')
 out.puts "---"
