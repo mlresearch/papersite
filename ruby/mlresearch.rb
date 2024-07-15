@@ -365,7 +365,10 @@ module MLResearch
           end
         end
         if File.file?('assets/' + filestub + '/' + filestub + '.pdf')
-          ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + filestub + '/' + filestub + '.pdf'
+          # TK This is the new approach of storing papers raw rather than gh-pages old approach below
+          #ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + filestub + '/' + filestub + '.pdf'
+          ha['pdf'] = 'https://raw.githubusercontent.com/mlresearch/' + volume_info['volume_dir'] + '/main/assets/' + filestub + '/' + filestub + '.pdf'
+          
         else
           raise "PDF " + '/assets/' + filestub + '/' + filestub + '.pdf' + " file not present"
         end
@@ -406,7 +409,10 @@ module MLResearch
       else
         ha['extras'] = []
         Dir.glob('assets/' + filestub + '/' + filestub +'-supp.*') do |supp_file|
-          ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + supp_file}]
+          # TK This is the new approach of storing papers raw rather than gh-pages old approach below
+          #ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + supp_file}]
+          ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://raw.githubusercontent.com/mlresearch/' + volume_info['volume_dir'] + '/main/assets/' + supp_file}]
+          
         end
         # Add supp link if it is available.
         if not supp_data.nil? and supp_data.has_key?(ha['id'])
