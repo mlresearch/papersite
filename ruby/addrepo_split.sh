@@ -14,7 +14,7 @@ git init
 git checkout -b gh-pages
 
 # Add and commit files
-git add _posts Gemfile *.bib _config.yml README.md index.md
+git add _posts Gemfile *.bib _config.yml README.md index.html
 git commit -m "Add pages for volume $volume_name"
 
 git remote add origin git@github.com:mlresearch/$1.git
@@ -23,6 +23,7 @@ git push -u origin gh-pages
 
 # Create and switch to main branch
 git checkout -b main
+git rm _posts Gemfile *.bib _config.yml README.md index.html
 
 # Add and commit pdfs
 for letter in {a..z}

@@ -14,11 +14,12 @@ git init
 git checkout -b gh-pages
 
 # Add and commit files
-git add _posts Gemfile *.bib _config.yml README.md index.md
+git add _posts Gemfile *.bib _config.yml README.md index.html
 git commit -m "Add pages for volume $volume_name"
 
 # Create and switch to main branch
 git checkout -b main
+git add _posts Gemfile *.bib _config.yml README.md index.html
 
 # Add and commit pdfs
 git add assets
