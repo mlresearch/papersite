@@ -358,7 +358,7 @@ module MLResearch
         ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + ha['id'] + '.pdf'
       else
         if File.file?(ha['id'] + '.pdf')
-          Dir.mkdir(filestub) unless File.exists?(filestub)
+          Dir.mkdir(filestub) unless File.exist?(filestub)
           if not File.file?(filestub + '/' + filestub + '.pdf')
             FileUtils.mv(ha['id'] + '.pdf', filestub + '/' + filestub + '.pdf')
           end
