@@ -17,19 +17,23 @@ git checkout -b gh-pages
 git add _posts Gemfile *.bib _config.yml README.md index.html
 git commit -m "Add pages for volume $volume_name"
 
+# Add remote repository 
+git remote add origin git@github.com:mlresearch/$1.git
+git remote -v
+
+# Push gh-pages
+git push -u origin gh-pages
+
+# Move gh-pages files out of the way.
+mkdir gh-pages_files
+mv _posts Gemfile *.bib _config.yml README.md index.html gh-pages_files
+
 # Create and switch to main branch
 git checkout -b main
-git add _posts Gemfile *.bib _config.yml README.md index.html
 
 # Add and commit pdfs
 git add assets
 git commit -m "Add assets for volume $volume_name"
 
-# Add remote repository 
-git remote add origin git@github.com:mlresearch/$1.git
-git remote -v
-
-# Push both branches
-git push -u origin gh-pages
 git push -u origin main
 echo "Repository created and pushed to GitHub."
