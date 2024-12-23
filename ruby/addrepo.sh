@@ -37,3 +37,6 @@ git commit -m "Add assets for volume $volume_name"
 
 git push -u origin main
 echo "Repository created and pushed to GitHub."
+
+git commit -a -m "Remove gh-pages files"
+git push

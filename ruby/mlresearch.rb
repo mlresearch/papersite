@@ -556,6 +556,9 @@ module MLResearch
     ha.tap { |hs| hs.delete('name') }
     
     ha['analytics'] = {'google' => {'tracking_id' => self.tracking_id}}
+
+    # Controls whether any links are switched off.
+    ha['link_visibility'] = {'openreview' => true, 'pdf' => true, 'supplementary' => true, 'software' => true, 'video' => true, 'arxiv' => true, 'doi' => true, 'website' => true}
     ha['orig_bibfile'] = bibfile
     return ha
   end
