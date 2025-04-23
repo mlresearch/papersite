@@ -17,18 +17,24 @@ git checkout -b gh-pages
 git add _posts Gemfile *.bib _config.yml README.md index.html
 git commit -m "Add pages for volume $volume_name"
 
+# Add remote repository 
 git remote add origin git@github.com:mlresearch/$1.git
 git remote -v
+
+# Push gh-pages
 git push -u origin gh-pages
+
+# Move gh-pages files out of the way.
+mkdir gh-pages_files
+mv _posts Gemfile *.bib _config.yml README.md index.html gh-pages_files
 
 # Create and switch to main branch
 git checkout -b main
-git rm _posts Gemfile *.bib _config.yml README.md index.html
 
 # Add and commit pdfs
 for letter in {a..z}
 do git add assets/$letter*
-   git commit -a -m "Add $volume_name pdfs begining with $letter"
+   git commit -a -m "Add $volume_name assets pdfs begining with $letter"
    if git push -u origin main; then
        continue
    else

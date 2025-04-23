@@ -66,6 +66,7 @@ module MLResearch
   def self.detex(string_in)
     # Returning up to second end character is to deal with new line
     string = string_in.dup
+    raise "Cannot process empty or frozen string" if string_in.nil? || string_in.to_s.strip == '' || string_in.frozen?
     return string unless string.respond_to?(:to_s)
     string = string.is_a?(String) ? string.dup : string.to_s
     string.force_encoding("utf-8")
@@ -241,23 +242,53 @@ module MLResearch
     return f
   end
   
+  # Splits author or editor names into their constituent parts and formats them as a structured array
+  # @param ha [Hash] The hash containing author/editor information
+  # @param obj [Hash] The object containing parsed BibTeX entry data
+  # @param type [Symbol] The type of names to process - either :author or :editor (default: :author)
+  # @return [Array<Hash>] Array of hashes containing structured name parts:
+  #   - given: Given/first names with LaTeX markup removed
+  #   - family: Family/last names with LaTeX markup removed 
+  #   - prefix: Name prefixes (e.g. "van", "de") if present, with LaTeX markup removed
+  #   - suffix: Name suffixes (e.g. "Jr.", "III") if present, with LaTeX markup removed
   def self.splitauthors(ha, obj, type=:author)
     puts obj[:author]
+    # Initialize array to store processed names
     a = Array.new(obj[type].length)       #=> [nil, nil, nil]
+    
+    # Process each name in the input object
     obj[type].each.with_index(0) do |name, index|
-      given = detex(name.given)
-      family = detex(name.family)
+      # Remove LaTeX markup from given and family names
+      begin
+        given = detex(name.given)
+      rescue => e
+        raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Please check the bibtex entry."
+      end
+
+      begin
+        family = detex(name.family) 
+      rescue => e
+        raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Please check the bibtex entry."
+      end
+      
+      # Create hash for this author with required name parts
       a[index] = {'given' => given, 'family' => family}
+      # Debug output for name components
       puts name.suffix
       puts name.prefix
       puts name.suffix
+      
+      # Add optional prefix if present
       if !name.prefix.nil?
         a[index]['prefix'] = detex(name.prefix)
       end
+      
+      # Add optional suffix if present
       if !name.suffix.nil?
         a[index]['suffix'] = detex(name.suffix)
       end
     end
+    
     return a
   end
   
