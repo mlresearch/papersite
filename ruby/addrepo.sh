@@ -8,6 +8,13 @@ fi
 
 volume_name=$1
 
+# Check if repository already exists
+if git ls-remote "git@github.com:mlresearch/$volume_name.git" &>/dev/null; then
+    echo "Repository $volume_name already exists on GitHub."
+    echo "Please use ./updaterepo.sh instead to update an existing repository."
+    exit 1
+fi
+
 git init
 
 # Create and switch to gh-pages branch
