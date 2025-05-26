@@ -83,11 +83,20 @@ module MLResearch
     # Need to deal with different encodings. Map to utf-8
   end
 
-    def self.detex_abstract(string)
+    def self.detex_abstract(string, key=nil)
     # Returning up to second end character is to deal with new line
     return string unless string.respond_to?(:to_s)
     string = string.is_a?(String) ? string.dup : string.to_s
     string.force_encoding("utf-8")
+    
+    # Check for Unicode characters
+    unicode_chars = string.scan(/[^\x00-\x7F]/)
+    if !unicode_chars.empty?
+      key_info = key ? " in entry '#{key}'" : ""
+      raise "ERROR: Abstract contains Unicode characters#{key_info}: #{unicode_chars.uniq.join(', ')}. Please replace these with LaTeX commands."
+    end
+    
+    # First normalize and decode basic LaTeX elements
     LaTeX::Decode::Base.normalize(string)
     LaTeX::Decode::Accents.decode!(string)
     LaTeX::Decode::Diacritics.decode!(string)
@@ -146,7 +155,7 @@ module MLResearch
       if ha['abstract'] == ''
         ha.tap { |hs| hs.delete('abstract') }
       else
-        ha['abstract'] = detex_abstract(ha['abstract'])
+        ha['abstract'] = detex_abstract(ha['abstract'], ha['id'])
       end
     end
     if ha.has_key?('title')

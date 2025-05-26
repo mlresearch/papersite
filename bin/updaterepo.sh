@@ -21,6 +21,10 @@ mv _posts Gemfile *.bib _config.yml README.md index.html gh-pages_files/ 2>/dev/
 git add assets
 git commit -m "Update assets for volume $volume_name" || true
 
+# Clean up old PDF locations
+git add -A
+git commit -m "Remove old PDF locations after reorganization" || true
+
 # Push main branch
 git push origin main
 
@@ -41,4 +45,7 @@ git push origin gh-pages
 # Switch back to main branch
 git checkout main
 
-echo "Repository updated successfully." 
+echo "Repository updated successfully."
+
+# Update the pull request template
+./setup_pr_template.sh $volume_name 
