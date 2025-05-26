@@ -66,6 +66,7 @@ module MLResearch
   def self.detex(string_in)
     # Returning up to second end character is to deal with new line
     string = string_in.dup
+    raise "Cannot process empty or frozen string" if string_in.nil? || string_in.to_s.strip == '' || string_in.frozen?
     return string unless string.respond_to?(:to_s)
     string = string.is_a?(String) ? string.dup : string.to_s
     string.force_encoding("utf-8")
@@ -241,23 +242,53 @@ module MLResearch
     return f
   end
   
+  # Splits author or editor names into their constituent parts and formats them as a structured array
+  # @param ha [Hash] The hash containing author/editor information
+  # @param obj [Hash] The object containing parsed BibTeX entry data
+  # @param type [Symbol] The type of names to process - either :author or :editor (default: :author)
+  # @return [Array<Hash>] Array of hashes containing structured name parts:
+  #   - given: Given/first names with LaTeX markup removed
+  #   - family: Family/last names with LaTeX markup removed 
+  #   - prefix: Name prefixes (e.g. "van", "de") if present, with LaTeX markup removed
+  #   - suffix: Name suffixes (e.g. "Jr.", "III") if present, with LaTeX markup removed
   def self.splitauthors(ha, obj, type=:author)
     puts obj[:author]
+    # Initialize array to store processed names
     a = Array.new(obj[type].length)       #=> [nil, nil, nil]
+    
+    # Process each name in the input object
     obj[type].each.with_index(0) do |name, index|
-      given = detex(name.given)
-      family = detex(name.family)
+      # Remove LaTeX markup from given and family names
+      begin
+        given = detex(name.given)
+      rescue => e
+        raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Please check the bibtex entry."
+      end
+
+      begin
+        family = detex(name.family) 
+      rescue => e
+        raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Please check the bibtex entry."
+      end
+      
+      # Create hash for this author with required name parts
       a[index] = {'given' => given, 'family' => family}
+      # Debug output for name components
       puts name.suffix
       puts name.prefix
       puts name.suffix
+      
+      # Add optional prefix if present
       if !name.prefix.nil?
         a[index]['prefix'] = detex(name.prefix)
       end
+      
+      # Add optional suffix if present
       if !name.suffix.nil?
         a[index]['suffix'] = detex(name.suffix)
       end
     end
+    
     return a
   end
   
@@ -358,15 +389,19 @@ module MLResearch
         ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + ha['id'] + '.pdf'
       else
         if File.file?(ha['id'] + '.pdf')
-          Dir.mkdir(filestub) unless File.exist?(filestub)
+          Dir.mkdir('assets') unless File.exist?('assets')
+          Dir.mkdir('assets/' + filestub) unless File.exist?('assets/' + filestub)
           if not File.file?(filestub + '/' + filestub + '.pdf')
-            FileUtils.mv(ha['id'] + '.pdf', filestub + '/' + filestub + '.pdf')
+            FileUtils.mv(ha['id'] + '.pdf', 'assets/' + filestub + '/' + filestub + '.pdf')
           end
         end
-        if File.file?(filestub + '/' + filestub + '.pdf')
-          ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + filestub + '/' + filestub + '.pdf'
+        if File.file?('assets/' + filestub + '/' + filestub + '.pdf')
+          # TK This is the new approach of storing papers raw rather than gh-pages old approach below
+          #ha['pdf'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + filestub + '/' + filestub + '.pdf'
+          ha['pdf'] = 'https://raw.githubusercontent.com/mlresearch/' + volume_info['volume_dir'] + '/main/assets/' + filestub + '/' + filestub + '.pdf'
+          
         else
-          raise "PDF " + filestub + '/' + filestub + '.pdf' + " file not present"
+          raise "PDF " + '/assets/' + filestub + '/' + filestub + '.pdf' + " file not present"
         end
       end
 
@@ -387,9 +422,9 @@ module MLResearch
       # Move all supplementary files to relevant directory
       Dir.glob(ha['id'] +'-supp.*') do |supp_file|
         newfilename =  supp_file.gsub(ha['id'], filestub)
-        Dir.mkdir(filestub) unless File.exists?(filestub)
-        if not File.file?(filestub + '/' + newfilename)
-          FileUtils.mv(supp_file, filestub + '/' + newfilename)
+        Dir.mkdir('assets/' + filestub) unless File.exist?('assets/' + filestub)
+        if not File.file?('assets/' + filestub + '/' + newfilename)
+          FileUtils.mv(supp_file, 'assets/' + filestub + '/' + newfilename)
         end
       end
       if ha.has_key?('supplementary')
@@ -401,10 +436,14 @@ module MLResearch
       ha['extras'] = []
       # Link to all -supp files in directory
       if inc_layout # deal with non conformant volumes.
-        ha['supplementary'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + supple
+        ha['supplementary'] = 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + supple
       else
-        Dir.glob(filestub + '/' + filestub +'-supp.*') do |supp_file|
-          ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/' + supp_file}]
+        ha['extras'] = []
+        Dir.glob('assets/' + filestub + '/' + filestub +'-supp.*') do |supp_file|
+          # TK This is the new approach of storing papers raw rather than gh-pages old approach below
+          #ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://proceedings.mlr.press' + '/' + volume_info['volume_dir'] + '/assets/' + supp_file}]
+          ha['extras'] += [{'label' => 'Supplementary ' + File.extname(supp_file)[1..-1].upcase, 'link' => 'https://raw.githubusercontent.com/mlresearch/' + volume_info['volume_dir'] + '/main/assets/' + supp_file}]
+          
         end
         # Add supp link if it is available.
         if not supp_data.nil? and supp_data.has_key?(ha['id'])
@@ -548,6 +587,9 @@ module MLResearch
     ha.tap { |hs| hs.delete('name') }
     
     ha['analytics'] = {'google' => {'tracking_id' => self.tracking_id}}
+
+    # Controls whether any links are switched off.
+    ha['link_visibility'] = {'openreview' => true, 'pdf' => true, 'supplementary' => true, 'software' => true, 'video' => true, 'arxiv' => true, 'doi' => true, 'website' => true}
     ha['orig_bibfile'] = bibfile
     return ha
   end
