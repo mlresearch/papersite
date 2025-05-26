@@ -69,7 +69,10 @@ if not video_file.nil?
   video_file = MLResearch.procdir + reponame + '/' + video_file
 end
 if not bib_file.nil?
-  bib_file = MLResearch.procdir + reponame + '/' + bib_file
+  bib_file = bib_file
+  puts "Debug: bib_file = #{bib_file}"
+  puts "Debug: File exists? #{File.exist?(bib_file)}"
+  puts "Debug: Current directory: #{Dir.pwd}"
 end
 if not software_file.nil?
   software_file = MLResearch.procdir + reponame + '/' + software_file
