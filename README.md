@@ -1,26 +1,51 @@
-# PMLR 162
+# PMLR Repository
 
-To suggest fixes to this volume please make a pull request containing the changes requested and a justification for the changes.
+This repository contains tools and scripts for managing and publishing proceedings for the Proceedings of Machine Learning Research (PMLR).
 
-To edit the details of this conference work edit the [_config.yml](./_config.yml) file and submit a pull request.
+*I've archived an old version of this code at https://mlresearch/old_papersite>. On 2025-05-26 that repo was cloned to start this one and restructure with aim of creating a better automated pipeline.*
 
-To make changes to the individual paper details, edit the associated paper file in the [./_posts](./_posts) subdirectory.
+## Overview
 
-For details of how to publish in PMLR please check https://proceedings.mlr.press/faq.html
+The repository is structured as follows:
 
-For details of what is required to submit a proceedings please check https://proceedings.mlr.press/spec.html
+- **lib/**: Contains Ruby scripts for managing the Jekyll site and processing BibTeX files.
+- **bin/**: Contains shell scripts for various tasks related to the repository.
 
 
+## Ruby Code
 
-Published as Volume 162 by the Proceedings of Machine Learning Research on 28 June 2022.
+The Ruby code is used for creating Jekyll sites for hosting PMLR on GitHub Pages. The main code is found in `lib/mlresearch.rb`.
 
-Volume Edited by:
-  * Kamalika Chaudhuri
-  * Stefanie Jegelka
-  * Le Song
-  * Csaba Szepesvari
-  * Gang Niu
-  * Sivan Sabato
+### Requirements
 
-Series Editors:
-  * Neil D. Lawrence
+The Ruby scripts depend on the following packages:
+
+- ActiveRecord
+- bibtex-ruby
+- facets
+- pandoc-ruby
+
+You can install these packages using:
+
+```bash
+gem install bibtex-ruby facets pandoc-ruby activerecord
+```
+
+Alternatively, you can use the provided `Gemfile` with:
+
+```bash
+bundle install
+```
+
+### Usage
+
+For detailed usage instructions, refer to the `lib/README.md` file.
+
+## Contributing
+
+To suggest fixes or improvements, please make a pull request containing the changes requested and a justification for the changes.
+
+For details on how to publish in PMLR, please check [PMLR FAQ](https://proceedings.mlr.press/faq.html).
+
+For details on what is required to submit a proceedings, please check [PMLR Specification](https://proceedings.mlr.press/spec.html).
+
