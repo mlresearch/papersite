@@ -21,7 +21,32 @@ git init
 git checkout -b gh-pages
 
 # Add and commit files
-git add _posts Gemfile *.bib _config.yml README.md index.html
+files_to_add=("_posts" "Gemfile" "_config.yml" "README.md" "index.html")
+bib_files=(*.bib)
+log_files=(*.log)
+
+for file in "${files_to_add[@]}"; do
+    if [ -e "$file" ]; then
+        git add "$file"
+    else
+        echo "Warning: $file not found, skipping..."
+    fi
+done
+
+# Add .bib files if they exist
+if [ ${#bib_files[@]} -gt 0 ] && [ "${bib_files[0]}" != "*.bib" ]; then
+    git add "${bib_files[@]}"
+else
+    echo "Warning: No .bib files found, skipping..."
+fi
+
+# Add .log files if they exist
+if [ ${#log_files[@]} -gt 0 ] && [ "${log_files[0]}" != "*.log" ]; then
+    git add "${log_files[@]}"
+else
+    echo "Warning: No .log files found, skipping..."
+fi
+
 git commit -m "Add pages for volume $volume_name"
 
 # Add remote repository 
@@ -40,7 +65,7 @@ git checkout -b main
 
 # Add and commit pdfs
 git add assets
-git commit -m "Add assets for volume $volume_name"
+git commit -a -m "Add assets for volume $volume_name"
 
 git push -u origin main
 echo "Repository created and pushed to GitHub."

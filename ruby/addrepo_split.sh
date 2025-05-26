@@ -21,7 +21,7 @@ git init
 git checkout -b gh-pages
 
 # Add and commit files
-git add _posts Gemfile *.bib _config.yml README.md index.html
+git add _posts Gemfile *.bib _config.yml README.md index.html *.log
 git commit -m "Add pages for volume $volume_name"
 
 # Add remote repository 
