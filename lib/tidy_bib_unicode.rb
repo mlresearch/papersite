@@ -4,7 +4,7 @@ require 'yaml'
 require 'unicode/name'
 require 'optparse'
 
-options = { accept_all: false, strict: false }
+options = { accept_all: false, strict: false, verbose: false }
 OptionParser.new do |opts|
   opts.banner = "Usage: ruby tidy_bib_unicode.rb input.bib [output_clean.bib] [options]"
   opts.on("--accept-all", "Automatically accept all proposed substitutions (no prompt)") do
@@ -13,10 +13,13 @@ OptionParser.new do |opts|
   opts.on("--strict", "Fail with error if a substitution is missing") do
     options[:strict] = true
   end
+  opts.on("--verbose", "Print extra information during processing") do
+    options[:verbose] = true
+  end
 end.parse!(ARGV)
 
 if ARGV.length < 1
-  puts "Usage: ruby tidy_bib_unicode.rb input.bib [output_clean.bib] [--accept-all] [--strict]"
+  puts "Usage: ruby tidy_bib_unicode.rb input.bib [output_clean.bib] [--accept-all] [--strict] [--verbose]"
   exit 1
 end
 
@@ -103,6 +106,12 @@ File.foreach(input_file) do |line|
 end
 unicode_chars.uniq!
 
+if options[:verbose]
+  puts "Input file: #{input_file}"
+  puts "Output file: #{output_file}"
+  puts "Using replacements file: #{UNICODE_REPLACEMENTS_FILE}"
+end
+
 if unicode_chars.empty?
   puts "No Unicode characters found. No changes made."
   File.write(output_file, File.read(input_file)) unless output_file == input_file
@@ -118,12 +127,18 @@ replacement_map = {}
 unicode_chars.each do |char|
   replacement = get_replacement(char, replacements, options)
   replacement_map[char] = replacement
+  if options[:verbose]
+    puts "[VERBOSE] Replacement for '#{char}' (#{unicode_name(char) || 'UNKNOWN'}): '#{replacement}'"
+  end
 end
 
 # Now process the file line by line and write to output
 File.open(output_file, 'w') do |outf|
   File.foreach(input_file) do |line|
     replacement_map.each do |char, replacement|
+      if options[:verbose] && line.include?(char)
+        puts "[VERBOSE] Replacing '#{char}' with '#{replacement}' in line: #{line.strip}"
+      end
       line = line.gsub(char, replacement)
     end
     outf.write(line)
