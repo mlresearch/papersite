@@ -164,7 +164,7 @@ module MLResearch
     end
     if ha.has_key?('pages')
       pages = ha['pages'].split('-')
-      puts ha['pages']
+      puts "[VERBOSE] Pages: #{ha['pages']}" if defined?(verbose) && verbose
       pages[0] = pages[0].strip
       pages[-1] = pages[-1].strip
       if pages[0].is_i?
@@ -205,14 +205,14 @@ module MLResearch
     
     if ha.has_key?('editor')
       ha['bibtex_editor'] = ha['editor']
-      editor = splitauthors(ha, obj, type=:editor)
+      editor = splitauthors(ha, obj, type=:editor, verbose=false)
       ha.tap { |hs| hs.delete('editor') }
       ha['editor'] = editor
     end
     
     if ha.has_key?('author')
       ha['bibtex_author'] = ha['author']
-      author = splitauthors(ha, obj)
+      author = splitauthors(ha, obj, type=:author, verbose=false)
       ha.tap { |hs| hs.delete('author') }
       ha['author'] = author
     end
@@ -233,6 +233,13 @@ module MLResearch
       ha['end'] = Date.parse ha['end']
     end
     
+    if verbose
+      puts "[VERBOSE] Volume info: #{ha.inspect}"
+    end
+    if verbose
+      puts "[VERBOSE] Published date: #{ha['published']}"
+    end
+    
     return ha
   end
   def self.yamltohash(obj)
@@ -246,7 +253,7 @@ module MLResearch
   end
   
   def self.filename(date, title)
-    puts title
+    puts "[VERBOSE] Generating filename for title: #{title}" if defined?(verbose) && verbose
     f = date.to_s + '-' + title.to_s + '.md'
     return f
   end
@@ -260,32 +267,23 @@ module MLResearch
   #   - family: Family/last names with LaTeX markup removed 
   #   - prefix: Name prefixes (e.g. "van", "de") if present, with LaTeX markup removed
   #   - suffix: Name suffixes (e.g. "Jr.", "III") if present, with LaTeX markup removed
-  def self.splitauthors(ha, obj, type=:author)
-    puts obj[:author]
-    # Initialize array to store processed names
-    a = Array.new(obj[type].length)       #=> [nil, nil, nil]
-    
-    # Process each name in the input object
+  def self.splitauthors(ha, obj, type=:author, verbose=false)
+    puts "[VERBOSE] Authors for entry #{obj[:id]}: #{obj[:author]}" if verbose
+    a = Array.new(obj[type].length)
     obj[type].each.with_index(0) do |name, index|
-      # Remove LaTeX markup from given and family names
       begin
         given = detex(name.given)
       rescue => e
         raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Please check the bibtex entry."
       end
-
       begin
-        family = detex(name.family) 
+        family = detex(name.family)
       rescue => e
         raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Please check the bibtex entry."
       end
-      
-      # Create hash for this author with required name parts
       a[index] = {'given' => given, 'family' => family}
-      # Debug output for name components
-      puts name.suffix
-      puts name.prefix
-      puts name.suffix
+      puts "[VERBOSE] Name suffix: #{name.suffix}" if verbose && name.suffix
+      puts "[VERBOSE] Name prefix: #{name.prefix}" if verbose && name.prefix
       
       # Add optional prefix if present
       if !name.prefix.nil?
@@ -297,7 +295,6 @@ module MLResearch
         a[index]['suffix'] = detex(name.suffix)
       end
     end
-    
     return a
   end
   
@@ -309,7 +306,7 @@ module MLResearch
       return disambiguate_chars(div-1) + (mod+97).chr
     end
   end
-  def self.extractpapers(bib_file, volume_no, volume_info, software_file=nil, video_file=nil, supp_file=nil, supp_name=nil)
+  def self.extractpapers(bib_file, volume_no, volume_info, software_file=nil, video_file=nil, supp_file=nil, supp_name=nil, verbose=false, quiet=false)
     # Extract paper info from bib file and put it into yaml files in _posts
     
     # Extract information about software links from a csv file.
@@ -340,6 +337,8 @@ module MLResearch
     bib = BibTeX.parse(contents)
     # do work on files ending in .rb in the desired directory
     ids = []
+    processed = 0
+    skipped = 0
     bib['@inproceedings'].each do |obj|
       obj.replace(bib.q('@string'))
       obj.join
@@ -381,13 +380,20 @@ module MLResearch
       else
         stubdate = volume_info['published']
       end
+      if ha['author'].nil? || !ha['author'].is_a?(Array) || ha['author'][0].nil? || !ha['author'][0].is_a?(Hash) || ha['author'][0]['family'].nil?
+        warn "[WARNING] Skipping entry due to missing or malformed author field: #{ha['id'] || ha['title'] || ha.inspect}" unless quiet
+        skipped += 1
+        next
+      end
       filestub = (ha['author'][0]['family'].downcase + stubdate.strftime('%y') + disambiguate_chars(count)).parameterize
       while ids.include? filestub
         count += 1
         filestub = (ha['author'][0]['family'].downcase + stubdate.strftime('%y') + disambiguate_chars(count)).parameterize
       end
       ids.push(filestub)
-      puts filestub
+      if verbose
+        puts "[VERBOSE] filestub: #{filestub}"
+      end
       #puts ha['author'][0]['family'] + published.year.to_s.slice(-2,-1) + 'a'
       #puts ha['id']
 
@@ -479,7 +485,9 @@ module MLResearch
       out.puts ya
       out.puts "# Format based on Martin Fenner's citeproc: https://blog.front-matter.io/posts/citeproc-yaml-for-bibliographies/"
       out.puts "---"
+      processed += 1
     end  
+    puts "Processed #{processed} entries, skipped #{skipped} due to errors." unless quiet
   end
 
   def self.extractconfig()
@@ -490,7 +498,7 @@ module MLResearch
 
     
   
-  def self.bibextractconfig(bibfile, volume_no, volume_type, volume_prefix)
+  def self.bibextractconfig(bibfile, volume_no, volume_type, volume_prefix, verbose=false, quiet=false)
     # Extract information about the volume from the bib file, place in _config.yml
     file = File.open(bibfile, "rb")
     contents = file.read
@@ -500,7 +508,13 @@ module MLResearch
     obj.replace(bib.q('@string'))
     obj.join
     ha = bibtohash(obj)
-    puts ha
+    unless ha.has_key?('published') && ha['published']
+      ha['published'] = Date.today
+      warn "[WARNING] No published date found in BibTeX entry; using today's date: #{ha['published'].strftime('%Y-%m-%d')}" unless quiet
+    end
+    puts "[VERBOSE] Volume YAML hash: #{ha.inspect}" if verbose && !quiet
+    puts "[VERBOSE] Published date: #{ha['published']}" if verbose && !quiet
+    puts "[VERBOSE] Reference date: #{Date.parse('2021-07-02')}" if verbose && !quiet
     ha['title'] = "Proceedings of Machine Learning Research"
     booktitle = ha['booktitle']
     ha['description'] = booktitle
@@ -544,8 +558,6 @@ module MLResearch
       end
     end
     ha['description'] += "\nSeries Editors:\n  Neil D. Lawrence\n"
-    puts ha['published']
-    puts Date.parse('2021-07-02')
     if ha['published'] < Date.parse('2021-07-02') # Mark left after this date.
       ha['description'] += "  * Mark Reid\n"
     end
@@ -600,6 +612,23 @@ module MLResearch
     # Controls whether any links are switched off.
     ha['link_visibility'] = {'openreview' => true, 'pdf' => true, 'supplementary' => true, 'software' => true, 'video' => true, 'arxiv' => true, 'doi' => true, 'website' => true}
     ha['orig_bibfile'] = bibfile
+
+    # At the end, print a summary unless quiet
+    unless quiet
+      paper_count = if ha['sections'].is_a?(Array)
+        ha['sections'].map { |s| s['papers'] ? s['papers'].size : 0 }.sum
+      else
+        # Fallback: count @inproceedings in the bib file
+        begin
+          bib = BibTeX.parse(File.read(bibfile))
+          bib['@inproceedings'].size
+        rescue
+          'unknown'
+        end
+      end
+      puts "Volume #{ha['volume']}: #{ha['title']}, #{paper_count} papers, published #{ha['published'].strftime('%Y-%m-%d')}"
+    end
+
     return ha
   end
   def self.write_volume_files(ha)
