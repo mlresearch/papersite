@@ -118,9 +118,11 @@ if unicode_chars.empty?
   exit 0
 end
 
-puts "Found the following Unicode characters:"
-unicode_chars.each do |char|
-  puts "  '#{char}' (#{unicode_name(char) || 'UNKNOWN'})"
+if options[:verbose]
+  puts "Found the following Unicode characters:"
+  unicode_chars.each do |char|
+    puts "  '#{char}' (#{unicode_name(char) || 'UNKNOWN'})"
+  end
 end
 replacements = load_replacements
 replacement_map = {}
@@ -145,8 +147,10 @@ File.open(output_file, 'w') do |outf|
   end
 end
 
-puts "Cleaned file written to #{output_file}"
-puts "Replacements used:"
-replacement_map.each do |char, replacement|
-  puts "  '#{char}' (#{unicode_name(char) || 'UNKNOWN'}) => '#{replacement}'"
+if options[:verbose]
+  puts "Cleaned file written to #{output_file}"
+  puts "Replacements used:"
+  replacement_map.each do |char, replacement|
+    puts "  '#{char}' (#{unicode_name(char) || 'UNKNOWN'}) => '#{replacement}'"
+  end
 end 
