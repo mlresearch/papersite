@@ -4,7 +4,7 @@ require 'yaml'
 require 'unicode/name'
 require 'optparse'
 
-options = { accept_all: false, strict: false, verbose: false }
+options = { accept_all: false, strict: false, verbose: false, quiet: false }
 OptionParser.new do |opts|
   opts.banner = "Usage: ruby tidy_bib_unicode.rb input.bib [output_clean.bib] [options]"
   opts.on("--accept-all", "Automatically accept all proposed substitutions (no prompt)") do
@@ -16,10 +16,13 @@ OptionParser.new do |opts|
   opts.on("--verbose", "Print extra information during processing") do
     options[:verbose] = true
   end
+  opts.on("--quiet", "Suppress all non-essential output, including summary") do
+    options[:quiet] = true
+  end
 end.parse!(ARGV)
 
 if ARGV.length < 1
-  puts "Usage: ruby tidy_bib_unicode.rb input.bib [output_clean.bib] [--accept-all] [--strict] [--verbose]"
+  puts "Usage: ruby tidy_bib_unicode.rb input.bib [output_clean.bib] [--accept-all] [--strict] [--verbose] [--quiet]"
   exit 1
 end
 
@@ -152,5 +155,10 @@ if options[:verbose]
   puts "Replacements used:"
   replacement_map.each do |char, replacement|
     puts "  '#{char}' (#{unicode_name(char) || 'UNKNOWN'}) => '#{replacement}'"
+  end
+elsif !options[:quiet]
+  unless replacement_map.empty?
+    summary = replacement_map.map { |char, replacement| "#{char}->#{replacement}" }.join(", ")
+    puts "#{replacement_map.size} replacements made: [#{summary}]"
   end
 end 
