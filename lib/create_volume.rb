@@ -73,6 +73,17 @@ if not bib_file.nil?
   puts "Debug: bib_file = #{bib_file}"
   puts "Debug: File exists? #{File.exist?(bib_file)}"
   puts "Debug: Current directory: #{Dir.pwd}"
+
+  # Run tidy_bib_unicode.rb on the bib file, output to a temp cleaned file
+  cleaned_bib_file = bib_file.sub(/\.bib$/, '_clean.bib')
+  tidy_cmd = "ruby #{File.expand_path('tidy_bib_unicode.rb', __dir__)} \"#{bib_file}\" \"#{cleaned_bib_file}\" --accept-all --strict"
+  puts "Running: #{tidy_cmd}"
+  system(tidy_cmd)
+  unless File.exist?(cleaned_bib_file)
+    STDERR.puts "[ERROR] Cleaned bib file was not created. Exiting."
+    exit 1
+  end
+  bib_file = cleaned_bib_file
 end
 if not software_file.nil?
   software_file = MLResearch.procdir + reponame + '/' + software_file
