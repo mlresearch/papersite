@@ -38,8 +38,26 @@ def load_replacements
   end
 end
 
+def sanitize_replacement(str)
+  str.to_s.strip.gsub(/[
+\n]+/, "")
+end
+
 def save_replacements(replacements)
-  File.open(UNICODE_REPLACEMENTS_FILE, 'w') { |f| f.write(replacements.to_yaml) }
+  # Double all backslashes in replacement strings before saving to YAML
+  replacements_to_save = {}
+  replacements.each do |char, val|
+    if val.is_a?(Hash) && val['replacement']
+      rep = sanitize_replacement(val['replacement']).gsub('\\', '\\\\')
+      replacements_to_save[char] = val.merge('replacement' => rep)
+    elsif val.is_a?(String)
+      rep = sanitize_replacement(val).gsub('\\', '\\\\')
+      replacements_to_save[char] = rep
+    else
+      replacements_to_save[char] = val
+    end
+  end
+  File.open(UNICODE_REPLACEMENTS_FILE, 'w') { |f| f.write(replacements_to_save.to_yaml) }
 end
 
 def unicode_name(char)
@@ -49,14 +67,14 @@ end
 def get_replacement(char, replacements, options)
   name = unicode_name(char) || 'UNKNOWN'
   if replacements.key?(char)
-    default = replacements[char].is_a?(Hash) ? replacements[char]['replacement'] : replacements[char]
+    default = sanitize_replacement(replacements[char].is_a?(Hash) ? replacements[char]['replacement'] : replacements[char])
     if options[:accept_all]
       return default
     else
       loop do
         print "Unicode character '#{char}' (#{name}) detected. Suggested replacement: '#{default}'. Press Enter to accept or type a new replacement: "
         input = $stdin.gets.strip
-        replacement = input.empty? ? default : input
+        replacement = input.empty? ? default : sanitize_replacement(input)
         if replacement.include?(char)
           puts "[WARNING] Replacement contains the original character. Please provide a replacement that does not include '#{char}'."
           next
@@ -81,7 +99,8 @@ def get_replacement(char, replacements, options)
     else
       loop do
         print "Unicode character '#{char}' (#{name}) detected. Please provide a replacement: "
-        replacement = $stdin.gets.strip
+        input = $stdin.gets.strip
+        replacement = sanitize_replacement(input)
         if replacement.include?(char)
           puts "[WARNING] Replacement contains the original character. Please provide a replacement that does not include '#{char}'."
           next
@@ -131,21 +150,25 @@ replacements = load_replacements
 replacement_map = {}
 unicode_chars.each do |char|
   replacement = get_replacement(char, replacements, options)
+  replacement = sanitize_replacement(replacement)
   replacement_map[char] = replacement
+  puts "[DEBUG] Replacement for '#{char}' (#{unicode_name(char) || 'UNKNOWN'}): '#{replacement}'"
   if options[:verbose]
     puts "[VERBOSE] Replacement for '#{char}' (#{unicode_name(char) || 'UNKNOWN'}): '#{replacement}'"
   end
 end
 
 # Now process the file line by line and write to output
+pattern = Regexp.union(replacement_map.keys)
 File.open(output_file, 'w') do |outf|
   File.foreach(input_file) do |line|
-    replacement_map.each do |char, replacement|
-      if options[:verbose] && line.include?(char)
-        puts "[VERBOSE] Replacing '#{char}' with '#{replacement}' in line: #{line.strip}"
+    if options[:verbose]
+      matches = line.scan(pattern)
+      matches.each do |char|
+        puts "[VERBOSE] Replacing '#{char}' with '#{replacement_map[char]}' in line: #{line.strip}"
       end
-      line = line.gsub(char, replacement)
     end
+    line = line.gsub(pattern) { |char| replacement_map[char] }
     outf.write(line)
   end
 end
