@@ -11,3 +11,4 @@ gem "facets", "~> 3.1"
 gem "pandoc-ruby", "~> 2.1"
 gem "activerecord", "~> 7.0"
 gem "json", "~> 2.8"
+gem 'unicode-name'

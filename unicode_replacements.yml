@@ -17,6 +17,6 @@
 ś: "\\'{s}"
 "≥": "$\\geq$"
 "≤": "$\\leq$"
-!binary "ww==": "\\'{e}"
-!binary "pA==": \"{a}
-!binary "qQ==": ''
+"—":
+  replacement: "---"
+  name: EM DASH

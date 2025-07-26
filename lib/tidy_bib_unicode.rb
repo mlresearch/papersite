@@ -152,7 +152,7 @@ unicode_chars.each do |char|
   replacement = get_replacement(char, replacements, options)
   replacement = sanitize_replacement(replacement)
   replacement_map[char] = replacement
-  puts "[DEBUG] Replacement for '#{char}' (#{unicode_name(char) || 'UNKNOWN'}): '#{replacement}'"
+  puts "[DEBUG] Replacement for '#{char}' (#{unicode_name(char) || 'UNKNOWN'}): '#{replacement}'" if options[:verbose]
   if options[:verbose]
     puts "[VERBOSE] Replacement for '#{char}' (#{unicode_name(char) || 'UNKNOWN'}): '#{replacement}'"
   end
