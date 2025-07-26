@@ -37,6 +37,10 @@ Gemfile.lock
 \#*
 .#*
 
+.venv
+.ruby-version
+papersite.code-workspace
+
 # VibeSafe System Files (Auto-added during installation)
 # These are VibeSafe infrastructure - not your project content
 
