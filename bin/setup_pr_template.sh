@@ -47,11 +47,16 @@ cd ../$volume_name
 git checkout main
 git add .github/pull_request_template.md
 git commit -m "Update pull request template for paper edits"
+git push origin main
+
+# Copy the template from papersite to the volume's .github directory
+cp ../papersite/pull_request_template.md ../$volume_name/.github/
 
 # Also add to gh-pages branch
 git checkout gh-pages
 git add .github/pull_request_template.md
 git commit -m "Update pull request template for paper edits"
+git push origin gh-pages
 
 # Switch back to main branch
 git checkout main

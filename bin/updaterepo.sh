@@ -21,15 +21,11 @@ mv _posts Gemfile *.bib _config.yml README.md index.html gh-pages_files/ 2>/dev/
 git add assets
 git commit -m "Update assets for volume $volume_name" || true
 
-# Clean up old PDF locations
-git add -A
-git commit -m "Remove old PDF locations after reorganization" || true
-
 # Push main branch
 git push origin main
 
 # Switch to gh-pages branch
-git checkout gh-pages || git checkout -b gh-pages
+git checkout -b gh-pages
 
 # Move files from temporary directory to current directory
 mv gh-pages_files/* . 2>/dev/null || true
@@ -47,5 +43,8 @@ git checkout main
 
 echo "Repository updated successfully."
 
+# Get the directory where the current script is located
+script_dir=$(dirname "$0")
+
 # Update the pull request template
-./setup_pr_template.sh $volume_name 
+"$script_dir/setup_pr_template.sh" $volume_name 
