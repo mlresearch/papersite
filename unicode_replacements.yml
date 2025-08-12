@@ -20,3 +20,6 @@
 "—":
   replacement: "---"
   name: EM DASH
+"−":
+  replacement: "-"
+  name: MINUS SIGN
