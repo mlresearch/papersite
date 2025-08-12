@@ -14,6 +14,7 @@ procdir = '/Users/neil/mlresearch/'
 
 verbose = false
 quiet = false
+skip_pdf_check = false
 
 options = OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} <volume> <bibfile> [options]"
@@ -29,6 +30,9 @@ options = OptionParser.new do |opts|
   opts.on("--quiet", "Suppress all output") do
     quiet = true
     verbose = false
+  end
+  opts.on("--skip-pdf-check", "Skip PDF file existence checks (useful when PDFs are in separate branch)") do
+    skip_pdf_check = true
   end
   opts.on("-h", "--help", "Show this help message") do
     puts opts
@@ -88,7 +92,7 @@ volume_info = MLResearch.bibextractconfig(bib_file, volume, nil, nil, verbose &&
 MLResearch.write_volume_files(volume_info)
 directory_name = "_posts"
 Dir.mkdir(directory_name) unless File.exists?(directory_name)
-MLResearch.extractpapers(bib_file, volume, volume_info, nil, nil, nil, nil, verbose && !quiet, quiet)
+MLResearch.extractpapers(bib_file, volume, volume_info, nil, nil, nil, nil, verbose && !quiet, quiet, skip_pdf_check)
 out = File.open('index.html', 'w')
 out.puts "---"
 out.puts "layout: home"

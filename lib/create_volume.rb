@@ -25,6 +25,7 @@ supp_name = nil
 verbose = false
 quiet = false
 interactive = false
+skip_pdf_check = false
 
 parser = OptionParser.new do |parser|
   parser.banner = "Usage: create_volume.rb -v VOLUME -b BIBFILE [options]"
@@ -70,6 +71,9 @@ parser = OptionParser.new do |parser|
   end
   parser.on("--interactive", "Prompt for Unicode character substitutions (default: auto-accept)") do
     interactive = true
+  end
+  parser.on("--skip-pdf-check", "Skip PDF file existence checks (useful when PDFs are in separate branch)") do
+    skip_pdf_check = true
   end
   parser.on("-h", "--help", "Show this help message") do
     puts parser
@@ -145,7 +149,7 @@ MLResearch.write_volume_files(volume_info)
 directory_name = "_posts"
 Dir.mkdir(directory_name) unless File.exist?(directory_name)
 # TK should have a way of deciding whether papers are to be stored RAW or in the GH-pages
-MLResearch.extractpapers(bib_file, volume_no, volume_info, software_file, video_file, supp_file, supp_name, verbose && !quiet, quiet)  
+MLResearch.extractpapers(bib_file, volume_no, volume_info, software_file, video_file, supp_file, supp_name, verbose && !quiet, quiet, skip_pdf_check)  
 out = File.open('index.html', 'w')
 out.puts "---"
 out.puts "layout: home"

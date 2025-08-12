@@ -188,6 +188,16 @@ module MLResearch
     ha['cycles'] = false
     if ha.has_key?('sections')
       sections = ha['sections'].split('|')
+      
+      # Validate that there are multiple sections if sections are defined
+      if sections.length <= 1
+        raise "ERROR: Special sections are defined but only #{sections.length} section found. " +
+              "This usually indicates incorrect use of the '|' delimiter. " +
+              "If you have only one section, remove the 'sections' field entirely. " +
+              "If you have multiple sections, ensure they are properly separated by '|' characters. " +
+              "Current sections value: '#{ha['sections']}'"
+      end
+      
       hasections = Array.new(sections.length)
       section_dates = ha['published'].split('|')
       sections.each.with_index do |section, index|
@@ -306,7 +316,7 @@ module MLResearch
       return disambiguate_chars(div-1) + (mod+97).chr
     end
   end
-  def self.extractpapers(bib_file, volume_no, volume_info, software_file=nil, video_file=nil, supp_file=nil, supp_name=nil, verbose=false, quiet=false)
+  def self.extractpapers(bib_file, volume_no, volume_info, software_file=nil, video_file=nil, supp_file=nil, supp_name=nil, verbose=false, quiet=false, skip_pdf_check=false)
     # Extract paper info from bib file and put it into yaml files in _posts
     
     # Extract information about software links from a csv file.
@@ -416,7 +426,13 @@ module MLResearch
           ha['pdf'] = 'https://raw.githubusercontent.com/mlresearch/' + volume_info['volume_dir'] + '/main/assets/' + filestub + '/' + filestub + '.pdf'
           
         else
-          raise "PDF " + '/assets/' + filestub + '/' + filestub + '.pdf' + " file not present"
+          unless skip_pdf_check
+            raise "PDF " + '/assets/' + filestub + '/' + filestub + '.pdf' + " file not present"
+          else
+            # When skipping PDF check, still set the PDF URL but warn about missing file
+            ha['pdf'] = 'https://raw.githubusercontent.com/mlresearch/' + volume_info['volume_dir'] + '/main/assets/' + filestub + '/' + filestub + '.pdf'
+            warn "[WARNING] PDF file not found for #{ha['id']} (filestub: #{filestub}), but continuing due to --skip-pdf-check flag" unless quiet
+          end
         end
       end
 
