@@ -23,3 +23,96 @@
 "−":
   replacement: "-"
   name: MINUS SIGN
+Õ:
+  replacement: "\\~{O}"
+  name: LATIN CAPITAL LETTER O WITH TILDE
+"–":
+  replacement: "--"
+  name: EN DASH
+"‘":
+  replacement: ''
+  name: LEFT SINGLE QUOTATION MARK
+"‑":
+  replacement: "-"
+  name: NON-BREAKING HYPHEN
+"×":
+  replacement: "$\\times$"
+  name: MULTIPLICATION SIGN
+"\U0001D435":
+  replacement: "$B$"
+  name: MATHEMATICAL ITALIC CAPITAL B
+"\U0001D456":
+  replacement: "$i$"
+  name: MATHEMATICAL ITALIC SMALL I
+"\U0001D461":
+  replacement: "$t$"
+  name: MATHEMATICAL ITALIC SMALL T
+"\U0001D44F":
+  replacement: "$b$"
+  name: MATHEMATICAL ITALIC SMALL B
+ϵ:
+  replacement: "$\\epsilon$"
+  name: GREEK LUNATE EPSILON SYMBOL
+"³":
+  replacement: "$^3$"
+  name: SUPERSCRIPT THREE
+"‐":
+  replacement: "-"
+  name: HYPHEN
+ï:
+  replacement: \"{i}
+  name: LATIN SMALL LETTER I WITH DIAERESIS
+"→":
+  replacement: "$\\rightarrow$"
+  name: RIGHTWARDS ARROW
+Ł:
+  replacement: "{\\L}"
+  name: LATIN CAPITAL LETTER L WITH STROKE
+ő:
+  replacement: "\\H{o}"
+  name: LATIN SMALL LETTER O WITH DOUBLE ACUTE
+̀:
+  replacement: "\\`"
+  name: COMBINING GRAVE ACCENT
+́:
+  replacement: "\\'"
+  name: COMBINING ACUTE ACCENT
+Γ:
+  replacement: "$\\Gamma$"
+  name: GREEK CAPITAL LETTER GAMMA
+"∆":
+  replacement: "$\\Delta$"
+  name: INCREMENT
+"∼":
+  replacement: "$\\tilde$"
+  name: TILDE OPERATOR
+"°":
+  replacement: "$^\\circ$"
+  name: DEGREE SIGN
+µ:
+  replacement: "$\\bm{\\mu}$"
+  name: MICRO SIGN
+"´":
+  replacement: "\\'"
+  name: ACUTE ACCENT
+ı:
+  replacement: "{\\i}"
+  name: LATIN SMALL LETTER DOTLESS I
+Å:
+  replacement: "{\\AA}"
+  name: LATIN CAPITAL LETTER A WITH RING ABOVE
+ϕ:
+  replacement: "$\\phi$"
+  name: GREEK PHI SYMBOL
+β:
+  replacement: "$\\beta$"
+  name: GREEK SMALL LETTER BETA
+π:
+  replacement: "$\\pi$"
+  name: GREEK SMALL LETTER PI
+η:
+  replacement: "$\\eta$"
+  name: GREEK SMALL LETTER ETA
+Θ:
+  replacement: "$\\Theta$"
+  name: GREEK CAPITAL LETTER THETA
