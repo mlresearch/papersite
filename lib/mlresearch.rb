@@ -416,8 +416,9 @@ module MLResearch
         if File.file?(ha['id'] + '.pdf')
           Dir.mkdir('assets') unless File.exist?('assets')
           Dir.mkdir('assets/' + filestub) unless File.exist?('assets/' + filestub)
-          if not File.file?(filestub + '/' + filestub + '.pdf')
-            FileUtils.mv(ha['id'] + '.pdf', 'assets/' + filestub + '/' + filestub + '.pdf')
+          if not File.file?('assets/' + filestub + '/' + filestub + '.pdf')
+            # Use git mv to preserve history and save bandwidth
+            system("git mv '#{ha['id']}.pdf' 'assets/#{filestub}/#{filestub}.pdf'")
           end
         end
         if File.file?('assets/' + filestub + '/' + filestub + '.pdf')
@@ -455,7 +456,8 @@ module MLResearch
         newfilename =  supp_file.gsub(ha['id'], filestub)
         Dir.mkdir('assets/' + filestub) unless File.exist?('assets/' + filestub)
         if not File.file?('assets/' + filestub + '/' + newfilename)
-          FileUtils.mv(supp_file, 'assets/' + filestub + '/' + newfilename)
+          # Use git mv to preserve history and save bandwidth
+          system("git mv '#{supp_file}' 'assets/#{filestub}/#{newfilename}'")
         end
       end
       if ha.has_key?('supplementary')
@@ -725,6 +727,92 @@ module MLResearch
     out.puts
     out.puts readme
     
-  end  
+  end
+
+  # Cleanup and validation functions for branch separation
+  def self.validate_branch_separation(volume_dir, verbose=false, quiet=false)
+    # Validate that PDFs are not in gh-pages branch
+    pdf_files = Dir.glob("**/*.pdf")
+    if pdf_files.any?
+      warn "[WARNING] Found PDF files in gh-pages branch: #{pdf_files.join(', ')}" unless quiet
+      return false
+    end
+    
+    # Validate that Jekyll files are not in main branch (when on main)
+    current_branch = `git branch --show-current`.strip
+    if current_branch == 'main'
+      jekyll_files = ['_posts', '_config.yml', 'Gemfile', 'index.html']
+      jekyll_files.each do |file|
+        if File.exist?(file)
+          warn "[WARNING] Found Jekyll file '#{file}' in main branch" unless quiet
+          return false
+        end
+      end
+    end
+    
+    puts "[INFO] Branch separation validation passed" if verbose && !quiet
+    return true
+  end
+
+  def self.cleanup_orphaned_files(volume_dir, verbose=false, quiet=false)
+    # Find orphaned files that don't belong in current branch
+    current_branch = `git branch --show-current`.strip
+    cleaned_files = []
+    
+    if current_branch == 'gh-pages'
+      # Remove any PDF files from gh-pages
+      pdf_files = Dir.glob("**/*.pdf")
+      pdf_files.each do |file|
+        if File.exist?(file)
+          system("git rm '#{file}'")
+          cleaned_files << file
+          puts "[CLEANUP] Removed PDF file: #{file}" if verbose && !quiet
+        end
+      end
+    elsif current_branch == 'main'
+      # Remove Jekyll files from main
+      jekyll_files = ['_posts', '_config.yml', 'Gemfile', 'index.html']
+      jekyll_files.each do |file|
+        if File.exist?(file)
+          system("git rm -r '#{file}'")
+          cleaned_files << file
+          puts "[CLEANUP] Removed Jekyll file: #{file}" if verbose && !quiet
+        end
+      end
+    end
+    
+    if cleaned_files.any?
+      puts "[INFO] Cleaned up #{cleaned_files.length} orphaned files" unless quiet
+    else
+      puts "[INFO] No orphaned files found" if verbose && !quiet
+    end
+    
+    return cleaned_files
+  end
+
+  def self.diagnostic_report(volume_dir, verbose=false, quiet=false)
+    puts "\n=== DIAGNOSTIC REPORT FOR #{volume_dir.upcase} ===" unless quiet
+    puts "Current directory: #{Dir.pwd}" if verbose && !quiet
+    puts "Current branch: #{`git branch --show-current`.strip}" unless quiet
+    
+    # File counts
+    pdf_count = Dir.glob("**/*.pdf").length
+    post_count = Dir.glob("_posts/*.md").length if File.exist?('_posts')
+    asset_count = Dir.glob("assets/**/*").length if File.exist?('assets')
+    
+    puts "PDF files: #{pdf_count}" unless quiet
+    puts "Post files: #{post_count || 0}" unless quiet
+    puts "Asset files: #{asset_count || 0}" unless quiet
+    
+    # Branch validation
+    validation_passed = validate_branch_separation(volume_dir, verbose, quiet)
+    puts "Branch separation: #{validation_passed ? 'PASS' : 'FAIL'}" unless quiet
+    
+    # Git status
+    puts "\nGit status:" unless quiet
+    system("git status --porcelain") unless quiet
+    
+    puts "=== END DIAGNOSTIC REPORT ===\n" unless quiet
+  end
 end
 
