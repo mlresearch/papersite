@@ -18,7 +18,7 @@ class BibTeXCleaner
 
   def parse_options
     parser = OptionParser.new do |parser|
-      parser.banner = "Usage: tidy_bibtex.rb INPUT OUTPUT [options]"
+      parser.banner = "Usage: tidy_bibtex.rb [INPUT OUTPUT] [options]"
       
       parser.on("--strict", "Strict mode - fail on any issues found") do
         @options[:strict] = true
@@ -66,14 +66,31 @@ class BibTeXCleaner
   def run
     parse_options
     
-    if ARGV.length < 2
+    # Auto-detect single BibTeX file if no arguments provided
+    if ARGV.length == 0
+      bib_files = find_bib_files
+      if bib_files.length == 0
+        STDERR.puts "Error: No BibTeX files found in current directory"
+        exit 1
+      elsif bib_files.length > 1
+        STDERR.puts "Error: Multiple BibTeX files found. Please specify which one to process:"
+        bib_files.each { |f| STDERR.puts "  #{f}" }
+        exit 1
+      else
+        input_file = bib_files[0]
+        output_file = input_file.sub(/\.bib$/, '_cleaned.bib')
+        puts "Auto-detected BibTeX file: #{input_file}" unless @options[:quiet]
+        puts "Output file: #{output_file}" unless @options[:quiet]
+      end
+    elsif ARGV.length < 2
       STDERR.puts "Error: Input and output files required"
-      STDERR.puts "Usage: tidy_bibtex.rb INPUT OUTPUT [options]"
+      STDERR.puts "Usage: tidy_bibtex.rb [INPUT OUTPUT] [options]"
+      STDERR.puts "       tidy_bibtex.rb [options]  # Auto-detect single .bib file"
       exit 1
+    else
+      input_file = ARGV[0]
+      output_file = ARGV[1]
     end
-    
-    input_file = ARGV[0]
-    output_file = ARGV[1]
     
     unless File.exist?(input_file)
       STDERR.puts "Error: Input file '#{input_file}' not found"
@@ -207,6 +224,14 @@ class BibTeXCleaner
     print "#{question} (y/n): "
     response = STDIN.gets.chomp.downcase
     response == 'y' || response == 'yes'
+  end
+
+  def find_bib_files
+    bib_files = []
+    Dir.glob("*.bib").each do |file|
+      bib_files << file
+    end
+    bib_files.sort
   end
 end
 
