@@ -1,5 +1,7 @@
 # PMLR Repository
 
+[![Tests](https://github.com/mlresearch/papersite/workflows/Test%20Scripts/badge.svg)](https://github.com/mlresearch/papersite/actions)
+
 This repository contains tools and scripts for managing and publishing proceedings for the Proceedings of Machine Learning Research (PMLR).
 
 *I've archived an old version of this code at <https://github.com/mlresearch/old_papersite>. On 2025-05-26 that repo was cloned to start this one and restructure with aim of creating a better automated pipeline.*
