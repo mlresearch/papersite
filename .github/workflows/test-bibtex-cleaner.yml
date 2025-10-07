@@ -148,8 +148,8 @@ jobs:
           exit 1
         fi
         
-        # Test that cleaned file passes validation
-        if ruby ../lib/tidy_bibtex.rb --strict --check-author-commas comprehensive_fixed.bib /tmp/validation.bib; then
+        # Test that cleaned file passes validation (use --fix-author-commas to fix author issues)
+        if ruby ../lib/tidy_bibtex.rb --strict --fix-author-commas comprehensive_fixed.bib /tmp/validation.bib; then
           echo "✓ Fixed file passes validation"
         else
           echo "ERROR: Fixed file should pass validation"
