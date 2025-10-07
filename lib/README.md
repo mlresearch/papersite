@@ -48,81 +48,74 @@ proceedings are available (see http://proceedings.mlr.press/).
 
 ## When the Proceedings are Ready
 
-The proceedings editor needs to provide you you with a zipped file that
-contains the PDFS and supplemental information, as well as a bib file
+The proceedings editor will submit a pull request to the repo. That pull request
+contains the PDFs and supplemental information, as well as a bib file
 containing information about the volume. The specification for all
 this is given here:
 
 http://proceedings.mlr.press/spec.html
 
-The scripts run in `papersite`. As a suggested directory structure, if
-`papersite` is located at
+### Modern Workflow (Recommended)
 
+1. **Setup Directory Structure**:
 ```bash
-~/mlresearch/papersite
+# Create volume directory
+cd ~/mlresearch/
+git clone git@github.com:mlresearch/vNN.git
 ```
-then create the new directory
+which will clone the repo including the bib file.
 
-```
-mkdir ~/mlresearch/vNN
-```
-with NN being the volume number.
+Add today's date to the bib file in the `published`-field in the @Proceedings entry in the `FILE.bib`.
 
-Then unzip the file containing PDFs and the bib file into the new
-directory.
+2. **Clean BibTeX File**:
+```bash
+# Fix common BibTeX issues (unescaped % characters, etc.)
+ruby ../papersite/lib/tidy_bibtex.rb --fix-all FILE.bib FILE_cleaned.bib
+```
 Add today's date to the `published`-field in the `@Proceedings` entry in `FILE.bib`.
 
+3. **Create Volume**:
 ```bash
-cd ~/mlresearch/vNN
-../papersite/ruby/create_volume.rb -v NN -b FILE.bib
+# Generate Jekyll site and organize assets
+ruby ../papersite/lib/create_volume.rb -v NN -b FILE_cleaned.bib
+
+# If PDFs are in separate branch, skip PDF checks
+ruby ../papersite/lib/create_volume.rb -v NN -b FILE_cleaned.bib --skip-pdf-check
 ```
 
-Where NN is the volume number and FILE.bib is the file provided by the
-proceedings editors (e.g. gpip2006.bib).
+4. **Deploy with Proper Branch Separation**:
+```bash
+# Use new deployment script (recommended)
+../papersite/bin/deploy_volume.sh NN
+```
 
-This will move the PDFs into the correct positions, along with
-supplemental material.
+This initially updates the main branch with the created files. Then creates a gh-pages branch. Then it deletes files to leave you with:
+
+- **main branch**: Contains assets (PDFs) and README.md
+- **gh-pages branch**: Contains Jekyll site files for GitHub Pages
+
+### Legacy Workflow (Deprecated)
 
 The site is created using Jekyll. There is a customised remote-theme for formating the proceedings which is referenced in the `_config.yml` file.
 
 Now, assuming you have already created the stub git repo on github,
 you can run the script
 
+### BibTeX Cleaning
+
+The `tidy_bibtex.rb` script fixes or flags common issues:
+- Unescaped % characters in abstract fields
+- Missing commas in author fields
+- Unicode character handling
+
+Usage:
 ```bash
-# CAREFUL RUNNING THIS! MAKE SURE YOU GET THE REPO VOLUME RIGHT!
-../papersite/ruby/addrepo.sh vNN
+ruby lib/tidy_bibtex.rb --fix-all input.bib output.bib
 ```
 
-which will init the git repo, and check in the code to the relevant
-repo.
+### Unicode Handling
 
-### Note
-
-Recently ML proceedings have been getting bigger, and github doesn't seem to like having them pushed in one go. If you need to split up into multiple commits, here's a script that can work.
-
-```bash
-# CAREFUL RUNNING THIS! MAKE SURE YOU GET THE REPO VOLUME RIGHT!
-../papersite/ruby/addrepo_split.sh vNN
-```
-
-It adds the core files, then commits the initial files before adding papers in alphabetical order.
+The system automatically handles Unicode characters using `unicode_replacements.yml`. Common characters are automatically converted to LaTeX equivalents.
 
 
-## Old JMLR Pages
 
-These scripts were also used to copy across from the old JMLR pages,
-see: https://github.com/mlresearch/mlresearch.github.io/blob/master/create_volume.sh
-
-Other files for updating from the original `db` format can be found as
-below:
-
-```bash
-./update_config.rb NN
-```
-
-To update/create the individual paper information from the
-`papersite/db/` storage  (stored in  `_posts` as files with `YYYY-MM-DD-keyname.md` with the date of publication and keyname from the bibtex entry) use
-
-```bash
-./update_papers.rb NN
-```

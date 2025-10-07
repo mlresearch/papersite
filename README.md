@@ -12,6 +12,50 @@ The repository is structured as follows:
 
 - **lib/**: Contains Ruby scripts for managing the Jekyll site and processing BibTeX files.
 - **bin/**: Contains shell scripts for various tasks related to the repository.
+- **backlog/**: Task management system for tracking improvements and features.
+- **cip/**: Code Improvement Plans for documenting architectural changes.
+
+## Volume Processing Workflow
+
+The modern workflow for processing PMLR volumes includes:
+
+1. **BibTeX Cleaning**: Use `tidy_bibtex.rb` to fix common issues like unescaped % characters
+2. **Volume Creation**: Use `create_volume.rb` to generate Jekyll posts and organize assets
+3. **Deployment**: Use `deploy_volume.sh` for proper branch separation (assets on main, Jekyll on gh-pages)
+
+### BibTeX Cleaning
+
+Before processing a volume, clean the BibTeX file to fix common issues:
+
+```bash
+# Clean BibTeX file (fixes unescaped % characters and other issues)
+ruby lib/tidy_bibtex.rb --fix-all input.bib output_cleaned.bib
+```
+
+### Volume Creation
+
+Create the Jekyll site and organize assets:
+
+```bash
+# Create volume with cleaned BibTeX
+ruby lib/create_volume.rb -v VOLUME_NUMBER -b cleaned.bib
+
+# If PDFs are in a separate branch, skip PDF checks
+ruby lib/create_volume.rb -v VOLUME_NUMBER -b cleaned.bib --skip-pdf-check
+```
+
+### Deployment
+
+Deploy the volume with proper branch separation:
+
+```bash
+# Deploy with new script (recommended)
+./bin/deploy_volume.sh VOLUME_NUMBER
+```
+
+This creates:
+- **main branch**: Contains assets (PDFs) and README.md
+- **gh-pages branch**: Contains Jekyll site files for GitHub Pages
 
 
 ## Ruby Code
