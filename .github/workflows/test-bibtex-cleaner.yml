@@ -119,7 +119,7 @@ jobs:
         cat > comprehensive.bib << 'EOF'
         @article{test1,
           title = {Machine Learning 100%},
-          author = {John Doe, , and Jane Smith},
+          author = {John Doe and Jane Smith},
           abstract = {This paper shows 50% improvement with 25% accuracy},
           year = {2024}
         }
