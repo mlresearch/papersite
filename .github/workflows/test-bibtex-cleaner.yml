@@ -1,0 +1,210 @@
+name: Test BibTeX Cleaner
+
+on:
+  push:
+    branches: [ main, gh-pages ]
+  pull_request:
+    branches: [ main, gh-pages ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        
+    - name: Install dependencies
+      run: |
+        gem install test-unit
+        
+    - name: Run BibTeX cleaner tests
+      run: |
+        ruby test/test_bibtex_cleaner.rb
+        
+    - name: Test auto-detection functionality
+      run: |
+        # Create a test directory with a single BibTeX file
+        mkdir -p test_auto_detection
+        cd test_auto_detection
+        
+        # Create a BibTeX file with issues
+        cat > test.bib << 'EOF'
+        @article{test2024,
+          title = {Machine Learning 100%},
+          author = {John Doe and Jane Smith},
+          abstract = {This is 50% accurate},
+          year = {2024}
+        }
+        EOF
+        
+        # Test auto-detection with issues (should fail in strict mode)
+        echo "Testing auto-detection with issues..."
+        if ruby ../lib/tidy_bibtex.rb --strict --check-author-commas; then
+          echo "ERROR: Script should have failed with issues present"
+          exit 1
+        else
+          echo "✓ Correctly failed with issues present"
+        fi
+        
+        # Test auto-detection with fixes
+        echo "Testing auto-detection with fixes..."
+        ruby ../lib/tidy_bibtex.rb --fix-percent --quiet
+        if [ -f "test_cleaned.bib" ]; then
+          echo "✓ Output file created successfully"
+        else
+          echo "ERROR: Output file not created"
+          exit 1
+        fi
+        
+        # Test that cleaned file passes validation
+        echo "Testing cleaned file validation..."
+        if ruby ../lib/tidy_bibtex.rb --strict --check-author-commas test_cleaned.bib /tmp/validation.bib; then
+          echo "✓ Cleaned file passes validation"
+        else
+          echo "ERROR: Cleaned file should pass validation"
+          exit 1
+        fi
+        
+    - name: Test multiple file detection
+      run: |
+        # Create a test directory with multiple BibTeX files
+        mkdir -p test_multiple_files
+        cd test_multiple_files
+        
+        # Create multiple BibTeX files
+        cat > file1.bib << 'EOF'
+        @article{test1, title = {Paper 1}, year = {2024}}
+        EOF
+        
+        cat > file2.bib << 'EOF'
+        @article{test2, title = {Paper 2}, year = {2024}}
+        EOF
+        
+        # Test multiple file detection (should fail)
+        echo "Testing multiple file detection..."
+        if ruby ../lib/tidy_bibtex.rb --strict 2>/dev/null; then
+          echo "ERROR: Script should have failed with multiple files"
+          exit 1
+        else
+          echo "✓ Correctly failed with multiple files"
+        fi
+        
+    - name: Test no file detection
+      run: |
+        # Create a test directory with no BibTeX files
+        mkdir -p test_no_files
+        cd test_no_files
+        
+        # Test no file detection (should fail)
+        echo "Testing no file detection..."
+        if ruby ../lib/tidy_bibtex.rb --strict 2>/dev/null; then
+          echo "ERROR: Script should have failed with no files"
+          exit 1
+        else
+          echo "✓ Correctly failed with no files"
+        fi
+        
+    - name: Test comprehensive BibTeX issues
+      run: |
+        # Create a comprehensive test file
+        mkdir -p test_comprehensive
+        cd test_comprehensive
+        
+        cat > comprehensive.bib << 'EOF'
+        @article{test1,
+          title = {Machine Learning 100%},
+          author = {John Doe, , and Jane Smith},
+          abstract = {This paper shows 50% improvement with 25% accuracy},
+          year = {2024}
+        }
+        
+        @article{test2,
+          title = {Another Paper 90%},
+          author = {Alice Brown and Bob Green},
+          abstract = {This shows 75% success rate},
+          year = {2024}
+        }
+        EOF
+        
+        # Test detection
+        echo "Testing comprehensive issue detection..."
+        ruby ../lib/tidy_bibtex.rb --check-author-commas comprehensive.bib /tmp/detection.bib
+        
+        # Test fixing
+        echo "Testing comprehensive issue fixing..."
+        ruby ../lib/tidy_bibtex.rb --fix-percent comprehensive.bib comprehensive_fixed.bib
+        
+        # Verify fixes
+        if grep -q "100\\\\%" comprehensive_fixed.bib && grep -q "50\\\\%" comprehensive_fixed.bib; then
+          echo "✓ Percent characters correctly escaped"
+        else
+          echo "ERROR: Percent characters not properly escaped"
+          exit 1
+        fi
+        
+        # Test that cleaned file passes validation
+        if ruby ../lib/tidy_bibtex.rb --strict --check-author-commas comprehensive_fixed.bib /tmp/validation.bib; then
+          echo "✓ Fixed file passes validation"
+        else
+          echo "ERROR: Fixed file should pass validation"
+          exit 1
+        fi
+        
+    - name: Test edge cases
+      run: |
+        # Test edge cases
+        mkdir -p test_edge_cases
+        cd test_edge_cases
+        
+        # Test file with no issues
+        cat > clean.bib << 'EOF'
+        @article{clean,
+          title = {Clean Paper},
+          author = {John Doe and Jane Smith},
+          abstract = {This is a clean abstract},
+          year = {2024}
+        }
+        EOF
+        
+        # Should pass validation
+        if ruby ../lib/tidy_bibtex.rb --strict --check-author-commas clean.bib /tmp/clean_output.bib; then
+          echo "✓ Clean file passes validation"
+        else
+          echo "ERROR: Clean file should pass validation"
+          exit 1
+        fi
+        
+        # Test file with only percent issues
+        cat > percent_only.bib << 'EOF'
+        @article{percent,
+          title = {Paper with 50% accuracy},
+          author = {John Doe and Jane Smith},
+          abstract = {This shows 75% improvement},
+          year = {2024}
+        }
+        EOF
+        
+        # Should detect issues
+        if ruby ../lib/tidy_bibtex.rb --strict percent_only.bib /tmp/percent_output.bib 2>/dev/null; then
+          echo "ERROR: Should have detected percent issues"
+          exit 1
+        else
+          echo "✓ Correctly detected percent issues"
+        fi
+        
+        # Should fix issues
+        ruby ../lib/tidy_bibtex.rb --fix-percent percent_only.bib percent_fixed.bib
+        
+        # Should pass after fixing
+        if ruby ../lib/tidy_bibtex.rb --strict --check-author-commas percent_fixed.bib /tmp/percent_validation.bib; then
+          echo "✓ Fixed file passes validation"
+        else
+          echo "ERROR: Fixed file should pass validation"
+          exit 1
+        fi
