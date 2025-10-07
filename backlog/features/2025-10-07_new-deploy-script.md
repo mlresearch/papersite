@@ -1,7 +1,7 @@
 ---
 id: 2025-10-07_new-deploy-script
 title: Create New Deploy Volume Script
-status: Proposed
+status: Completed
 priority: High
 created: "2025-10-07"
 last_updated: "2025-10-07"
@@ -17,17 +17,17 @@ Create a new deployment script that properly handles the separation of assets an
 
 ## Acceptance Criteria
 
-- [ ] Script adds created files to main branch
-- [ ] Script copies pull request template from papersite directory to .github/
-- [ ] Script commits changes to main branch
-- [ ] Script creates or switches to gh-pages branch
-- [ ] Script deletes assets from gh-pages branch
-- [ ] Script pushes gh-pages branch with Jekyll content
-- [ ] Script checks out main branch (recovering assets)
-- [ ] Script deletes all files except assets and README.md from main
-- [ ] Script pushes cleaned main branch
-- [ ] Script provides clear status messages for each step
-- [ ] Script handles errors gracefully with proper exit codes
+- [x] Script adds created files to main branch
+- [x] Script copies pull request template from papersite directory to .github/
+- [x] Script commits changes to main branch
+- [x] Script creates or switches to gh-pages branch
+- [x] Script deletes assets from gh-pages branch
+- [x] Script pushes gh-pages branch with Jekyll content
+- [x] Script checks out main branch (recovering assets)
+- [x] Script deletes all files except assets and README.md from main
+- [x] Script pushes cleaned main branch
+- [x] Script provides clear status messages for each step
+- [x] Script handles errors gracefully with proper exit codes
 
 ## Implementation Notes
 
@@ -57,3 +57,6 @@ This approach ensures:
 
 ### 2025-10-07
 Task created with Proposed status. New deploy script created with improved workflow for proper branch separation.
+
+### 2025-10-07
+Task completed. New deploy_volume.sh script implemented with proper branch separation workflow. Old updaterepo.sh script removed.
