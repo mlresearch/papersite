@@ -1,6 +1,6 @@
 # PMLR Repository
 
-[![Tests](https://github.com/mlresearch/papersite/workflows/Test%20Scripts/badge.svg)](https://github.com/mlresearch/papersite/actions)
+[![Tests](https://github.com/mlresearch/papersite/workflows/Test%20BibTeX%20Cleaner/badge.svg)](https://github.com/mlresearch/papersite/actions)
 
 This repository contains tools and scripts for managing and publishing proceedings for the Proceedings of Machine Learning Research (PMLR).
 
