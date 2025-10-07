@@ -131,3 +131,24 @@
 ←:
   replacement: "$\\leftarrow$"
   name: LEFTWARDS ARROW
+ğ:
+  replacement: "\\u{g}"
+  name: LATIN SMALL LETTER G WITH BREVE
+¨:
+  replacement: "\\\"{}"
+  name: DIAERESIS
+ş:
+  replacement: "\\c{s}"
+  name: LATIN SMALL LETTER S WITH CEDILLA
+ć:
+  replacement: "\\'{c}"
+  name: LATIN SMALL LETTER C WITH ACUTE
+ę:
+  replacement: "\\k{e}"
+  name: LATIN SMALL LETTER E WITH OGONEK
+"\u00A0":
+  replacement: "~"
+  name: NO-BREAK SPACE
+ß:
+  replacement: "{\\ss}"
+  name: LATIN SMALL LETTER SHARP S
