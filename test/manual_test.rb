@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/tidy_bibtex'
+require 'tempfile'
 
 puts "BibTeX Cleaner Manual Test Suite"
 puts "=" * 40

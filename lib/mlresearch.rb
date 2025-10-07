@@ -284,12 +284,12 @@ module MLResearch
       begin
         given = detex(name.given)
       rescue => e
-        raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Please check the bibtex entry."
+        raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
       end
       begin
         family = detex(name.family)
       rescue => e
-        raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Please check the bibtex entry."
+        raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
       end
       a[index] = {'given' => given, 'family' => family}
       puts "[VERBOSE] Name suffix: #{name.suffix}" if verbose && name.suffix

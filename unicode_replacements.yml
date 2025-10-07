@@ -116,3 +116,18 @@
 Θ:
   replacement: "$\\Theta$"
   name: GREEK CAPITAL LETTER THETA
+ç:
+  replacement: "\\c{c}"
+  name: LATIN SMALL LETTER C WITH CEDILLA
+ã:
+  replacement: "\\~{a}"
+  name: LATIN SMALL LETTER A WITH TILDE
+Á:
+  replacement: "\\'{A}"
+  name: LATIN CAPITAL LETTER A WITH ACUTE
+å:
+  replacement: "{\\aa}"
+  name: LATIN SMALL LETTER A WITH RING ABOVE
+←:
+  replacement: "$\\leftarrow$"
+  name: LEFTWARDS ARROW
