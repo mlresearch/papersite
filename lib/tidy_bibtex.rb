@@ -100,7 +100,18 @@ class BibTeXCleaner
     puts "Input file: #{input_file}" unless @options[:quiet]
     puts "Output file: #{output_file}" unless @options[:quiet]
     
-    content = File.read(input_file)
+    # Try to read with UTF-8, fall back to other encodings if needed
+    begin
+      content = File.read(input_file, encoding: 'UTF-8')
+    rescue Encoding::InvalidByteSequenceError, Encoding::UndefinedConversionError
+      # If UTF-8 fails, try with binary mode and force UTF-8 encoding
+      content = File.read(input_file, encoding: 'binary').force_encoding('UTF-8')
+      unless content.valid_encoding?
+        # If still invalid, try ISO-8859-1 (Latin-1) and convert to UTF-8
+        content = File.read(input_file, encoding: 'ISO-8859-1:UTF-8')
+      end
+    end
+    
     issues_found = []
     fixes_applied = []
     
@@ -161,7 +172,7 @@ class BibTeXCleaner
     end
     
     # Write cleaned file
-    File.write(output_file, content)
+    File.write(output_file, content, encoding: 'UTF-8')
     puts "Cleaned file written to #{output_file}" unless @options[:quiet]
     
     if issues_found.any? && fixes_applied.empty?
