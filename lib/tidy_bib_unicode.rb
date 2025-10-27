@@ -123,7 +123,7 @@ end
 
 # First, scan the file for all unique unicode characters
 unicode_chars = []
-File.foreach(input_file) do |line|
+File.foreach(input_file, encoding: 'UTF-8') do |line|
   unicode_chars.concat(line.scan(/[^\u0000-\u007F]/))
 end
 unicode_chars.uniq!
@@ -136,7 +136,7 @@ end
 
 if unicode_chars.empty?
   puts "No Unicode characters found. No changes made."
-  File.write(output_file, File.read(input_file)) unless output_file == input_file
+  File.write(output_file, File.read(input_file, encoding: 'UTF-8'), encoding: 'UTF-8') unless output_file == input_file
   exit 0
 end
 
@@ -160,8 +160,8 @@ end
 
 # Now process the file line by line and write to output
 pattern = Regexp.union(replacement_map.keys)
-File.open(output_file, 'w') do |outf|
-  File.foreach(input_file) do |line|
+File.open(output_file, 'w', encoding: 'UTF-8') do |outf|
+  File.foreach(input_file, encoding: 'UTF-8') do |line|
     if options[:verbose]
       matches = line.scan(pattern)
       matches.each do |char|
