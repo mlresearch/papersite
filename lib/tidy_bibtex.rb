@@ -150,6 +150,18 @@ class BibTeXCleaner
       issues_found.concat(comma_issues)
     end
     
+    # Check for unmatched braces in title fields - report only, don't fix
+    brace_issues = find_unmatched_braces(content)
+    if brace_issues.any?
+      issues_found.concat(brace_issues)
+      if @options[:fix_all]
+        puts "\nFound #{brace_issues.length} unmatched braces in title fields that need manual review:" unless @options[:quiet]
+        brace_issues.each do |issue|
+          puts "  - #{issue}" unless @options[:quiet]
+        end
+      end
+    end
+    
     # Report issues found
     if issues_found.any?
       puts "\nIssues found:" unless @options[:quiet]
@@ -230,6 +242,26 @@ class BibTeXCleaner
   end
 
   # Removed fix_empty_author_fields method - we don't auto-fix author issues
+
+  def find_unmatched_braces(content)
+    issues = []
+    lines = content.split("\n")
+    
+    lines.each_with_index do |line, index|
+      # Check for title fields with unmatched braces
+      # Pattern: title = {{...}, should be title = {{...}},
+      if line.match(/^\s*title\s*=\s*\{/)
+        # Count opening and closing braces
+        opening = line.count('{')
+        closing = line.count('}')
+        if opening != closing
+          issues << "Line #{index + 1}: Unmatched braces in title field (#{opening} opening, #{closing} closing)"
+        end
+      end
+    end
+    
+    issues
+  end
 
   def ask_fix(question)
     print "#{question} (y/n): "
