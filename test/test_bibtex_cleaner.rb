@@ -72,6 +72,112 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     assert issues.any? { |issue| issue.include?("double comma") }, "Should detect double comma issues"
   end
 
+  def test_unmatched_braces_detection
+    content = create_bib_with_unmatched_braces
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    
+    assert issues.length > 0, "Should find unmatched braces"
+    assert issues.any? { |issue| issue.include?("Unmatched braces in title field") }, "Should detect unmatched braces in title"
+    assert issues.any? { |issue| issue.include?("(2 opening, 1 closing)") }, "Should report correct brace counts"
+  end
+
+  def test_matched_braces_no_issues
+    content = create_bib_with_matched_braces
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    
+    assert_equal 0, issues.length, "Should not find issues with properly matched braces"
+  end
+
+  def test_multiple_unmatched_braces
+    content = create_bib_with_multiple_unmatched_braces
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    
+    assert issues.length >= 2, "Should find multiple unmatched brace issues"
+  end
+
+  def test_utf8_file_reading
+    # Create a file with UTF-8 characters
+    content = create_bib_with_utf8_characters
+    create_test_bib_with_encoding("utf8_test.bib", content, 'UTF-8')
+    
+    @cleaner.instance_variable_set(:@options, { 
+      quiet: true,
+      strict: false 
+    })
+    
+    # Should successfully read and process UTF-8 file
+    assert_nothing_raised do
+      @cleaner.run
+    end
+    
+    assert File.exist?("utf8_test_cleaned.bib"), "Should create output file"
+    output = File.read("utf8_test_cleaned.bib", encoding: 'UTF-8')
+    assert output.include?("Müller"), "Should preserve UTF-8 characters"
+  end
+
+  def test_latin1_file_reading
+    # Create a file with Latin-1/ISO-8859-1 encoded characters
+    content = create_bib_with_latin1_characters
+    create_test_bib_with_encoding("latin1_test.bib", content, 'ISO-8859-1')
+    
+    @cleaner.instance_variable_set(:@options, { 
+      quiet: true,
+      strict: false 
+    })
+    
+    # Should gracefully handle Latin-1 and convert to UTF-8
+    assert_nothing_raised do
+      @cleaner.run
+    end
+    
+    assert File.exist?("latin1_test_cleaned.bib"), "Should create output file"
+    # Output should be UTF-8
+    output = File.read("latin1_test_cleaned.bib", encoding: 'UTF-8')
+    assert output.valid_encoding?, "Output should be valid UTF-8"
+  end
+
+  def test_output_always_utf8
+    # Test that output is always UTF-8 regardless of input
+    content = create_bib_with_utf8_characters
+    create_test_bib("mixed_test.bib", content)
+    
+    @cleaner.instance_variable_set(:@options, { 
+      quiet: true,
+      strict: false 
+    })
+    
+    @cleaner.run
+    
+    # Read output and verify it's UTF-8
+    output_file = "mixed_test_cleaned.bib"
+    assert File.exist?(output_file), "Should create output file"
+    
+    # Check encoding by reading with UTF-8
+    assert_nothing_raised do
+      content = File.read(output_file, encoding: 'UTF-8')
+      assert content.valid_encoding?, "Output should be valid UTF-8"
+    end
+  end
+
+  def test_international_characters_preserved
+    # Test that various international characters are preserved
+    content = create_bib_with_international_characters
+    create_test_bib_with_encoding("intl_test.bib", content, 'UTF-8')
+    
+    @cleaner.instance_variable_set(:@options, { 
+      fix_all: true,
+      quiet: true,
+      strict: false 
+    })
+    
+    @cleaner.run
+    
+    output = File.read("intl_test_cleaned.bib", encoding: 'UTF-8')
+    assert output.include?("Müller"), "Should preserve German umlaut"
+    assert output.include?("José"), "Should preserve Spanish accent"
+    assert output.include?("Łukasz"), "Should preserve Polish characters"
+  end
+
   def test_strict_mode_with_issues
     create_test_bib("test.bib", create_bib_with_percent_issues)
     
@@ -265,6 +371,10 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     File.write(filename, content)
   end
 
+  def create_test_bib_with_encoding(filename, content, encoding)
+    File.write(filename, content, encoding: encoding)
+  end
+
   def create_bib_with_percent_issues
     <<~BIB
       @article{test2024,
@@ -293,6 +403,78 @@ class TestBibTeXCleaner < Test::Unit::TestCase
         title = {Machine Learning},
         author = {John Doe and Jane Smith},
         abstract = {This is a clean abstract},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_unmatched_braces
+    <<~BIB
+      @InProceedings{test2024,
+        title = {{Enhancing Robustness: A Test Case},
+        author = {John Doe and Jane Smith},
+        abstract = {This is a test abstract},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_matched_braces
+    <<~BIB
+      @InProceedings{test2024,
+        title = {{Enhancing Robustness: A Test Case}},
+        author = {John Doe and Jane Smith},
+        abstract = {This is a test abstract},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_multiple_unmatched_braces
+    <<~BIB
+      @InProceedings{test2024a,
+        title = {{First Paper with Unmatched Braces},
+        author = {John Doe},
+        year = {2024}
+      }
+      
+      @InProceedings{test2024b,
+        title = {{Second Paper Also Wrong},
+        author = {Jane Smith},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_utf8_characters
+    <<~BIB
+      @article{test2024,
+        title = {Machine Learning with Müller},
+        author = {Müller, Hans and Schmidt, Klaus},
+        abstract = {This paper discusses résumé parsing},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_latin1_characters
+    # Content with characters common in Latin-1/ISO-8859-1
+    <<~BIB
+      @article{test2024,
+        title = {Machine Learning},
+        author = {Muller, Hans},
+        abstract = {This is a test with special characters},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_international_characters
+    <<~BIB
+      @article{test2024,
+        title = {International Collaboration},
+        author = {Müller, Hans and García, José and Łukasz, Kowalski},
+        abstract = {This paper brings together researchers from Germany, Spain, and Poland},
         year = {2024}
       }
     BIB
