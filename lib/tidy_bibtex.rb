@@ -155,7 +155,8 @@ class BibTeXCleaner
     if brace_issues.any?
       issues_found.concat(brace_issues)
       if @options[:fix_all]
-        puts "\nFound #{brace_issues.length} unmatched braces in title fields that need manual review:" unless @options[:quiet]
+        puts "\nFound #{brace_issues.length} unmatched braces in title fields that need MANUAL FIXES:" unless @options[:quiet]
+        puts "  (Multi-line titles may have closing brace on next line - check context)" unless @options[:quiet]
         brace_issues.each do |issue|
           puts "  - #{issue}" unless @options[:quiet]
         end
@@ -188,7 +189,10 @@ class BibTeXCleaner
     puts "Cleaned file written to #{output_file}" unless @options[:quiet]
     
     if issues_found.any? && fixes_applied.empty?
-      puts "\nWarning: Issues found but no fixes applied. Use --fix-percent, --fix-author-commas, or --fix-all to apply fixes."
+      puts "\nWarning: Issues found but no fixes applied."
+      puts "  - Use --fix-percent or --fix-all to automatically fix % characters"
+      puts "  - Unmatched braces in title fields REQUIRE MANUAL REVIEW AND FIXES"
+      puts "  - Empty author fields (double commas) REQUIRE MANUAL REVIEW AND FIXES"
     end
   end
 
