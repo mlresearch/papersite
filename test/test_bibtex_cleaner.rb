@@ -95,6 +95,81 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     assert issues.length >= 2, "Should find multiple unmatched brace issues"
   end
 
+  def test_multiline_title_with_balanced_braces
+    # Test case: Multi-line title that is properly balanced (no false positive)
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Multi-line Title: This is a Long Title that Spans
+                  Multiple Lines},
+        author = {John Doe},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    assert_equal 0, issues.length, "Should not find issues with balanced multi-line title"
+  end
+
+  def test_single_line_title_with_balanced_braces
+    # Test case: Single-line title that is properly balanced (no false positive)
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {This is a Single Line Title with Balanced Braces},
+        author = {John Doe},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    assert_equal 0, issues.length, "Should not find issues with balanced single-line title"
+  end
+
+  def test_multiline_title_with_unbalanced_braces
+    # Test case: Multi-line title with actual brace imbalance (true positive)
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Multi-line Title: This is Missing a Closing Brace
+                  on Multiple Lines,
+        author = {John Doe},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    assert issues.length > 0, "Should detect unbalanced braces in multi-line title"
+    assert issues.any? { |issue| issue.include?("Unmatched braces in title field") }, 
+           "Should report unmatched braces"
+  end
+
+  def test_title_with_nested_braces_balanced
+    # Test case: Title with nested braces that are balanced
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {{Nested {Braces} Within Title}: A Test Case},
+        author = {John Doe},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    assert_equal 0, issues.length, "Should handle nested balanced braces correctly"
+  end
+
+  def test_multiline_title_with_special_chars
+    # Test case: Multi-line title with LaTeX special characters
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Title with $\\delta$-Parameter: A Study on
+                  Mathematical Notation},
+        author = {John Doe},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_unmatched_braces, content)
+    assert_equal 0, issues.length, "Should handle LaTeX special characters in multi-line titles"
+  end
+
   def test_utf8_file_reading
     # Create a file with UTF-8 characters
     content = create_bib_with_utf8_characters
