@@ -78,7 +78,7 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     
     assert issues.length > 0, "Should find unmatched braces"
     assert issues.any? { |issue| issue.include?("Unmatched braces in title field") }, "Should detect unmatched braces in title"
-    assert issues.any? { |issue| issue.include?("(2 opening, 1 closing)") }, "Should report correct brace counts"
+    assert issues.any? { |issue| issue.include?("extra opening brace") }, "Should report extra opening braces"
   end
 
   def test_matched_braces_no_issues

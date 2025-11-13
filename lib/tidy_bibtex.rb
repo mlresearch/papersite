@@ -251,15 +251,43 @@ class BibTeXCleaner
     issues = []
     lines = content.split("\n")
     
+    in_title = false
+    title_start_line = 0
+    brace_count = 0
+    
     lines.each_with_index do |line, index|
-      # Check for title fields with unmatched braces
-      # Pattern: title = {{...}, should be title = {{...}},
       if line.match(/^\s*title\s*=\s*\{/)
-        # Count opening and closing braces
-        opening = line.count('{')
-        closing = line.count('}')
-        if opening != closing
-          issues << "Line #{index + 1}: Unmatched braces in title field (#{opening} opening, #{closing} closing)"
+        # Start of a title field
+        in_title = true
+        title_start_line = index + 1
+        brace_count = line.count('{') - line.count('}')
+        
+        # If title completes on this line (ends with },)
+        if brace_count == 0 && line.match(/\},\s*$/)
+          # Title is balanced and complete
+          in_title = false
+        end
+      elsif in_title
+        # Continuation of title field
+        prev_line_braces = line.count('{') - line.count('}')
+        brace_count += prev_line_braces
+        
+        # Check if we've reached the end of the title field
+        # Title ends when we hit another field starting line OR when braces balance with },
+        if line.match(/^\s*\w+\s*=/)
+          # Hit next field - title should have been closed already
+          if brace_count != 0
+            # Calculate total opening and closing braces in title
+            total_opening = brace_count + prev_line_braces
+            total_closing = prev_line_braces
+            issues << "Line #{title_start_line}: Unmatched braces in title field (#{brace_count} net extra #{brace_count > 0 ? 'opening' : 'closing'} brace#{brace_count.abs > 1 ? 's' : ''})"
+          end
+          in_title = false
+          brace_count = 0
+        elsif brace_count == 0
+          # Braces balanced - title field complete
+          in_title = false
+          brace_count = 0
         end
       end
     end
