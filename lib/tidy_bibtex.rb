@@ -163,6 +163,32 @@ class BibTeXCleaner
       end
     end
     
+    # Check for triple backslashes - report only, don't fix
+    triple_backslash_issues = find_triple_backslashes(content)
+    if triple_backslash_issues.any?
+      issues_found.concat(triple_backslash_issues)
+      if @options[:fix_all]
+        puts "\nFound #{triple_backslash_issues.length} triple backslash sequences that need MANUAL FIXES:" unless @options[:quiet]
+        puts "  (Common issue: \\\\\\\% should be \\%)" unless @options[:quiet]
+        triple_backslash_issues.each do |issue|
+          puts "  #{issue}" unless @options[:quiet]
+        end
+      end
+    end
+    
+    # Check for double backslashes - report as warnings
+    double_backslash_issues = find_double_backslashes(content)
+    if double_backslash_issues.any?
+      issues_found.concat(double_backslash_issues)
+      if @options[:fix_all] || @options[:verbose]
+        puts "\nFound #{double_backslash_issues.length} double backslash sequences to REVIEW:" unless @options[:quiet]
+        puts "  (May be intentional for \\\\, but \\\\% should usually be \\%)" unless @options[:quiet]
+        double_backslash_issues.each do |issue|
+          puts "  #{issue}" unless @options[:quiet]
+        end
+      end
+    end
+    
     # Report issues found
     if issues_found.any?
       puts "\nIssues found:" unless @options[:quiet]
@@ -190,9 +216,11 @@ class BibTeXCleaner
     
     if issues_found.any? && fixes_applied.empty?
       puts "\nWarning: Issues found but no fixes applied."
-      puts "  - Use --fix-percent or --fix-all to automatically fix % characters"
+      puts "  - Use --fix-percent or --fix-all to automatically fix unescaped % characters"
       puts "  - Unmatched braces in title fields REQUIRE MANUAL REVIEW AND FIXES"
       puts "  - Empty author fields (double commas) REQUIRE MANUAL REVIEW AND FIXES"
+      puts "  - Triple backslashes (e.g., \\\\\\\%) REQUIRE MANUAL FIXES (should be \\%)"
+      puts "  - Double backslashes (e.g., \\\\%) should be REVIEWED (usually should be \\%)"
     end
   end
 
@@ -289,6 +317,43 @@ class BibTeXCleaner
           in_title = false
           brace_count = 0
         end
+      end
+    end
+    
+    issues
+  end
+
+  def find_triple_backslashes(content)
+    issues = []
+    lines = content.split("\n")
+    
+    lines.each_with_index do |line, index|
+      # Look for three or more consecutive backslashes
+      # Common issues: \\\% (should be \%), \\\times (should be \times)
+      if line.match(/\\\\\\/)
+        # Show the problematic part with context
+        line_preview = line.strip
+        line_preview = line_preview[0..80] + "..." if line_preview.length > 80
+        issues << "Line #{index + 1}: Triple backslash found - likely should be single backslash\n    Context: #{line_preview}"
+      end
+    end
+    
+    issues
+  end
+
+  def find_double_backslashes(content)
+    issues = []
+    lines = content.split("\n")
+    
+    lines.each_with_index do |line, index|
+      # Look for double backslashes that aren't line breaks or intentional
+      # Skip if it's \\\\ (which we flag separately) or \\ at end of line (line break)
+      if line.match(/\\\\/) && !line.match(/\\\\\\/) && !line.match(/\\\\\s*$/)
+        # Common issues: \\% (should be \%), \\times (should be \times)
+        # But \\ at end of line is valid for line breaks in tables
+        line_preview = line.strip
+        line_preview = line_preview[0..80] + "..." if line_preview.length > 80
+        issues << "Line #{index + 1}: Double backslash found - review if intentional\n    Context: #{line_preview}"
       end
     end
     

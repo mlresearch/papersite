@@ -170,6 +170,77 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     assert_equal 0, issues.length, "Should handle LaTeX special characters in multi-line titles"
   end
 
+  def test_triple_backslash_detection
+    # Test case: Detect triple backslashes (common error in percentages)
+    # In Ruby strings, we need to escape backslashes: \\\\\\ becomes \\\
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Test Paper},
+        author = {John Doe},
+        abstract = {This method achieves 95\\\\\\% accuracy with 10\\\\\\% improvement.},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_triple_backslashes, content)
+    assert issues.length > 0, "Should detect triple backslashes"
+    assert issues.any? { |issue| issue.include?("Triple backslash found") }, 
+           "Should report triple backslash issues"
+    assert issues.any? { |issue| issue.include?("Context:") }, 
+           "Should show line context"
+  end
+
+  def test_no_triple_backslash_in_correct_latex
+    # Test case: Correctly escaped LaTeX should not trigger false positives
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Test Paper},
+        author = {John Doe},
+        abstract = {This method achieves 95\\\\% accuracy with \\\\textbf{bold} text.},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_triple_backslashes, content)
+    assert_equal 0, issues.length, "Should not flag double backslash as triple backslash"
+  end
+
+  def test_double_backslash_detection
+    # Test case: Detect double backslashes (unusual, worth reviewing)
+    # In Ruby strings, \\\\ becomes \\
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Test Paper},
+        author = {John Doe},
+        abstract = {This method achieves 95\\\\% accuracy.},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_double_backslashes, content)
+    assert issues.length > 0, "Should detect double backslashes"
+    assert issues.any? { |issue| issue.include?("Double backslash found") }, 
+           "Should report double backslash issues"
+    assert issues.any? { |issue| issue.include?("Context:") }, 
+           "Should show line context"
+  end
+
+  def test_no_double_backslash_for_single_backslash
+    # Test case: Single backslash is correct and should not trigger
+    # In Ruby strings, \\ becomes \
+    content = <<~BIB
+      @InProceedings{test2024,
+        title = {Test Paper},
+        author = {John Doe},
+        abstract = {This method achieves 95\\% accuracy with \\textbf{bold} text.},
+        year = {2024}
+      }
+    BIB
+    
+    issues = @cleaner.send(:find_double_backslashes, content)
+    assert_equal 0, issues.length, "Should not flag correctly single-escaped LaTeX"
+  end
+
   def test_utf8_file_reading
     # Create a file with UTF-8 characters
     content = create_bib_with_utf8_characters
