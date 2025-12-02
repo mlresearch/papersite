@@ -18,6 +18,7 @@
 ś: "\\'{s}"
 "≥": "$\\geq$"
 "≤": "$\\leq$"
+"≈": "$\\approx$"
 "—":
   replacement: "---"
   name: EM DASH
