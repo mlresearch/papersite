@@ -32,9 +32,9 @@
 "–":
   replacement: "--"
   name: EN DASH
-"‘":
-  replacement: ''
-  name: LEFT SINGLE QUOTATION MARK
+"’":
+  replacement: "'"
+  name: RIGHT SINGLE QUOTATION MARK
 "‑":
   replacement: "-"
   name: NON-BREAKING HYPHEN
