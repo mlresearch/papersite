@@ -1,12 +1,14 @@
 ---
-id: 2025-10-07_updaterepo-script-improvements
-title: "Improve updaterepo.sh script for better volume deployment"
-status: proposed
-priority: high
-created: "2025-10-07"
-last_updated: "2025-10-07"
-owner: "Development Team"
+category: infrastructure
+created: '2025-10-07'
 dependencies: []
+id: 2025-10-07_updaterepo-script-improvements
+last_updated: '2025-10-07'
+owner: Development Team
+priority: High
+related_cips: []
+status: Proposed
+title: Improve updaterepo.sh script for better volume deployment
 ---
 
 # Task: Improve updaterepo.sh script for better volume deployment

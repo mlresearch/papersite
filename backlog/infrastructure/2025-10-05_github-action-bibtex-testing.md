@@ -1,12 +1,14 @@
 ---
-id: "2025-10-05_github-action-bibtex-testing"
-title: "GitHub Action for BibTeX Cleaner Script Testing"
-status: "ready"
-priority: "medium"
-created: "2025-10-05"
-last_updated: "2025-10-05"
-owner: "Neil D. Lawrence"
+category: infrastructure
+created: '2025-10-05'
 dependencies: []
+id: 2025-10-05_github-action-bibtex-testing
+last_updated: '2025-10-05'
+owner: Neil D. Lawrence
+priority: Medium
+related_cips: []
+status: Ready
+title: GitHub Action for BibTeX Cleaner Script Testing
 ---
 
 # Task: GitHub Action for BibTeX Cleaner Script Testing

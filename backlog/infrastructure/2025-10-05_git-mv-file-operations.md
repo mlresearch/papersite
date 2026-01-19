@@ -1,17 +1,19 @@
 ---
-id: "2025-10-05_git-mv-file-operations"
-title: "Replace FileUtils.mv with git mv for file operations"
-status: "completed"
-priority: "high"
-created: "2025-10-05"
-last_updated: "2025-10-05"
-owner: "Neil D. Lawrence"
+category: infrastructure
+created: '2025-10-05'
 dependencies: []
+id: 2025-10-05_git-mv-file-operations
+last_updated: '2025-10-05'
+owner: Neil D. Lawrence
+priority: High
+related_cips: []
+status: Completed
 tags:
 - infrastructure
 - git
 - file-operations
 - bandwidth-optimization
+title: Replace FileUtils.mv with git mv for file operations
 ---
 
 # Task: Replace FileUtils.mv with git mv for file operations

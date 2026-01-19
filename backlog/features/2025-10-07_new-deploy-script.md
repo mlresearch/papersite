@@ -1,12 +1,14 @@
 ---
-id: 2025-10-07_new-deploy-script
-title: Create New Deploy Volume Script
-status: Completed
-priority: High
-created: "2025-10-07"
-last_updated: "2025-10-07"
-owner: "Neil Lawrence"
+category: features
+created: '2025-10-07'
 dependencies: []
+id: 2025-10-07_new-deploy-script
+last_updated: '2025-10-07'
+owner: Neil Lawrence
+priority: High
+related_cips: []
+status: Completed
+title: Create New Deploy Volume Script
 ---
 
 # Task: Create New Deploy Volume Script
