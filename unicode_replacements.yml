@@ -4,6 +4,7 @@
 á: "\\'{a}"
 í: "\\'{i}"
 ö: \"{o}
+ø: "{\\o}"
 é: "\\'{e}"
 è: "\\`{e}"
 "'": "'"
@@ -41,6 +42,9 @@
 "×":
   replacement: "$\\times$"
   name: MULTIPLICATION SIGN
+"±":
+  replacement: "$\\pm$"
+  name: PLUS-MINUS SIGN
 "\U0001D435":
   replacement: "$B$"
   name: MATHEMATICAL ITALIC CAPITAL B
@@ -110,6 +114,9 @@
 β:
   replacement: "$\\beta$"
   name: GREEK SMALL LETTER BETA
+κ:
+  replacement: "$\\kappa$"
+  name: GREEK SMALL LETTER KAPPA
 π:
   replacement: "$\\pi$"
   name: GREEK SMALL LETTER PI
@@ -131,6 +138,9 @@
 å:
   replacement: "{\\aa}"
   name: LATIN SMALL LETTER A WITH RING ABOVE
+æ:
+  replacement: "{\\ae}"
+  name: LATIN SMALL LETTER AE
 ←:
   replacement: "$\\leftarrow$"
   name: LEFTWARDS ARROW
