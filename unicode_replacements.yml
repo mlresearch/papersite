@@ -2,6 +2,7 @@
 ü: \"{u}
 Ö: \"{O}
 á: "\\'{a}"
+à: "\\`{a}"
 í: "\\'{i}"
 ö: \"{o}
 ø: "{\\o}"
@@ -57,6 +58,9 @@
 "\U0001D44F":
   replacement: "$b$"
   name: MATHEMATICAL ITALIC SMALL B
+"\U0001D707":
+  replacement: "$\\mu$"
+  name: MATHEMATICAL ITALIC SMALL MU
 ϵ:
   replacement: "$\\epsilon$"
   name: GREEK LUNATE EPSILON SYMBOL
@@ -165,3 +169,6 @@
 ß:
   replacement: "{\\ss}"
   name: LATIN SMALL LETTER SHARP S
+ﬀ:
+  replacement: "ff"
+  name: LATIN SMALL LIGATURE FF
