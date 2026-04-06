@@ -9,6 +9,7 @@
 é: "\\'{e}"
 è: "\\`{e}"
 "'": "'"
+"'": "`"
 ä: \"{a}
 ó: "\\'{o}"
 â: "\\^{a}"
@@ -115,9 +116,18 @@
 ϕ:
   replacement: "$\\phi$"
   name: GREEK PHI SYMBOL
+α:
+  replacement: "$\\alpha$"
+  name: GREEK SMALL LETTER ALPHA
+μ:
+  replacement: "$\\mu$"
+  name: GREEK SMALL LETTER MU
 β:
   replacement: "$\\beta$"
   name: GREEK SMALL LETTER BETA
+δ:
+  replacement: "$\\delta$"
+  name: GREEK SMALL LETTER DELTA
 κ:
   replacement: "$\\kappa$"
   name: GREEK SMALL LETTER KAPPA
@@ -148,6 +158,9 @@
 ←:
   replacement: "$\\leftarrow$"
   name: LEFTWARDS ARROW
+◦:
+  replacement: "$\\circ$"
+  name: WHITE BULLET
 ğ:
   replacement: "\\u{g}"
   name: LATIN SMALL LETTER G WITH BREVE
@@ -160,6 +173,15 @@
 ć:
   replacement: "\\'{c}"
   name: LATIN SMALL LETTER C WITH ACUTE
+č:
+  replacement: "\\v{c}"
+  name: LATIN SMALL LETTER C WITH CARON
+ł:
+  replacement: "{\\l}"
+  name: LATIN SMALL LETTER L WITH STROKE
+ń:
+  replacement: "\\'{n}"
+  name: LATIN SMALL LETTER N WITH ACUTE
 ę:
   replacement: "\\k{e}"
   name: LATIN SMALL LETTER E WITH OGONEK

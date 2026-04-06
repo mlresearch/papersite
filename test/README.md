@@ -121,8 +121,20 @@ def test_debug_example
 end
 ```
 
+## Related Test Suites
+
+This directory (`test/`) covers the BibTeX cleaner (`tidy_bibtex.rb`).
+A separate bash regression suite in [`tests/`](../tests/README.md) covers
+the pre-publication volume checker (`check_volume.rb`). Both can be run
+together:
+
+```bash
+ruby test/run_tests.rb && bash tests/test_check_volume.sh
+```
+
 ## References
 
 - [Test::Unit Documentation](https://ruby-doc.org/stdlib-2.7.0/libdoc/test/unit/rdoc/Test/Unit.html)
 - [CIP-0002: Testing Framework and Conventions](../cip/cip0002.md)
 - [CIP-0003: BibTeX File Format Validation and Cleaning](../cip/cip0003.md)
+- [tests/README.md — Volume Checker Regression Tests](../tests/README.md)

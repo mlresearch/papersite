@@ -1,0 +1,494 @@
+@Proceedings{CPAL2026,
+	booktitle = {Conference on Parsimony and Learning},
+	name = {Third Conference on Parsimony and Learning},
+	shortname = {CPAL},
+	editor = {Burkholz, Rebekka  and Liu, Shiwei  and Ravishankar, Saiprasad and Redman, William and Huang, Wei and Su, Weijie  and Zhu, Zhihui},
+	volume = {328},
+	year = {2026},
+	start = {2026-03-23},
+	end = {2026-03-24},
+	conference_url = {https://cpal.cc},
+	address = {Tübingen, Germany},
+}
+
+@InProceedings{chen26a,
+	title = {Semantic Homogeneity As Demonstration: Batch-Structured Semi-Supervised In-Context Learning for Natural Language Understanding},
+	author = {Chen, Cheng and Pan, Yuangang and Tsang, Ivor},
+	pages = {1-23},
+	openreview = {y5bJXgBx6a},
+	abstract = {In-context learning (ICL) adapts large language models (LLMs) to downstream natural language understanding (NLU) tasks by prepending a small set of labeled demonstrations (input--label exemplars) to each query. While effective, this paradigm is costly and fragile: curating representative demonstrations and maintaining their relevance at scale is difficult, and inference cost grows with prompt length. This motivates a complementary question: \emph{can LLMs benefit from in-context signals without using explicit exemplar pairs at all?} We propose \textbf{B}atch-Structured \textbf{I}mplicit \textbf{D}emonstration-Free \textbf{S}emi-supervised ICL (\textbf{BIDS}-ICL). 
+Instead of providing exemplar pairs, we use a small labeled seed set only to induce \emph{semantic structure}: we embed and cluster test-time inputs into \emph{semantically homogeneous batches}, then prompt the LLM with the batch as context for predicting the labels of all items in that batch. 
+In this non-exemplar regime, batch structure itself becomes an informative conditioning signal. 
+We further consider a practical extension that arises naturally from the clustering pipeline: each item may be accompanied by a \emph{pseudo-label hint} (e.g., an encoder-predicted intent), which can be noisy due to cluster mis-assignment and label propagation. Rather than asking whether pseudo-labels are universally good or bad, we ask a conditional question: \emph{when is it useful to expose an LLM to pseudo-label hints under batch-structured prompting?} On the theory side, we provide a Bayesian aggregation perspective and draw on stagewise Plackett--Luce (PL) aggregation to explain why semantically homogeneous batches can improve prediction reliability. Empirically, across eight datasets and two LLMs, we observe a consistent competency--homogeneity interaction: semantic homogeneity acts as an orthogonal in-context signal that systematically modulates pseudo-label utility. When batches exhibit low homogeneity, pseudo-label hints often amplify clustering noise and may underperform unlabeled structured batching. When homogeneity is high, pseudo-label hints become more reliable, though their marginal benefit diminishes when structural coherence alone already induces strong label separation.}
+}
+
+@InProceedings{yang26,
+	title = {Improving Medical Visual Reinforcement Fine-Tuning via Perception and Reasoning Augmentation},
+	author = {Yang, Guangjing and Yu, ZhangYuan and Qin, Ziyuan and Song, Xinyuan and Yi, Huahui and Kang, Qingbo and Gao, Jun and Li, Yiyue and Du, Chenlin and Lao, Qicheng},
+	pages = {24-41},
+	openreview = {y3TlQ7nYOA},
+	abstract = {While recent advances in Reinforcement Fine-Tuning (RFT) have shown that rule-based reward schemes can enable effective post-training for large language models, their extension to cross-modal, vision-centric domains remains largely underexplored. This limitation is especially pronounced in the medical imaging domain, where effective performance requires both robust visual perception and structured reasoning. In this work, we address this gap by proposing \textit{VRFT-Aug}, a visual reinforcement fine-tuning framework tailored for the medical domain. VRFT-Aug introduces a series of training strategies designed to augment both perception and reasoning, including prior knowledge injection, perception-driven policy refinement, medically informed reward shaping, and behavioral imitation. Together, these methods aim to stabilize and improve the RFT process.
+
+Through extensive experiments across multiple medical datasets, we show that our approaches consistently outperform both standard supervised fine-tuning and RFT baselines. Moreover, we provide empirically grounded insights and practical training heuristics that can be generalized to other medical image tasks. We hope this work contributes actionable guidance and fresh inspiration for the ongoing effort to develop reliable, reasoning-capable models for high-stakes medical applications.}
+}
+
+@InProceedings{su26,
+	title = {ROSE: Reordered SparseGPT for More Accurate One-Shot Large Language Models Pruning},
+	author = {Su, Mingluo and Wang, Huan},
+	pages = {42-60},
+	openreview = {x43pVuRwGM},
+	abstract = {Pruning is widely recognized as an effective method for reducing the parameters of large language models (LLMs), potentially leading to more efficient deployment and inference. One classic and prominent path of LLM one-shot pruning is to leverage second-order gradients (i.e., Hessian), represented by the pioneering work SparseGPT. However, the predefined left-to-right pruning order in SparseGPT leads to suboptimal performance when the weights exhibit columnar patterns. This paper studies the effect of pruning order under the SparseGPT framework. The analyses lead us to propose ROSE, a reordered SparseGPT method that prioritizes weights with larger potential pruning errors to be pruned earlier. ROSE first performs pre-pruning to identify candidate weights for removal, and estimates both column and block pruning loss. Subsequently, two-level reordering is performed: columns within each block are reordered in descending order of column loss, while blocks are reordered based on block loss. We introduce the relative range of block loss as a metric to identify columnar layers, enabling adaptive reordering across the entire model. Substantial empirical results on prevalent LLMs (LLaMA2-7B/13B/70B, LLaMA3-8B, Mistral-7B) demonstrate that ROSE surpasses the original SparseGPT and other counterpart pruning methods.}
+}
+
+@InProceedings{huang26a,
+	title = {AlphaFormer: End-to-End Symbolic Regression of Alpha Factors with Transformers},
+	author = {Huang, Haotong and Peng, Jie and Ding, Zezhen and Li, Pingzhi and Chen, Tianlong},
+	pages = {61-82},
+	openreview = {tpnr6ZHSBD},
+	abstract = {Identifying predictive patterns for stock market trends, known as alpha factors, is a critical challenge in quantitative finance. Symbolic regression (SR) methods can discover these factors as interpretable mathematical expressions, offering advantages over ``black-box'' machine learning approaches and manual methods that rely heavily on human expertise. However, existing SR methods typically restart the discovery process for each new dataset, failing to leverage prior knowledge. To address this limitation, we propose AlphaFormer, an encoder-decoder Transformer model designed for the end-to-end generation of synergistic alpha factors from raw stock market data. AlphaFormer leverages pre-training on synthetic datasets to efficiently uncover synergistic alpha factors for new datasets, capitalizing on acquired prior knowledge. To overcome the challenge of generating synthetic stock datasets with temporal dependencies, we introduce a novel generative framework that integrates multiple time-series generative models to generate synthetic stock data and dynamically select the highest quality samples, ensuring the creation of high-fidelity datasets crucial for pre-training. Extensive evaluations on real-world stock market datasets demonstrate that AlphaFormer outperforms existing methods across widely used metrics, achieving superior performance with significantly reduced inference computation---generating only 33% as many factors as the best baseline and requiring no further training during inference. Backtests further show that AlphaFormer delivers the highest annual return among all methods, highlighting its practical potential for superior investment performance.}
+}
+
+@InProceedings{joundi26,
+	title = {From sparse recovery to plug-and-play priors, understanding trade-offs for stable recovery with generalized projected gradient descent},
+	author = {Joundi, Ali and Traonmilin, Yann and Aujol, Jean-François},
+	pages = {83-103},
+	openreview = {tFPDgYd2B6},
+	abstract = {We consider the problem of recovering an unknown low-dimensional vector from noisy, underdetermined observations. We focus on the Generalized Projected Gradient Descent (GPGD) framework, which unifies traditional sparse recovery methods and modern approaches using learned deep projective priors. 
+		We extend previous convergence results to robustness to model and projection errors. We use these theoretical results to explore ways to better control stability and robustness constants. To reduce recovery errors due to measurement noise, we consider generalized back-projection strategies to adapt GPGD to structured noise, such as sparse outliers. To improve the stability of GPGD, we propose a normalized idempotent regularization for the learning of deep projective priors. 
+		We provide numerical experiments in the context of sparse recovery and image inverse problems, highlighting the trade-offs between identifiability and stability that can be achieved with such methods.}
+}
+
+@InProceedings{nicolicioiu26,
+	title = {Panza: Investigating the Feasibility of Fully-Local Personalized Text Generation},
+	author = {Nicolicioiu, Armand Mihai and Iofinova, Eugenia and Jovanovic, Andrej and Kurtic, Eldar and Nikdan, Mahdi and Panferov, Andrei and Markov, Ilia and Shavit, Nir N and Alistarh, Dan},
+	pages = {104-130},
+	openreview = {soFWnTqd23},
+	abstract = {The availability of powerful open-source large language models (LLMs) opens exciting use cases, such as using personal data to fine-tune these models to imitate a user's unique writing style. Two key requirements for this functionality are personalization–in the sense that the output should recognizably reflect the user's own writing style—and privacy–users may justifiably be wary of uploading extremely personal data, such as their email archive, to a third-party service. In this paper, we demonstrate the feasibility of training and running such an assistant, which we call Panza, on commodity hardware, for the specific use case of email generation. Panza's personalization features are based on a combination of parameter-efficient fine-tuning using a variant of the Reverse Instructions technique and Retrieval-Augmented Generation (RAG). We demonstrate that this combination allows us to fine-tune an LLM to reflect a user's writing style using limited data, while executing on extremely limited resources, e.g. on a free Google Colab instance. Our key methodological contribution is the first detailed study of evaluation metrics for this task, and of how different choices of system components--the use of RAG and of different fine-tuning approaches--impact the system's performance. Additionally, we demonstrate that very little data - under 100 email samples - are sufficient to create models that convincingly imitate humans, showcasing a previously unknown attack vector in language models. We are releasing the full Panza code as well as three new email datasets licensed for research use.}
+}
+
+@InProceedings{he26a,
+	title = {Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion},
+	author = {He, Yangfan and Li, Sida and Wang, Jianhui and Song, Xinyuan and Li, Kun and Yuan, Xinhang and Lu, Kuan and Huo, Menghao and Tang, Jingqun and Xin, Yi and Chen, Jiaqi and Li, Keqin and Zhang, Miao and Wang, Xueqian},
+	pages = {131-163},
+	openreview = {qUDhbQUstF},
+	abstract = {Recent advancements in text-to-image (T2I) generation using diffusion models have enabled cost-effective video-editing applications by leveraging pre-trained models, eliminating the need for resource-intensive training. However, the frame independence of T2I generation often results in poor temporal consistency. Existing methods address this issue through temporal layer fine-tuning or inference-based temporal propagation, but these approaches suffer from high training costs or limited temporal coherence.
+To address these challenges, we propose a  General and Efficient  Adapter (GE-Adapter) that integrates temporal, spatial and semantic consistency with Baliteral Denoising Diffusion Implicit Models (DDIM) inversion. This framework introduces three key components: (1) Frame-based Temporal Consistency Blocks (FTC Blocks) to capture frame-specific features and enforce smooth inter-frame transitions using temporally aware loss functions; (2) Channel-dependent Spatial Consistency Blocks (SCD Blocks) employing bilateral filters to enhance spatial coherence by reducing noise and artifacts; (3) a Token-based Semantic Consistency Module (TSC Module) to maintain semantic alignment through a combination of shared prompt tokens and frame-specific tokens. Extensive experiments on multiple datasets demonstrate that our method significantly improves perceptual quality, text-image relevance, and temporal coherence. The proposed approach offers a practical and efficient solution for text-to-video (T2V) editing. Our code is available in the supplementary materials.}
+}
+
+@InProceedings{miñoza26,
+	title = {SPIKE: Sparse Koopman Regularization for Physics-Informed Neural Networks},
+	author = {Miñoza, Jose Marie Antonio},
+	pages = {164-191},
+	openreview = {qPm2f2OE7j},
+	abstract = {Physics-Informed Neural Networks (PINNs) provide a mesh-free approach for solving differential equations by embedding physical constraints into neural network training. However, PINNs tend to overfit within the training domain, leading to poor generalization when extrapolating beyond trained spatiotemporal regions. This work presents SPIKE (Sparse Physics-Informed Koopman-Enhanced), a framework that regularizes PINNs with continuous-time Koopman operators to learn parsimonious dynamics representations. By enforcing linear dynamics $dz/dt = Az$ in a learned observable space, both PIKE (without explicit sparsity) and SPIKE (with L1 regularization on $A$) learn sparse generator matrices, embodying the parsimony principle that complex dynamics admit low-dimensional structure. Experiments across parabolic, hyperbolic, dispersive, and stiff PDEs, including fluid dynamics (Navier-Stokes) and chaotic ODEs (Lorenz), demonstrate consistent improvements in temporal extrapolation, spatial generalization, and long-term prediction accuracy. The continuous-time formulation with matrix exponential integration provides unconditional stability for stiff systems while avoiding diagonal dominance issues inherent in discrete-time Koopman operators.}
+}
+
+@InProceedings{lyu26,
+	title = {Cannistraci-Hebb Training with N:M Semi-Structured Sparsity for Pre-Training and Re-Training},
+	author = {Lyu, Jiaqing and Wang, Ruijie and Bao, Kangyou and Zhang, Yingtao and Cannistraci, Carlo Vittorio},
+	pages = {192-217},
+	openreview = {oo7G9mheNo},
+	abstract = {Sparse training offers a pivotal pathway for scaling deep learning efficiency, replacing dense networks with sparse counterparts that maintain competitive performance using significantly fewer parameters. While brain-inspired sparse training methods like Cannistraci-Hebb Training (CHT) have shown great promise, they typically rely on unstructured sparsity, failing to exploit the acceleration capabilities of modern GPU architectures. Conversely, NVIDIA’s N:M semi-structured sparsity has emerged as a standard for hardware-efficient acceleration. However, the existing N:M training methods always rely on straight-through estimators (STE) and need to maintain dense weights, which do not constitute true sparse training. In this work, we bridge the gap between dynamic sparse training and hardware efficiency. We make three primary contributions: (1) We introduce CHTs24, the first framework to integrate Cannistraci-Hebb Training with 2:4 semi-structured sparsity. This approach outperforms strong baselines (e.g., SR-STE) in training linear layers within Large Language Models (LLMs). (2) We propose the epi-topology Dynamic Sparse re-Training (eDSrT) pipeline, a novel methodology for transitioning dense models to semi-structured sparsity. (3) We demonstrate the efficacy of this pipeline by adapting CHTs24 to prune and retrain a Vision Transformer (ViT) into 2:4 sparsity in just 100 epochs with negligible performance loss. Collectively, our research presents a synergistic, hardware-friendly approach to advancing sparse training for large-scale neural networks.}
+}
+
+@InProceedings{kohli26,
+	title = {Lattice-Based Vector Quantization for Low-Bit Quantization-Aware Training},
+	author = {Kohli, Rishika and Dhavala, Soma S and Gupta, Shaifu and Gaur, Manoj Singh},
+	pages = {218-241},
+	openreview = {oTbUCHufvj},
+	abstract = {Quantization is an effective approach for deploying deep learning models on resource-constrained hardware, but maintaining accuracy and training stability at extreme low precision remains a major challenge. In this work, we study lattice-based vector quantization (VQ) as a practical alternative to scalar quantization for low-bit quantization-aware training (QAT). We develop a unified quantization pipeline that integrates structured lattice projections into both QAT and post-training quantization (PTQ), supporting multiple lattice choices—including E8 and D4—via a fused projection operator with straight-through estimation.
+
+Through extensive experiments across a wide range of bit-widths, lattice parameterizations, and training regimes, we show that lattice-based VQ consistently enables stable training and meaningful accuracy below 2 bits, where scalar quantization and existing PTQ methods typically underperform or are unavailable. In this low-bit regime, exploiting geometric structure across weight blocks improves robustness by reducing overload and stabilizing optimization, while at moderate and higher bit-widths, performance differences narrow and simpler quantization schemes become sufficient. We further analyze the role of lattice choice, dynamic-range scaling, and overload behavior, and demonstrate that explicit overload control is central to reliable low-bit performance. Finally, we show that lattice-based QAT extends beyond binary classification and weight-only quantization, supporting multi-class tasks, joint weight–activation quantization, and transformer encoders such as BERT, achieving substantial compression with controlled accuracy degradation}
+}
+
+@InProceedings{zhao26a,
+	title = {ShapLoRA: Allocation of Low-rank Adaption on Large Language Models via Shapley Value Inspired Importance Estimation},
+	author = {Zhao, Colin and Yao, Qinghua and Song, Xinyuan and Zhu, Wei},
+	pages = {242-264},
+	openreview = {nWFDLoxSqL},
+	abstract = {Low-rank adaption (LoRA) is a representative method in the field of parameter-efficient fine-tuning (PEFT), and is key to Democratizating the modern large language models (LLMs). The vanilla LoRA is implemented with uniform ranks, and the recent literature have found that properly allocating ranks on the LLM backbones results in performance boosts. However, the previous rank allocation methods have limitations since they rely on inexplanable and unreliable importance measures for the LoRA ranks. To address the above issues, we propose the ShapLoRA framework. Inspired by the explanable attribution measure Shapley Value, we combine the sensitivity-based measures with the idea of coalitions in the collaborative games among LoRA ranks, and propose a more explainable importance measure called Shapley sensitivity. In addition, we optimize the workflow of the existing works by: (a) calculating Shapley sensitivity on a separate validation set; (b) Setting up the allocating-retraining procedures for fair comparisons. We have conducted experiments on various challenging tasks, and the experimental results demonstrate that our ShapLoRA method can outperform the recent baselines with comparable tunable parameters.\footnote{Codes and fine-tuned models will be open-sourced to facilitate future research.}}
+}
+
+@InProceedings{schultheis26,
+	title = {LLMQ: Efficient Lower-Precision LLM Training for Consumer GPUs},
+	author = {Schultheis, Erik and Alistarh, Dan},
+	pages = {265-284},
+	openreview = {nEev1u9Kzm},
+	abstract = {We present LLMQ, an end-to-end CUDA/C++ implementation for medium-sized language-model training, e.g. 3B to 32B parameters, on affordable, commodity GPUs. These devices are characterized by low memory availability and slow communication compared to datacentre-grade GPUs. Consequently, we showcase a range of optimizations that target these bottlenecks, including activation checkpointing, offloading, and copy-engine based collectives. LLMQ is  able to train or fine-tune a 7B model on a single 16GB mid-range gaming card, or a 32B model on a workstation equipped with 4 RTX 4090s. This is achieved while executing a standard 8-bit training pipeline, without additional algorithmic approximations, and maintaining FLOP utilization of around 50\%. The efficiency of LLMQ rivals that of production-scale systems on much more expensive cloud-grade GPUs.}
+}
+
+@InProceedings{chehboune26,
+	title = {Parameter-Efficient Distributional RL via Normalizing Flows and a Geometry-Aware Cramér Surrogate},
+	author = {Chehboune, Simo Alami and Kaddah, Rim and CANI, Marie-Paule and Read, Jesse},
+	pages = {285-313},
+	openreview = {k2alUGhVlP},
+	abstract = {Distributional Reinforcement Learning (DistRL) improves upon expectation-based methods by modeling full return distributions, but standard approaches often remain far from parsimonious. Categorical methods (e.g., C51) rely on fixed supports where parameter counts scale linearly with resolution, while quantile methods approximate distributions as discrete mixtures whose piecewise-constant densities can be wasteful when modeling complex multi-modal or heavy-tailed returns. We introduce NFDRL, a parsimonious architecture that models return distributions using continuous normalizing flows. Unlike categorical baselines, our flow-based model maintains a compact parameter footprint that does not grow with the effective resolution of the distribution, while providing a dynamic, adaptive support for returns. To train this continuous representation, we propose a Cramér-inspired, geometry-aware distance defined over probability masses obtained from the flow. We show that this distance is a true probability metric, that the associated distributional Bellman operator is a $\sqrt{\gamma}$-contraction, and that the resulting objective admits unbiased sample gradients—properties that are typically not simultaneously guaranteed in prior PDF-based DistRL methods. Empirically, NFDRL recovers rich, multi-modal return landscapes on toy MDPs and achieves performance competitive with categorical baselines on the Atari-5 benchmark, while offering substantially better parameter efficiency.}
+}
+
+@InProceedings{zhu26,
+	title = {Analyzing and Mitigating Model Collapse in Reflow Methods},
+	author = {Zhu, Huminhao and Wang, Fangyikang and Ding, Tianyu and Qu, Qing and Zhu, Zhihui},
+	pages = {314-340},
+	openreview = {hWsYMCMOze},
+	abstract = {Generative models increasingly encounter synthetic data produced by earlier model snapshots, either unintentionally through data contamination or deliberately through self-training procedures such as Reflow. In rectified flow and related diffusion/flow systems, Reflow retrains on model-generated samples to straighten trajectories and accelerate sampling, but repeated self-training can degrade sample quality and diversity. 
+We provide a mechanistic analysis of this failure mode and a principled mitigation strategy. 
+Using a linear denoising autoencoder (DAE) as a tractable surrogate for Reflow-style recursion, we show that under purely synthetic recursive training the end-to-end linear map contracts: its operator norm decays to zero at a geometric rate, reflecting a progressive loss of representational power. We further prove that augmenting each Reflow round with a fixed fraction of real data prevents this degeneration by keeping the operator norm bounded away from zero. 
+Finally, we validate that the qualitative trends implied by the theory are observable in practical Reflow pipelines on toy settings and image benchmarks, and we show that simple real-data–augmented Reflow schemes preserve Reflow's sampling-speed benefits while maintaining image quality.}
+}
+
+@InProceedings{hadou26,
+	title = {Stochastic Unrolled Neural Networks},
+	author = {Hadou, Samar and NaderiAlizadeh, Navid and Ribeiro, Alejandro},
+	pages = {341-359},
+	openreview = {hQQMk0IOPv},
+	abstract = {This paper develops stochastic unrolled neural networks as learned optimizers for empirical risk minimization (ERM) problems. We view a fixed-depth unrolled architecture as a parameterized optimizer whose layers define a trajectory from an initial random model to a task-specific solution. To handle full datasets, we let each layer interact with randomly drawn mini-batches from the downstream dataset, so that the optimizer incrementally absorbs the entire task. We then train the unrolled optimizer under descent constraints that encourage reductions in loss gradient norms along this trajectory, shaping its dynamics to mimic a convergent stochastic descent method. We prove that such stochastic unrolled networks converge to near-stationary downstream models and quantify performance changes under shifts in the task distribution. As a case study, we instantiate this framework in federated learning by designing an unrolled graph neural network (GNN) architecture derived from decentralized gradient descent, and show that it maintains strong performance under data heterogeneity and asynchronous communication on collaborative image classification tasks.}
+}
+
+@InProceedings{chen26b,
+	title = {Prompt Stability Matters: Evaluating and Optimizing Auto-Generated Prompt in General-Purpose Systems},
+	author = {Chen, Ke and Yu, Xucheng and Zhou, Yufei and Wang, Haohan},
+	pages = {360-374},
+	openreview = {gwf9E5M14g},
+	abstract = {Automatic prompt generation plays a crucial role in enabling general-purpose multi-agent systems to perform diverse tasks autonomously. Existing methods typically evaluate prompts based on their immediate task performance, overlooking the intrinsic qualities that determine their reliability. This outcome-centric view not only limits interpretability but also fails to account for the inherent stochasticity of large language models (LLMs). In this work, we bring attention to prompt stability—the consistency of model responses across repeated executions—as a key factor for building robust and effective prompt generation systems. To quantify this, we propose semantic stability as a criterion for assessing the response consistency of prompts. Based on the proposed metric, we developed the first stability-aware general-purpose prompt generation system that leverages stability feedback to iteratively enhance both prompt quality and system-level performance. Furthermore, we establish a logical chain between prompt stability and task success by analyzing the structural dependencies within our system, proving stability as a necessary condition for effective system-level execution. Empirical results across general and domain-specific tasks demonstrate that our stability-aware framework improves both accuracy and output consistency. By shifting the focus from one-off results to persistent reliability, our work offers a new perspective on prompt design and contributes practical tools for building more trustworthy general-purpose systems.}
+}
+
+@InProceedings{zhang26a,
+	title = {Symbiotic Cooperation for Web Agents: Harnessing Complementary Strengths of Large and Small LLMs},
+	author = {Zhang, Ruichen and Qiu, Mufan and Tan, Zhen and Zhang, Mohan and Lu, Xiaopeng and Peng, Jie and Xu, Kaidi and Agudelo, Leandro Z. and Qian, Peter Zhenghao and Chen, Tianlong},
+	pages = {375-427},
+	openreview = {gvYCdNQ3Wp},
+	abstract = {Web browsing agents powered by large language models (LLMs) have shown tremendous potential in automating complex web-based tasks. Existing approaches typically rely on large LLMs (e.g., GPT-4o) to explore web environments and generate trajectory data, which is then used either for demonstration retrieval (for large LLMs) or to distill small LLMs (e.g., Llama3) in a process that remains decoupled from the exploration. In this paper, we propose AgentSymbiotic, an iterative framework that couples data synthesis with task-performance, yielding a “symbiotic improvement” for both large and small LLMs. Our study uncovers a complementary dynamic between LLM types: while large LLMs excel at generating high-quality trajectories for distillation, the distilled small LLMs—owing to their distinct reasoning capabilities—often choose actions that diverge from those of their larger counterparts. This divergence drives the exploration of novel trajectories, thereby enriching the synthesized data. However, we also observe that the performance of small LLMs becomes a bottleneck in this iterative enhancement process. To address this, we propose two innovations in LLM distillation: a speculative data synthesis strategy that mitigates off-policy bias, and a multi-task learning approach designed to boost the reasoning capabilities of the student LLM. Furthermore, we introduce a hybrid mode for privacy preservation to address user privacy concerns. Evaluated on the WebArena benchmark, AgentSymbiotic achieves state-of-the-art performance with both LLM types. Our best large-LLM agent reaches 52%, surpassing the previous best of 45%, while our 8B distilled model achieves 49%, effectively compressing the intelligence of large models into a compact, inference-efficient agent that reduces deployment costs while matching SoTA performance. Code is released at: https://anonymous.4open.science/r/agent-0E80/README.md}
+}
+
+@InProceedings{song26a,
+	title = {Matrix Sensing with Kernel Optimal Loss: Robustness and Optimization Landscape},
+	author = {Song, Xinyuan and Ma, Ziye},
+	pages = {428-500},
+	openreview = {flemTyWd0m},
+	abstract = {In this paper, we study how the choice of loss functions of non-convex optimization problems affects their robustness and optimization landscape, through the study of noisy matrix sensing. In traditional regression tasks, mean squared error (MSE) loss is a common choice, but it can be unreliable for non-Gaussian or heavy-tailed noise. To address this issue, we adopt a robust loss based on nonparametric regression, which uses a kernel-based estimate of the residual density and maximizes the estimated log-likelihood. This robust formulation coincides with the MSE loss under Gaussian errors but remains stable under more general settings. We further examine how this robust loss reshapes the optimization landscape by analyzing the upper-bound of restricted isometry property (RIP) constants for spurious local minima to disappear. Through theoretical and empirical analysis, we show that this new loss excels in handling large noise and remains robust across diverse noise distributions. This work provides initial insights into improving the robustness of machine learning models through simple loss modification, guided by an intuitive and broadly applicable analytical framework.}
+}
+
+@InProceedings{yildirim26,
+	title = {Pruned Adaptation Modules: A Simple yet Strong Baseline for Continual Foundation Models},
+	author = {Yildirim, Elif Ceren Gok and Yildirim, Murat Onur and Vanschoren, Joaquin},
+	pages = {501-515},
+	openreview = {eGofyQoLrr},
+	abstract = {The continual learning literature has rapidly shifted from traditional class-incremental learning (CIL) techniques to foundation model (FM)-based CIL methods without a clear understanding of how these newer approaches compare to strong, lightweight convolutional baselines. This abrupt transition has created a substantial methodological gap, making it difficult to assess whether recent FM-based CIL progress reflects genuine advances or merely the absence of rigorous baselines. To address this gap, we introduce Pruned Adaptation Modules (PAM), a simple yet effective method that freezes the vast majority of the pre-trained ResNet while enabling scalable continual adaptation through sparse task-specific layers. PAM yields up to a 5$\times$ reduction in trainable parameters and a 6$\times$ reduction in total parameters, significantly reducing the cost of continual updates. Across diverse benchmarks, PAM consistently mitigates catastrophic forgetting and outperforms state-of-the-art FM-based CIL approaches. Our findings position PAM as a strong and transparent baseline that helps bridge the gap between traditional and FM-based CIL, guiding future research for a more accurate assessment of true progress in continual adaptation.}
+}
+
+@InProceedings{he26b,
+	title = {Token-Aware Representation Augmentation for Fine-Grained Semi-Supervised Learning},
+	author = {He, Hongyang and Zhong, Yan and Song, Xinyuan and Liu, Daizong and Sanchez, Victor},
+	pages = {516-528},
+	openreview = {dTLvE5EP7p},
+	abstract = {FixMatch is a widely adopted semi-supervised learning (SSL) framework that relies on consistency regularization between weakly and strongly augmented versions of unlabeled data. In the case of image classification, its reliance on indiscriminate image-level augmentations often leads to overfitting on early confident predictions while neglecting semantically rich but underexplored features. In this work, we introduce Token-Aware FixMatch (TA-FixMatch), a novel SSL framework that operates at the token representation level to enhance feature diversity and generalization. Specifically, we propose a token-aware masking strategy that identifies and softly suppresses the most influential tokens contributing to high-confidence predictions; and a structured token-level augmentation pipeline that perturbs, reorganizes, and semantically enriches the remaining tokens. These representation-level augmentations guide the model to attend to alternative evidence and discover complementary features, which is particularly beneficial in fine-grained classification tasks. Extensive experiments on standard (CIFAR-100, STL-10) and fine-grained (CUB-200-2011, NABirds, Stanford Cars) benchmarks demonstrate that TA-FixMatch outperforms existing state-of-the-art SSL methods under low-label regimes.}
+}
+
+@InProceedings{wang26a,
+	title = {MMA:Benchmarking Multi-ModalLarge Language Models in Ambiguity Contexts},
+	author = {Wang, Ru and Song, Selena and Wang, Yuquan and Ding, Liang and Gong, Mingming and Iwasawa, Yusuke and Matsuo, Yutaka and Guo, Jiaxian},
+	pages = {529-551},
+	openreview = {dC5Y1U9USM},
+	abstract = {While visual information in multimodal settings can naturally help resolve inherent ambiguities in natural language, the ability of multimodal large language models (MLLMs) to leverage visual cues for disambiguation remains underexplored. In this paper, we introduce the benchmark specifically designed to evaluate the performance of MLLMs in Ambiguous contexts (MMA). MMA uses a multiple-choice visual question-answering format with a novel evaluation protocol in which each ambiguous text is paired with two distinct images that suggest different scenarios. This setup requires models to provide different correct answers based on the visual context, effectively testing their ability to perform cross-modal disambiguation. By evaluating 25 proprietary and open-sourced MLLMs, we find that: (1) MLLMs often overlook scenario-specific information provided by images to clarify the ambiguity of texts. When presented with two different contextual images and asked the same question, MLLMs achieved an accuracy rate of only 53.22% in answering both correctly, compared to human performance at 88.97%. (2) Among the three types of ambiguity, models perform best under lexical ambiguity and worst under syntactic ambiguity. (3) Proprietary models (e.g., Gemini 2.0 Pro, top performer at 78.9%) outperform open-source counterparts by an average margin of 16.78%. These findings firstly underscore the current limitations of MLLMs in integrating visual information to clarify textual ambiguities and highlight critical areas for future improvements. The codes and benchmark data are https://github.com/physicsru/mma}
+}
+
+@InProceedings{wang26b,
+	title = {Optimal $k$-Discretization Learning},
+	author = {Wang, Tong and Wang, Zhangyang},
+	pages = {552-564},
+	openreview = {cj9yL8kzTf},
+	abstract = {The $k$-discretization problem is known to be NP-hard in general. Existing algorithms exploit various heuristics and obtain at most local minima that are sensitive to initializations. This paper starts by discussing how to leverage polynomial-time optimal solvers for 1-D $k$-discretization which can serve as a powerful and parsimonious regularizer for complex learning tasks.
+The algorithm can be accelerated by sampling, with bounded approximation errors proven. The paper then presents an embedding learning approach to handle multi-dimensional $k$-discretization, based on the 1-D solution. Equipped with many novel task-specific modifications, the proposed approach achieves highly promising performance on a vast variety of application tasks, including signal quantization, image clustering, and image smoothening. Our codes are available at \url{https://github.com/VITA-Group/SnC}.}
+}
+
+@InProceedings{rangamani26,
+	title = {Deep Neural Regression Collapse},
+	author = {Rangamani, Akshay and Unal, Altay},
+	pages = {565-581},
+	openreview = {by6XCDB718},
+	abstract = {Neural Collapse is a phenomenon that helps identify sparse and low rank structures in deep classifiers. Recent work has extended the definition of neural collapse to regression problems, albeit only measuring the phenomenon at the last layer. In this paper, we establish that Neural Regression Collapse (NRC) also occurs below the last layer across different types of models. We show that in the collapsed layers of neural regression models, features lie in a subspace that corresponds to the target dimension, the feature covariance aligns with the target covariance, the input subspace of the layer weights aligns with the feature subspace, and the linear prediction error of the features is close to the overall prediction error of the model. In addition to establishing Deep NRC, we also show that models that exhibit Deep NRC learn the intrinsic dimension of low rank targets and explore the necessity of weight decay in inducing Deep NRC. This paper provides a more complete picture of the simple structure learned by deep networks in the context of regression.}
+}
+
+@InProceedings{wang26c,
+	title = {Beyond In-Distribution Success: Scaling Curves of CoT Granularity for Language Model Generalization},
+	author = {Wang, Ru and Huang, Wei and Song, Selena and Zhang, Haoyu and Niu, Qian and Iwasawa, Yusuke and Matsuo, Yutaka and Guo, Jiaxian},
+	pages = {582-611},
+	openreview = {aaKvY41iDq},
+	abstract = {Generalization to novel compound tasks under distribution shift is important for deploying transformer-based language models (LMs). This work investigates Chain-of-Thought (CoT) reasoning as a means to enhance OOD generalization. Through controlled experiments across several compound tasks, we reveal three key insights: (1) While QA-trained models achieve near-perfect in-distribution accuracy, their OOD performance degrades catastrophically, even with 10000k+ training examples; (2) the granularity of CoT data strongly correlates with generalization performance; finer-grained CoT data leads to better generalization; (3) CoT exhibits remarkable sample efficiency, matching QA performance with much less (even 80%) data. Theoretically, we demonstrate that CoT forces internalization of valid dependency structures, and thus can achieve better generalization. Further, we show that transformer positional embeddings can amplify generalization by emphasizing subtask condition recurrence in long CoT sequences. Our combined theoretical and empirical analysis provides compelling evidence for CoT reasoning as a crucial training paradigm for enabling LM generalization on multi-step reasoning tasks under structural distributional shifts.}
+}
+
+@InProceedings{pham26,
+	title = {Learning in the Null Space: Small Singular Values for Continual Learning},
+	author = {Pham, Cuong Anh and Vepakomma, Praneeth and Horváth, Samuel},
+	pages = {612-628},
+	openreview = {ZFNMp3Zuo7},
+	abstract = {Alleviating catastrophic forgetting while enabling further learning is a primary challenge in continual learning (CL). Orthogonal-based training methods have gained attention for their efficiency and strong theoretical properties, and many existing approaches enforce orthogonality through gradient projection. In this paper, we revisit orthogonality and exploit the fact that small singular values correspond to directions that are nearly orthogonal to the input space of previous tasks. Building on this principle, we introduce NESS (Null-space Estimated from Small Singular values), a CL method that applies orthogonality directly in the weight space rather than through gradient manipulation. Specifically, NESS constructs an approximate null space using the smallest singular values of each layer’s input representation and parameterizes task-specific updates via a compact low-rank adaptation (LoRA-style) formulation constrained to this subspace. The subspace basis is fixed to preserve the null-space constraint, and only a single trainable matrix is learned for each task. This design ensures that the resulting updates remain approximately in the null space of previous inputs while enabling adaptation to new tasks. Our theoretical analysis and experiments on three benchmark datasets demonstrate competitive performance, low forgetting, and stable accuracy across tasks, highlighting the role of small singular values in continual learning. The code is available at https://github.com/pacman-ctm/NESS.}
+}
+
+@InProceedings{huang26b,
+	title = {(PASS) Visual Prompt Locates Good Structure Sparsity through a Recurrent HyperNetwork},
+	author = {Huang, Tianjin and Tao, Yong and Fang, Meng and Shen, Li and Liu, Fan and Pei, Yulong and Pechenizkiy, Mykola and Chen, Tianlong},
+	pages = {629-643},
+	openreview = {YirBkzY8AF},
+	abstract = {Large-scale neural networks have demonstrated remarkable performance in different domains like vision and language processing, although at the cost of massive computation resources. As illustrated by compression literature, structural model pruning is a prominent algorithm to encourage model efficiency, thanks to its acceleration-friendly sparsity patterns. One of the key questions of structural pruning is how to estimate the channel significance. In parallel, work on data-centric AI has shown that prompting-based techniques enable impressive generalization of large language models across diverse downstream tasks. In this paper, we investigate a charming possibility - leveraging visual prompts to capture the channel importance and derive high-quality structural sparsity. To this end, we propose a novel algorithmic framework, namely PASS. It is a tailored hyper-network to take both visual prompts and network weight statistics as input, and output layer-wise channel sparsity in a recurrent manner. Such designs consider the intrinsic channel dependency between layers. Comprehensive experiments across multiple network architectures and six datasets demonstrate the superiority of PASS in locating good structural sparsity. For example, at the same FLOPs level, PASS subnetworks achieve $1\%\sim 3\%$ better accuracy on Food101 dataset; or with a similar performance of $80\%$ accuracy, PASS subnetworks obtain $0.35\times$ more speedup than the baselines.}
+}
+
+@InProceedings{zhang26b,
+	title = {Sparsity-Aware Prompt Tuning: A Simple and Effective Way to Fine-tune High-Sparsity LLMs},
+	author = {Zhang, Yuxin and Huang, Weizhong and Ma, Yuexiao and Zhong, Yunshan and Zheng, Xiawu and Ji, Rongrong},
+	pages = {644-657},
+	openreview = {XE1s8Uxw8q},
+	abstract = {Pruning has recently demonstrated promising results in alleviating the heavy parameter burden and computational cost of Large Language Models (LLMs). However, the missing of sparsity-friendly fine-tuning significantly limits the performance of high-sparsity LLMs. While LoRA serves as the most popular fine-tuning approach for dense LLMs, it is naturally incompatible with unstructured sparsity since the merging operation condenses the weight matrix, thereby eliminating the benefits of sparsity. In this paper, we introduce Sparsity-aware Prompt Tuning (SPT), a simple and effective fine-tuning approach specifically tailored for sparse LLMs. Instead of fine-tuning the remaining weights or adding extra adaptors, SPT aims to learn soft prompts to compensate for pruned LLMs, enabling them to generate more desired content. Pruning occurs gradually during fine-tuning, with the prompt length proportional to the sparsity ratio assigned to each layer. This gradual imposition of pruning allows the output deviation caused by pruning to be efficiently mitigated through sparsity-aware prompt tuning. Our experimental results demonstrate that SPT significantly enhances the performance of sparse LLMs across a wide array of model architectures, parameter sizes, and tasks, particularly at high sparsity ratios. For instance, fine-tuning an 80% sparse LLaMA-V2-13B produced by SparsGPT for just 2.5 hours, SPT improves the zero-shot performance from 47.39% to 55.27%, outperforming its LoRA baseline by 2.55%, while using only 6.5% of the trainable parameters compared to the latter. This will deliver a 3.14x end-to-end inference speed-up using the DeepSparse inference engine.}
+}
+
+@InProceedings{dong26,
+	title = {Scalable LLM Reasoning Acceleration with Low-rank Distillation},
+	author = {Dong, Harry and Acun, Bilge and Chen, Beidi and Chi, Yuejie},
+	pages = {658-675},
+	openreview = {VPLVS6htID},
+	abstract = {Due to long generations, large language model (LLM) math reasoning demands significant computational resources and time. While many existing efficient inference methods have been developed with excellent performance preservation on language tasks, they often severely degrade math performance. In this paper, we propose Caprese, a resource-efficient distillation method to recover lost capabilities from deploying efficient inference methods, focused primarily in feedforward blocks. With original weights unperturbed, roughly 1\% of additional parameters, and only 20K synthetic training samples, we are able to recover much if not all of the reasoning capabilities lost from efficient inference for thinking LLMs and without harm to language tasks for instruct LLMs. Moreover, Caprese slashes the number of active parameters ($\sim$2B cut for Gemma 2 9B and Llama 3.1 8B) and integrates cleanly into existing model layers to reduce latency (>16\% time-to-next-token reduction) while encouraging response brevity (up to 8.5\% fewer tokens).}
+}
+
+@InProceedings{hu26a,
+	title = {FocusDC: Real-World Scene Infusion for Robust Dataset Condensation},
+	author = {Hu, Youbing and Cheng, Yun and Saukh, Olga and Ozdemir, Firat and Lu, Anqi and Cao, Zhiqiang and Zhang, Min and Li, Zhijun},
+	pages = {676-697},
+	openreview = {UnQctiNWoR},
+	abstract = {Dataset distillation has emerged as a strategy to compress real-world datasets for efficient training. However, it struggles with large-scale and high-resolution datasets, limiting its practicality. This paper introduces a novel resolution-independent dataset distillation method Focus ed Dataset Condensation (FocusDC), which achieves diversity and realism in distilled data by identifying key information patches, thereby ensuring the generalization capability of the distilled dataset across different network architectures. Specifically, FocusDC leverages a pre-trained Vision Transformer (ViT) to extract key image patches, which are then synthesized into a single distilled image. These distilled images, which capture multiple targets, are suitable not only for classification tasks but also for dense tasks such as object detection. To further improve the generalization of the distilled dataset, each synthesized image is augmented with a downsampled view of the original image. Experimental results on the ImageNet-1K dataset demonstrate that, with 100 images per class (IPC), ResNet50 and MobileNet-v2 achieve validation accuracies of 71.0% and 62.6%, respectively, outperforming state-of-the-art methods by 2.8% and 4.7%. Notably, FocusDC is the first method to use distilled datasets for object detection tasks. On the COCO2017 dataset, with an IPC of 50, YOLOv11n and YOLOv11s achieve 24.4% and 32.1% mAP, respectively, further validating the effectiveness of our approach.}
+}
+
+@InProceedings{bai26,
+	title = {ERC-SVD: Error-Controlled SVD for Large Language Model Compression},
+	author = {Bai, Haolei and Jian, Siyong and Liang, Tuo and Yin, Yu and Wang, Huan},
+	pages = {698-719},
+	openreview = {UB7HrKXWXF},
+	abstract = {Large language models (LLMs) have demonstrated impressive capabilities in a wide range of downstream natural language processing tasks. 
+Nevertheless, their considerable sizes and memory demands hinder practical deployment, underscoring the importance of developing efficient compression strategies. 
+Singular value decomposition (SVD) decomposes a matrix into orthogonal components, enabling efficient low-rank approximation. This is particularly suitable for LLM compression, where weight matrices often exhibit significant redundancy.
+However, current SVD-based methods neglect the residual matrix from truncation, resulting in significant truncation loss. 
+Additionally, compressing all layers of the model results in severe error propagation. 
+To overcome these limitations, we propose ERC-SVD, a new post-training SVD-based LLM compression method from an error-controlled perspective. 
+Specifically, we leverage the residual matrix generated during the truncation process to reduce truncation loss. 
+Moreover, under a fixed overall compression ratio, we selectively compress the last few layers of the model, which mitigates error propagation and improves compressed model performance.
+Comprehensive evaluations on diverse LLM families and multiple benchmark datasets indicate that ERC-SVD consistently achieves superior performance over existing counterpart methods, demonstrating its practical effectiveness.}
+}
+
+@InProceedings{essien26,
+	title = {Can Less Be More? Benchmarking Lightweight Models Against State-of-the-Art Deep Learning Architectures for Deployable Seizure Detection},
+	author = {Essien, Isaiah and Ginsberg, Donna-lee and Thornburg, Jesse},
+	pages = {720-734},
+	openreview = {SWpehCTx04},
+	abstract = {Over the past decades, emerging research in seizure detection has highlighted the critical need for resource-constrained, deployable models that can operate in low-infrastructure environments. Seizure detection models that achieve high accuracy on benchmarks rarely run on the hardware available in low-resource contexts like developing countries, where epilepsy takes the heaviest toll. This work addresses the fundamental disconnect between model performance and real-world deployability by developing and evaluating parsimonious deep learning architectures for real-time epileptic seizure detection on consumer smartphones. This study systematically develops and compares two lightweight models: a Convolutional Neural Network with Gated Recurrent Units (CNN-GRU) and a 1D Convolutional Network with Multi-Head Attention (1D CNN-MHA). The optimal model is selected for both detection performance and deployment feasibility. The parsimonious 1D CNN-MHA model achieved superior performance with 96% accuracy, 93% sensitivity, and 0.99 AUC, outperforming the CNN-GRU model in both accuracy and sensitivity. Benchmarking against state-of-the-art models reveals a persistent deployment gap: while "lightweight" models in the literature lack deployment evidence, and high-accuracy models are bound to server-grade hardware, the 23.8 KB TensorFlow Lite model bridges this gap by delivering competitive accuracy while running in real-time on mid-range Android devices. Crucially, these results establish deployment feasibility rather than clinical validity: the system demonstrates that seizure-like motion patterns can be reliably discriminated under strict on-device constraints using commodity smartphones. The findings therefore support the principle that carefully designed parsimonious architectures can approach the performance of heavier models while remaining executable in real-world edge environments. This work can be interpreted as a feasibility study of deployability designed to enable subsequent large-scale clinical validation rather than as a population-level diagnostic model.}
+}
+
+@InProceedings{baeg26,
+	title = {Beyond Greedy Decoding: Model-Specific Strategy Selection via Multi-faceted Uncertainty Decomposition},
+	author = {Baeg, Kwangje and Lim, Yubin},
+	pages = {735-755},
+	openreview = {Qa5XCernKa},
+	abstract = {Large Language Models (LLMs) rely on static decoding strategies despite significant differences in the difficulty of generation. Recent uncertainty-based approaches aggregate diverse signals, overlooking model heterogeneity---particularly pronounced in morphologically rich languages (e.g., Korean) where tokenization variations lead to unique uncertainty traits. We focus on Korean instruction-tuned LLMs and decompose uncertainty into three largely independent components---Semantic Entropy, Graph Laplacian, and Trajectory Consistency. Unsupervised clustering reveals model-specific behavioral profiles with marked heterogeneity, challenging aggregation-based approaches and supporting uncertainty-guided strategy selection. High generation quality does not correlate with low output diversity, and universal decoding strategies fail for heterogeneous models. Cross-dataset validation shows that uncertainty patterns capture transferable model characteristics, enabling practitioners to systematically select strategies based on generation context.}
+}
+
+@InProceedings{liu26,
+	title = {Superclass-Guided Representation Disentanglement for Spurious Correlation Mitigation},
+	author = {Liu, Chenruo and Liu, Hongjun and Lai, Zeyu and Shen, Yiqiu and Zhao, Chen and Lei, Qi},
+	pages = {756-794},
+	openreview = {Jf8mD2oAIv},
+	abstract = {To enhance group robustness to spurious correlations, prior work often relies on auxiliary group annotations and assumes identical sets of groups across training and test domains. To overcome these limitations, we propose to leverage superclasses—categories that lie higher in the semantic hierarchy than the task’s actual labels—as a more intrinsic signal than group labels for discerning spurious correlations. Our model incorporates superclass guidance from a pretrained vision-language model via gradient-based attention alignment, and then integrates feature disentanglement with a theoretically supported minimax-optimal feature-usage strategy. As a result, our approach attains robustness to more complex group structures and spurious correlations, without the need to annotate any training samples. Experiments across diverse domain generalization tasks show that our method significantly outperforms strong baselines and goes well beyond the vision-language model's guidance, with clear improvements in both quantitative metrics and qualitative visualizations.}
+}
+
+@InProceedings{cao26,
+	title = {Dynamic SFT with Structured Measurements: Fast Queries, Fast Updates, Provable Guarantees},
+	author = {Cao, Yang and Song, Zhao},
+	pages = {795-825},
+	openreview = {JdYi8XpabR},
+	abstract = {The sparse Fourier transform typically proceeds in two stages: frequency estimation and signal estimation. The first recovers the set of frequencies from noisy time-domain samples; the second constructs their corresponding magnitudes. In most methods, signal estimation is only approximate and depends on the frequencies identified in the first stage. In this paper, we study a complementary question: given access to an oracle that returns the exact magnitude for any queried frequency, what is the minimum number of oracle calls needed to perform a sparse Fourier transform? For an n-point discrete Fourier transform, the naive approach queries all n frequencies. We design the first algorithm that requires only $o(n)$ oracle invocations. We further complement this upper bound with a lower bound, derived using tools from computational complexity.}
+}
+
+@InProceedings{bolatov26,
+	title = {Byzantine-Robust Optimization under $(L_0,L_1)$-Smoothness},
+	author = {Bolatov, Arman and Horváth, Samuel and Takáč, Martin and Gorbunov, Eduard},
+	pages = {826-854},
+	openreview = {IhErR5K3EL},
+	abstract = {We consider distributed optimization under Byzantine attacks in the presence of $(L_0,L_1)$-smoothness, a generalization of standard $L$-smoothness that captures functions with state-dependent gradient Lipschitz constants. We propose $\texttt{Byz-NSGDM}$, a normalized stochastic gradient descent method with momentum that achieves robustness against Byzantine workers while maintaining convergence guarantees. Our algorithm combines momentum normalization with Byzantine-robust aggregation enhanced by Nearest Neighbor Mixing (NNM) to handle both the challenges posed by $(L_0,L_1)$-smoothness and Byzantine adversaries. We prove that $\texttt{Byz-NSGDM}$ achieves a convergence rate of $O(K^{-1/4})$ up to a Byzantine bias floor proportional to the robustness coefficient and gradient heterogeneity. Experimental validation on heterogeneous MNIST classification and synthetic $(L_0,L_1)$-smooth optimization problems demonstrates the effectiveness of our approach against various Byzantine attack strategies.}
+}
+
+@InProceedings{zhuang26,
+	title = {Effective Learning for Small Reasoning Models: An Empirical Study on 0.5B Reasoning LLMs},
+	author = {Zhuang, Xialie and MA, Peixian and Jia, Zhikai and Cao, Zane and Liu, Shiwei},
+	pages = {855-869},
+	openreview = {HeZKqIXrdh},
+	abstract = {The ongoing evolution of language models has led to the development of large-scale architectures that demonstrate exceptional performance across a wide range of tasks. However, these models come with significant computational and energy demands, as well as potential privacy implications. In this context, Small Reasoning Language Models (SRLMs) with approximately 0.5 billion parameters present a compelling alternative due to their remarkable computational efficiency and cost-effectiveness, particularly in resource-constrained environments. Despite these advantages, the limited capacity of 0.5 billion parameter models poses challenges in handling complex tasks such as mathematical reasoning. This research investigates various training strategies, including supervised fine-tuning (SFT), knowledge distillation (KD), and reinforcement learning (RL), as well as their hybrid implementations, to enhance the performance of 0.5B SRLMs. We analyze effective methodologies to bridge the performance gap between SRLMS and larger models and present insights into optimal training pipelines tailored for these smaller architectures. Through extensive experimental validation and analysis, our work aims to provide actionable recommendations for maximizing the reasoning capabilities of 0.5B models.}
+}
+
+@InProceedings{kopp26,
+	title = {Learning of Discretized LSTMs},
+	author = {Kopp, Nikolaus and Pernkopf, Franz},
+	pages = {870-880},
+	openreview = {EWHoyOreAO},
+	abstract = {The growing demand for both large-scale machine learning applications and AI models on embedded devices has created a need to miniaturize neural networks. A common approach is to discretize weights and activations, reducing memory footprint and computational cost. Many existing methods, however, rely on heuristic gradients or post-training quantization. Probabilistic approaches allow networks with discrete parameters and activations to be trained directly without such heuristics, yet their application to recurrent neural networks remains underexplored. In this work, we analyze several probabilistic training algorithms previously studied on feed-forward and convolutional networks, and demonstrate that the reparametrization trick can be effectively applied to LSTM networks with discrete weights. We investigate the effect of using step functions for individual LSTM gates, finding that binarizing the candidate and output gate can maintain performance, whereas binarizing the input gate severely degrades it. We show that probabilistic training pose a valuable alternative to quantization-aware training. Comparisons with continuous LSTMs paint a nuanced picture: in some cases, discrete valued networks match the results of continuous ones, while in others, discretization leads to a performance decline.}
+}
+
+@InProceedings{tang26a,
+	title = {GRAIL: Post-hoc Compensation by Linear Reconstruction for Compressed Networks},
+	author = {Tang, Wenwu and Wang, Dong and Thiele, Lothar and Saukh, Olga},
+	pages = {881-895},
+	openreview = {DYnWU3fQNx},
+	abstract = {Structured deep model compression methods reduce memory and inference costs, but the majority of existing approaches still suffer from notable accuracy degradation under aggressive compression. We propose \emph{post-hoc blockwise compensation}, called GRAIL, a simple zero-finetuning step applied after pruning or folding that restores each block’s input–output behavior using a small calibration set. The method summarizes producer-side activations with a Gram matrix and solves a ridge least-squares problem to project the original hidden representation onto the reduced hidden space, yielding a linear map that is merged into the consumer weights while the producer is narrowed to the selected or folded outputs. The approach is selector-agnostic (magnitude, Wanda, Gram-based selection, or folding), data-aware (requiring only a few forward passes without gradients or labels), and recovers classic pruning/folding when the Gram matrix is near identity. Across ResNets, ViTs, and decoder-only LLMs, post-hoc compensation with GRAIL consistently improves accuracy or perplexity over data-free and data-aware pruning/folding baselines in practical compression regimes, with manageable overhead and no backpropagation. Our code is available at: \href{https://github.com/TWWinde/GRAIL_Compensation}{https://github.com/TWWinde/GRAIL}}
+}
+
+@InProceedings{schrödter26,
+	title = {Trainable Bitwise Soft Quantization for Input Feature Compression},
+	author = {Schrödter, Karsten and Stenkamp, Jan and Herrmann, Nina and Gieseke, Fabian},
+	pages = {896-920},
+	openreview = {AhrDRUlzeD},
+	abstract = {The growing demand for machine learning applications in the context of the Internet of Things calls for new approaches to optimize the use of limited compute and memory resources.
+Despite significant progress that has been made w.r.t. reducing model sizes and improving efficiency, many applications still require remote servers to provide the required resources.
+However, such approaches rely on transmitting data from edge devices to remote servers, which may not always be feasible due to bandwidth, latency, or energy constraints.
+We propose a task-specific, trainable feature quantization layer that compresses the input features of a neural network. This can significantly reduce the amount of data that needs to be transferred from the device to a remote server.
+In particular, the layer allows each input feature to be quantized to a user-defined number of bits, enabling a simple on-device compression at the time of data collection. 
+The layer is designed to approximate step functions with sigmoids, enabling trainable quantization thresholds. 
+By concatenating outputs from multiple sigmoids, introduced as bitwise soft quantization, it achieves trainable quantized values when integrated with a neural network.
+We compare our method to full-precision inference as well as to several quantization baselines.
+Experiments show that our approach outperforms standard quantization methods, while maintaining accuracy levels close to those of full-precision models.
+In particular, depending on the dataset, compression factors of $5\times$ to $16\times$ can be achieved compared to $32$-bit input without significant performance loss.}
+}
+
+@InProceedings{sklaviadis26,
+	title = {A Stein identity for $q$-Gaussians with bounded support},
+	author = {Sklaviadis, Sophia and Möllenhoff, Thomas and Figueiredo, Mario A. T. and Martins, Andre and Khan, Mohammad Emtiyaz},
+	pages = {921-939},
+	openreview = {AdtW8Bayno},
+	abstract = {Stein's identity is a fundamental tool in machine learning with applications in generative models, stochastic optimization, and other problems involving gradients of expectations under Gaussian distributions. Less attention has been paid to problems with non-Gaussian expectations.
+Here, we consider the class of bounded-support $q$-Gaussians and derive 
+a new Stein identity leading to gradient estimators which have nearly identical forms to the Gaussian ones, and which are similarly easy to implement.
+We do this by extending the previous results of Landsman, Vanduffel, and Yao (2013) to prove new Bonnet- and Price-type theorems for $q$-Gaussians. We also simplify their forms by using *escort* distributions.
+Our experiments show that bounded-support distributions can reduce the variance of gradient estimators, which can potentially be useful for Bayesian deep learning and sharpness-aware minimization.
+Overall, our work simplifies the application of Stein's identity for an important class of non-Gaussian distributions.}
+}
+
+@InProceedings{hu26b,
+	title = {Concept based Ambiguity Resolution in LLMs},
+	author = {Hu, Zhibo and Wang, Chen and Shu, Yanfeng and Paik, Hye-young and Zhu, Liming},
+	pages = {940-956},
+	openreview = {A2x1TgaadC},
+	abstract = {Ambiguity in natural language is a significant obstacle for achieving accurate text to structured data mapping through large language models (LLMs), which affects the performance of tasks such as mapping text to agentic tool calling and text-to-SQL queries. Existing methods to ambiguity handling either rely on the ReACT framework to obtain correct mappings through trial and error, or on supervised fine-tuning to bias models toward specific tasks. In this paper, we adopt a different approach that characterizes representation differences of ambiguous text in the latent space and leverages these differences to identify ambiguity before mapping them to structured data. To detect sentence-level ambiguity, we focus on the relationship between ambiguous questions and their interpretations. Unlike distances calculated by dense embeddings, we introduce a new distance measure based on a path kernel over concepts. With this measurement, we identify patterns to distinguish ambiguous from unambiguous questions. Furthermore, we propose a method for improving LLM performance on ambiguous agentic tool calling through missing concept prediction. Both achieve state-of-the-art results.}
+}
+
+@InProceedings{tezekbayev26,
+	title = {Simplex Deep Linear Discriminant Analysis},
+	author = {Tezekbayev, Maxat and Bolatov, Arman and Assylbekov, Zhenisbek},
+	pages = {957-967},
+	openreview = {9CC0pqPq13},
+	abstract = {We revisit Deep Linear Discriminant Analysis (Deep LDA) from a likelihood-based perspective. While classical LDA is a simple Gaussian model with linear decision boundaries, attaching an LDA head to a neural encoder raises the question of how to train the resulting deep classifier by maximum likelihood estimation (MLE). We first show that end-to-end MLE training of an unconstrained Deep LDA model ignores discrimination: when both the LDA parameters and the encoder parameters are learned jointly, the likelihood admits a degenerate solution in which some of the class clusters may heavily overlap or even collapse, and classification performance deteriorates. Batchwise moment re-estimation of the LDA parameters does not remove this failure mode. We then propose a constrained Deep LDA formulation that fixes the class means to the vertices of a regular simplex in the latent space and restricts the shared covariance to be spherical, leaving only the priors and a single variance parameter to be learned along with the encoder. Under these geometric constraints, MLE becomes stable and yields well-separated class clusters in the latent space. On images (Fashion-MNIST, CIFAR-10, CIFAR-100) and texts (AG News, CLINC150), the resulting Deep LDA models achieve accuracy competitive with softmax baselines while offering a simple, interpretable latent geometry that is clearly visible in two-dimensional projections.}
+}
+
+@InProceedings{yashaswini26,
+	title = {Emergence of Auditory Receptive Fields based on Surprise},
+	author = {Yashaswini, Yashaswin and Dash, Sneha and Bandyopadhyay, Sharba},
+	pages = {968-988},
+	openreview = {992xgvrxDK},
+	abstract = {Understanding how sensory systems efficiently encode natural stimuli is a fundamental challenge in neuroscience. While the efficient coding hypothesis explains many aspects of sensory processing, its role in processing surprising auditory inputs remains unclear. We present two computational frameworks modeling the development of auditory neural receptive fields via unsupervised learning to address this challenge. In the first framework, a single-layer network’s synaptic weights adapt to auditory inputs to maximize activations for surprising events while minimizing overall activity. The weights are adjusted using three factors $(\alpha, \beta, \gamma)$ and the gradient of the $l1$ norm of activations. An autoregressive generative model (CochleaNet), trained on LibriSpeech, provides the joint probability distribution to calculate surprise, defined as the negative log probability of time-frequency bin energy conditioned on previous time steps and other frequency channels. We find learning to be fast, with robust convergence of weights using random speech samples. This approach yields spectrotemporal receptive fields (STRFs) whose tuning properties closely match neurophysiological observations. Second, we propose a principled Kalman-MI formulation in which the generative prior, latent auditory state, and synaptic weights are jointly updated online. Mutual-information gradients, serving as a normative proxy for expected surprise reduction, drive adaptation in a linear-Gaussian state-space model, producing deviant-selective receptive fields in an oddball paradigm. Together, these approaches aim to refine the interplay between sparse coding and surprise-driven learning, offering new insights into efficient sensory encoding.}
+}
+
+@InProceedings{amanlou26,
+	title = {KNIGHT: Knowledge Graph-Driven Multiple-Choice Question Generation with Adaptive Hardness Calibration},
+	author = {Amanlou, Mohammad and Moghaddam, Erfan Shafiee and Nouri, Mahdi and Jafary, Yasaman Amou and Farsi, Farhan and Bahrak, Behnam},
+	pages = {989-1024},
+	openreview = {8kA9oO5gEc},
+	abstract = {With the rise of large language models (LLMs), they have become instrumental in applications such as Retrieval-Augmented Generation (RAG). Yet evaluating these systems remains bottlenecked by the time and cost of building specialized assessment datasets.
+We introduce KNIGHT, an LLM-based, knowledge-graph-driven framework for generating multiple-choice question (MCQ) datasets from external sources. KNIGHT constructs a topic-specific knowledge graph, a structured, parsimonious summary of entities and relations, that can be reused to generate instructor-controlled difficulty levels, including multi-hop questions, without repeatedly re-feeding the full source text. This KG acts as a compressed, reusable state, making question generation a cheap read over the graph. We instantiate KNIGHT on Wikipedia/Wikidata, while keeping the framework domain- and ontology-agnostic.
+As a case study, KNIGHT produces six MCQ datasets in History, Biology, and Mathematics. We evaluate quality on five criteria: fluency, unambiguity (single correct answer), topic relevance, option uniqueness, and answerability given the provided sources (as a proxy for hallucination). Results show that KNIGHT enables token- and cost-efficient generation from a reusable KG representation, achieves high quality across these criteria, and yields model rankings aligned with MMLU-style benchmarks, while supporting topic-specific and difficulty-controlled evaluation.}
+}
+
+@InProceedings{xu26,
+	title = {Teaching LLMs According to Their Aptitude: Adaptive Switching Between CoT and TIR for Mathematical Problem Solving},
+	author = {Xu, Xin and Xu, Yan and Chen, Tianhao and Yan, Yuchen and Liu, Chengwu and Chen, Zaoyu and Wang, Yufei and Yin, Yichun and Wang, Yasheng and Liu, Qun and Yin, Lu},
+	pages = {1025-1048},
+	openreview = {8PWIyOSSVP},
+	abstract = {Existing supervised fine-tuning (SFT) approaches to enhance the mathematical reasoning of large language models (LLMs) rely either on Chain-of-Thought (CoT) for generalizability or Tool-Integrated Reasoning (TIR) for precise computation. While efforts have been made to combine these methods, they primarily rely on post-selection or predefined strategies, leaving an open question: Could we endow LLMs with the ability to adaptively determine whether to use CoT or TIR based on the math problems at hand before decoding? In this work, we propose TATA (Teaching LLMs According to Their Aptitude), an adaptive framework that enables LLMs to personalize their reasoning strategy for different problems spontaneously, aligning it with their intrinsic aptitude. TATA incorporates base-LLM-aware data selection during SFT to tailor training data to the model’s unique abilities, which equips LLMs to autonomously determine and apply the effective reasoning strategy at test time. Empirical results demonstrate that TATA effectively combines the complementary strengths of CoT and TIR, achieving superior or comparable performance with improved inference efficiency compared to existing methods. Further analysis highlights the crucial role of aptitude-aware data selection in enabling LLMs to make informed and adaptive reasoning decisions, aligning reasoning strategies with model capabilities.}
+}
+
+@InProceedings{zhao26b,
+	title = {Sparse Mixture-of-Experts for Compositional Generalization: Empirical Evidence and Theoretical Foundations of Optimal Sparsity},
+	author = {Zhao, Jinze and Wang, Peihao and Yang, Junjie and Cai, Ruisi and Liu, Gaowen and Srinivasa, Jayanth and Kompella, Ramana Rao and Liang, Yingbin and Wang, Zhangyang},
+	pages = {1049-1071},
+	openreview = {7hdbscsEZA},
+	abstract = {Sparse Mixture-of-Experts (SMoE) architectures have gained prominence for their ability to scale neural networks, particularly transformers, without a proportional increase in computational cost. Despite their success, their role in compositional generalization, i.e., adapting to novel combinations of known components, remains under-explored. This study challenges the assumption that minimal expert activation suffices for task generalization and investigates the relationship between task complexity and optimal sparsity in SMoE models. Through empirical evaluations on the SRAVEN symbolic reasoning task and the SKILL-MIX benchmark, we demonstrate that (i) the number of activated experts consistently increases with the perceived task difficulty to maintain performance; and (ii) the optimal number of activated experts scales proportionally with task complexity. Our theoretical analysis derives a scaling law for optimal sparsity by balancing approximation and estimation errors, revealing alignment with empirical observations. We formally show that the optimal sparsity lies between minimal activation (1-2 experts) and full activation, with the exact number scaling proportionally to task complexity and further influenced by the size of the training data and the complexity of the model. These findings offer practical insights for designing SMoE models that achieve computational efficiency while enabling robust compositional generalization.}
+}
+
+@InProceedings{tang26b,
+	title = {Data-Efficient and Robust Trajectory Generation through Pathlet Dictionary Learning},
+	author = {tang, yuanbo and Tang, Yan and Zhao, Zihui and Zhang, Zixuan and Li, Yang},
+	pages = {1072-1089},
+	openreview = {5ztaBeJIqD},
+	abstract = {Trajectory generation has recently drawn growing interest in privacy-preserving urban mobility studies and location-based service applications. 
+Although many studies have used deep learning or generative AI methods to model trajectories and achieved promising results, real‑world trajectory data are noisy and often incomplete (e.g., device instability, low sampling rates, privacy‑driven partial reporting), introducing distribution shifts and, as observed in our experiments, marked differences between synthetic and real trajectory distributions.
+To address this issue, we exploit the low-dimensional structure and regular patterns in 
+urban trajectories and propose a parsimonious deep generative model based on sparse pathlet 
+representations, which encode trajectories with sparse binary vectors associated with a 
+learned compact dictionary of trajectory segments.
+Specifically, we introduce a probabilistic graphical model to describe the trajectory generation process, which includes a Variational Autoencoder (VAE) component and a linear decoder component. 
+During training, the model can simultaneously learn the latent embedding of sparse pathlet representations and the pathlet dictionary that captures essential mobility patterns in the trajectory dataset. The conditional version of our model can also be used to generate customized trajectories based on temporal and spatial constraints.
+Our model can effectively learn data distribution even using noisy data, achieving relative improvements of 35.4\% and 26.3\% over strong baselines on two real-world trajectory datasets.
+Moreover, the generated trajectories can be conveniently utilized for multiple downstream tasks, including trajectory prediction and data denoising.
+Lastly, the framework design offers a significant efficiency advantage, saving 64.8\% of the time and 56.5\% of GPU memory compared to previous approaches. 
+The code repository is available at https://anonymous.4open.science/r/Data-Efficient-and-Robust-Trajectory-Generation-through-Pathlet-Dictionary-Learning-045E.}
+}
+
+@InProceedings{singh26,
+	title = {SonoEdit: Null-Space Constrained Knowledge Editing for Pronunciation Correction in LLM-Based TTS},
+	author = {Singh, Ayush Pratap and Singh, Harshit and Mathur, Nityanand and Mandloi, Akshat and Kamath, Sudarshan},
+	pages = {1090-1100},
+	openreview = {5uW9XGx7Gk},
+	abstract = {Neural text-to-speech systems systematically mispronounce low-resource proper nouns, particularly non-English names, brands, and geographic locations due to their underrepresentation in predominantly English training corpora. Existing solutions require expensive multilingual data collection or manual phonetic annotation, limiting TTS deployment in diverse linguistic contexts. We introduce SonoEdit, a model editing technique that surgically corrects pronunciation errors in pre-trained TTS models without retraining. Correcting such errors traditionally requires costly supervised finetuning or manual phoneme injection. In this work, we present a parsimonious alternative using Null-Space Pronunciation Editing, a single-shot parameter update that modifies the pronunciation of specific words while provably preserving the rest of the model’s behavior. We first adapt Acoustic Causal Tracing to identify the specific Transformer layers governing text-to-pronunciation mapping. We then employ Null-Space Constrained Editing to compute a closed-form weight update that rectifies the target pronunciation while remaining mathematically orthogonal to the manifold of general speech, constructing a constrained update that drives the model’s acoustic output toward a desired pronunciation exemplar while ensuring zero first-order change on a preserved corpus.}
+}
+
+@InProceedings{english26,
+	title = {FLIPR: FLexible and Interpretable Prediction Regions for time series},
+	author = {English, Eshant and Lippert, Christoph},
+	pages = {1101-1111},
+	openreview = {5u1Qo1wP1J},
+	abstract = {Constructing reliable and interpretable prediction regions remains a core challenge in time-series forecasting. While conformal prediction offers rigorous finite-sample coverage guarantees, most existing approaches focus on univariate intervals and fail to capture dependencies across multiple forecast horizons. We propose FLexible and Interpretable Prediction Regions (FLIPR) for time series, a flexible and interpretable conformal framework that constructs balanced joint prediction regions for multi-horizon forecasts. FLIPR for time series produces a $K-$th–order conformity score that jointly calibrates horizon-wise residuals using standardised mean and scale estimates, enabling explicit control of $K-$family-wise error while preserving interpretability. The resulting regions are rectangular yet adaptive, distributing coverage uniformly across horizons without requiring any additional learned model. Empirical results on synthetic and real-world datasets show that FLIPR achieves valid coverage with compact, well-calibrated prediction regions, outperforming existing conformal baselines in efficiency and interpretability.}
+}
+
+@InProceedings{zhang26c,
+	title = {Enhancing Long-Context Inference with Context-Position Duo-Mixture},
+	author = {Zhang, Zhenyu and Sridhar, Sharath Nittur and Wang, Zhangyang and Kundu, Souvik},
+	pages = {1112-1124},
+	openreview = {56qbbO5txd},
+	abstract = {Long-context understanding ability of the existing large language models (LLMs) is generally limited by their pre-training context window, providing limited effectiveness as context length increases. Moreover, even within the range of pre-training context length, LLMs often fail to capture vital information present in the middle of the context-window. Towards mitigating these limitations, we introduce context-position duo-mixture (CoPMix) of LLMs, a simple yet effective training-free method designed to enhance their long-context understanding performance in terms of both effectiveness as well as context awareness. Specifically, we present an input context chunking and mixing strategy that divides long sequences into multiple chunks, each accompanied by a shared context sink. The input query attends to all chunks in parallel, enabling the efficient integration of information across chunks. We then introduce an adaptive assignment of positional information to enhance the context awareness. This duo-mixture strategy reduces the quadratic complexity of attention to sub-quadratic while improving long-context processing performance. Extensive experiments across multiple LLMs on diverse long-context datasets demonstrate that CoPMix achieves up to a 9.79% accuracy improvement over the existing alternatives, while reducing the pre-filling latency by up to 69.14% compared to full attention LLM alternative.}
+}
+
+@InProceedings{you26,
+	title = {Generalized Radius and Integrated Codebook Transforms for Differentiable Vector Quantization},
+	author = {You, Haochen and Zhang, Heng and He, Hongyang and Li, Yuqi and Liu, Baojing},
+	pages = {1125-1160},
+	openreview = {31ALqciQGE},
+	abstract = {Vector quantization (VQ) underpins modern generative and representation models by turning continuous latents into discrete tokens. Yet hard nearest-neighbor assignments are non-differentiable and are typically optimized with heuristic straight-through estimators, which couple the update step size to the quantization gap and train each code in isolation, leading to unstable gradients and severe codebook under-utilization at scale. In this paper, we introduce GRIT-VQ (Generalized Radius & Integrated Transform Vector Quantization), a unified surrogate framework that keeps hard assignments in the forward pass while making VQ fully differentiable. GRIT-VQ replaces the straight-through estimator with a radius-based update that moves latents along the quantization direction with a controllable, geometry-aware step, and applies a data-agnostic integrated transform to the codebook so that all codes are updated through shared parameters rather than independently. Our theoretical analysis clarifies the fundamental optimization dynamics introduced by GRIT-VQ, establishing conditions for stable gradient flow, coordinated codebook evolution, and reliable avoidance of collapse across a broad family of quantizers. Across image reconstruction, image generation, and recommendation tokenization benchmarks, GRIT-VQ consistently improves reconstruction error, generative quality, and recommendation accuracy while substantially increasing codebook utilization compared to existing VQ variants.}
+}
+
+@InProceedings{tupitsa26,
+	title = {Selective Collaboration for Robust Federated Learning},
+	author = {Tupitsa, Nazarii and Horváth, Samuel and Takáč, Martin and Gorbunov, Eduard},
+	pages = {1161-1194},
+	openreview = {2xnkTBPetd},
+	abstract = {Federated Learning (FL) revolutionizes machine learning by enabling model training across decentralized data sources without aggregating sensitive client data. However, the inherent heterogeneity of client data presents unique challenges, as not all client contributions positively impact model performance. In this work, we propose a novel algorithm, Merit-Based Federated Averaging (\Algn), which dynamically assigns aggregation weights to clients based on their data distribution's relevance to a target objective. By leveraging stochastic gradients and solving an auxiliary optimization problem, our method adaptively identifies beneficial collaborators, ensuring efficient and robust learning. We establish theoretical convergence guarantees under mild assumptions and demonstrate that \Algn achieves superior convergence by harnessing the advantages of diverse yet complementary datasets. Empirical evaluations highlight its ability to mitigate the adverse effects of outlier and adversarial clients, paving the way for more effective and resilient FL in heterogeneous environments.}
+}
+
+@InProceedings{navarrete26,
+	title = {What Scalable Second-Order Information Knows for Pruning at Initialization},
+	author = {Navarrete, Ivo Gollini and Cuadrado, Nicolas Mauricio and Takáč, Martin and Horváth, Samuel},
+	pages = {1195-1227},
+	openreview = {1EWyO9KJWq},
+	abstract = {Pruning remains an effective strategy for reducing both the costs and environmental impact associated with deploying large neural networks (NNs) while maintaining performance. Classical methods, such as OBD (LeCun et al., 1989) and OBS (Hassibi et al., 1992), demonstrate that utilizing curvature information can significantly enhance the balance between network complexity and performance. However, the computation and storage of the Hessian matrix make it impractical for modern NNs, motivating the use of approximations. Recent research (Gur et al., 2018; Karakida et al., 2019) suggests that the top eigenvalues guide optimization in a small subspace, are identifiable early, and remain consistent during training. Motivated by these findings, we revisit pruning at initialization (PaI) to evaluate scalable, unbiased second-order approximations, such as the Empirical Fisher and Hutchinson diagonals. Our experiments show that these methods capture sufficient curvature information to improve the identification of critical parameters compared to first-order baselines, while maintaining linear complexity. Additionally, we empirically demonstrate that updating batch normalization statistics as a warmup phase improves the performance of data-dependent criteria and mitigates the issue of layer collapse. Notably, Hutchinson-based criteria consistently outperformed or matched existing PaI algorithms across various models (including VGG, ResNet, and ViT) and datasets (such as CIFAR-10/100, TinyImageNet, and ImageNet). Our findings suggest that scalable second-order approximations strike an effective balance between computational efficiency and accuracy, making them a valuable addition to the pruning toolkit. We make our code available.}
+}
+
+@InProceedings{song26b,
+	title = {Efficient Temporal Consistency in Diffusion-Based Video Editing with Adaptor Modules: A Theoretical Framework},
+	author = {Song, Xinyuan and He, Yangfan and Li, Sida and Wang, Jianhui and He, Hongyang and Yuan, Xinhang and Wang, Ruoyu and Chen, Jiaqi and Li, Keqin and Lu, Kuan and Huo, Menghao and Bi, Ziqian and Li, Binxu and Liu, Pei},
+	pages = {1228-1250},
+	openreview = {0M4EFfQmzs},
+	abstract = {Adapter-based methods are commonly used to enhance model performance with minimal additional complexity, especially in video editing tasks that require frame-to-frame consistency. By inserting small, learnable modules into pretrained diffusion models, these adapters can maintain temporal coherence without extensive retraining. Approaches that incorporate prompt learning with both shared and frame-specific tokens are particularly effective in preserving continuity across frames at low training cost. In this work, we want to provide a general theoretical framework for adapters that maintain frame consistency in DDIM-based models under a temporal consistency loss. First, we prove that the temporal consistency objective is differentiable under bounded feature norms, and we establish a Lipschitz bound on its gradient. Second, we show that gradient descent on this objective decreases the loss monotonically and converges to a local minimum if the learning rate is within an appropriate range. Finally, we analyze the stability of modules in the DDIM inversion procedure, showing that the associated error remains controlled. These theoretical findings will reinforce the reliability of diffusion-based video editing methods that rely on adapter strategies and provide theoretical insights in video generation tasks.}
+}
+

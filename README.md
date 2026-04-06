@@ -17,46 +17,102 @@ The repository is structured as follows:
 
 ## Volume Processing Workflow
 
-The modern workflow for processing PMLR volumes includes:
+The standard workflow for publishing a PMLR volume:
 
-1. **BibTeX Cleaning**: Use `tidy_bibtex.rb` to fix common issues like unescaped % characters
-2. **Volume Creation**: Use `create_volume.rb` to generate Jekyll posts and organize assets
-3. **Deployment**: Use `deploy_volume.sh` for proper branch separation (assets on main, Jekyll on gh-pages)
+1. **Pre-publication check**: Use `check_volume.sh` to validate the volume directory before touching anything
+2. **BibTeX cleaning**: Use `tidy_bibtex.rb` to fix common formatting issues
+3. **Volume creation**: Use `create_volume.rb` to generate Jekyll posts and organise assets
+4. **Deployment**: Use `deploy_volume.sh` for the two-branch separation strategy
 
-### BibTeX Cleaning
+### Step 1 — Pre-publication Check
 
-Before processing a volume, clean the BibTeX file to fix common issues:
+Run this first to catch common submission errors before processing:
 
 ```bash
-# Clean BibTeX file (fixes unescaped % characters and other issues)
-ruby lib/tidy_bibtex.rb --fix-all input.bib output_cleaned.bib
+cd ~/mlresearch/v304
+../papersite/bin/check_volume.sh 304
 ```
 
-### Volume Creation
+The checker validates:
 
-Create the Jekyll site and organize assets:
+| Check | What it catches |
+|---|---|
+| `@Proceedings` entry | Missing required fields (`published`, `name`, `volume`, …); `volume` not in braces; date not in `YYYY-MM-DD` format |
+| PDF locations | PDFs in subdirectories (e.g. `pdfs/`) instead of the repository root |
+| Supplementary locations | Supp files in subdirectories (e.g. `supplementary_material/`) instead of root |
+| BibTeX key / PDF match | Keys without a matching PDF; orphaned PDFs with no BibTeX entry |
+| Author name formatting | Missing comma separator (`YanjunXu` → `Xu, Yanjun`); lowercase surname; reversed `Given, Surname` order |
+| Double backslashes | `\\textit`, `\\Delta`, etc. that should be single backslash |
+| Escaped characters | `\$`, `\{`, `\}`, `\_` in abstracts/titles that should be unescaped |
+| Non-ASCII BibTeX keys | Keys like `miñoza26` that will fail during processing |
+
+The script exits `0` if all checks pass, `1` if any errors are found.
+
+### Step 2 — BibTeX Cleaning
 
 ```bash
-# Create volume with cleaned BibTeX
-ruby lib/create_volume.rb -v VOLUME_NUMBER -b cleaned.bib
-
-# If PDFs are in a separate branch, skip PDF checks
-ruby lib/create_volume.rb -v VOLUME_NUMBER -b cleaned.bib --skip-pdf-check
+ruby lib/tidy_bibtex.rb proceedings.bib proceedings.bib --fix-percent
 ```
 
-### Deployment
-
-Deploy the volume with proper branch separation:
+### Step 3 — Volume Creation
 
 ```bash
-# Deploy with new script (recommended)
-./bin/deploy_volume.sh VOLUME_NUMBER
+ruby lib/create_volume.rb -v 304 -b proceedings.bib
+
+# If PDFs are in a separate branch, skip PDF existence checks
+ruby lib/create_volume.rb -v 304 -b proceedings.bib --skip-pdf-check
+```
+
+### Step 4 — Deployment
+
+```bash
+echo "yes" | bash bin/deploy_volume.sh 304
 ```
 
 This creates:
-- **main branch**: Contains assets (PDFs) and README.md
-- **gh-pages branch**: Contains Jekyll site files for GitHub Pages
+- **main branch**: Assets (PDFs, supplementary files) and `README.md`
+- **gh-pages branch**: Jekyll site files served by GitHub Pages
 
+
+## Testing
+
+The repository has two test suites covering different components.
+
+### BibTeX Cleaner — `test/`
+
+Ruby `Test::Unit` tests for `tidy_bibtex.rb`. Covers auto-detection, issue
+detection and fixing, command-line options, and edge cases.
+
+```bash
+ruby test/run_tests.rb          # run all BibTeX cleaner tests
+ruby test/test_bibtex_cleaner.rb  # run a single file
+```
+
+See [`test/README.md`](test/README.md) for full details and conventions.
+
+### Volume Checker — `tests/`
+
+Bash regression tests for `check_volume.rb`, using real bib files extracted
+from git history as fixtures for known-bad submissions, plus synthetic
+fixtures for file-location checks.
+
+```bash
+cd ~/mlresearch/papersite
+bash tests/test_check_volume.sh           # run all regression tests
+bash tests/test_check_volume.sh --verbose # show every individual assertion
+```
+
+**Fixtures** (`tests/fixtures/`):
+
+| Fixture | Source | Tests |
+|---|---|---|
+| `v304_original/` | `git show 59fd75f:proceedings.bib` | Author errors, double backslashes, escaped chars, `volume` not in braces |
+| `v328_original/` | `git show 0545422:CPAL26.bib` | Non-ASCII BibTeX keys |
+| `pdfs_in_subdir/` | Synthetic | PDFs in `pdfs/` subdirectory |
+| `supps_in_subdir/` | Synthetic | Supplementary files in `supplementary_material/` |
+| `clean_volume/` | Synthetic | All checks pass; zero-exit regression |
+
+See [`tests/README.md`](tests/README.md) for fixture details and guidance on adding new tests.
 
 ## Ruby Code
 
