@@ -194,3 +194,9 @@
 ﬀ:
   replacement: "ff"
   name: LATIN SMALL LIGATURE FF
+É:
+  replacement: "\\'{E}"
+  name: LATIN CAPITAL LETTER E WITH ACUTE
+‘:
+  replacement: "`"
+  name: LEFT SINGLE QUOTATION MARK

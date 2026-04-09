@@ -92,10 +92,12 @@ echo "  2. Create/update gh-pages with Jekyll files only"
 echo "  3. Clean main to keep only assets and README"
 echo "  4. PUSH both branches to GitHub"
 echo ""
-read -p "Continue? (yes/no): " -r
-if [[ ! $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
-    echo "Deployment cancelled"
-    exit 0
+if [[ "${SKIP_CONFIRM:-}" != "1" ]]; then
+    read -p "Continue? (yes/no): " -r
+    if [[ ! $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
+        echo "Deployment cancelled"
+        exit 0
+    fi
 fi
 
 echo ""

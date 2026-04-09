@@ -136,6 +136,7 @@ class VolumeChecker
     subdirs_with_pdfs = []
     Dir.glob(File.join(@vol_dir, '*/')).each do |subdir|
       next if File.basename(subdir) == 'assets'
+      next if File.basename(subdir) =~ /permissions?$/i
       pdfs = Dir.glob(File.join(subdir, '**', '*.pdf'))
                  .reject { |f| File.basename(f) =~ SUPP_PATTERN }
       subdirs_with_pdfs << [File.basename(subdir), pdfs.size] if pdfs.any?
@@ -179,7 +180,7 @@ class VolumeChecker
   def check_pdf_bib_match(content)
     section "BibTeX key / PDF file match"
 
-    keys = content.scan(/@InProceedings\s*\{\s*(\w+)\s*,/i).flatten
+    keys = content.scan(/@InProceedings\s*\{\s*([\w-]+)\s*,/i).flatten
     root_pdfs = Dir.glob(File.join(@vol_dir, '*.pdf'))
                    .map { |f| File.basename(f, '.pdf') }
                    .reject { |f| f =~ /-supp$/ }
@@ -212,7 +213,7 @@ class VolumeChecker
     # Author fields can span multiple lines; we collect everything between
     # 'author = {' and the matching closing brace.
     entry_positions = {}
-    content.scan(/@\w+\s*\{\s*(\w+)\s*,/i) { entry_positions[$~.begin(0)] = $1 }
+    content.scan(/@\w+\s*\{\s*([\w-]+)\s*,/i) { entry_positions[$~.begin(0)] = $1 }
 
     content.scan(/author\s*=\s*\{/i) do
       start = $~.end(0)
@@ -253,7 +254,7 @@ class VolumeChecker
     section "Double backslashes"
 
     lines_with_double = []
-    entry_re = /(@\w+)\s*\{\s*(\w+)\s*,/i
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
     current_key = nil
 
     content.each_line.with_index(1) do |line, lineno|
@@ -278,7 +279,7 @@ class VolumeChecker
     issues = []
     current_key = nil
     in_field = false
-    entry_re = /(@\w+)\s*\{\s*(\w+)\s*,/i
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
 
     content.each_line.with_index(1) do |line, lineno|
       if (m = line.match(entry_re))
@@ -307,7 +308,7 @@ class VolumeChecker
   def check_non_ascii_keys(content)
     section "BibTeX key characters"
 
-    bad_keys = content.scan(/@InProceedings\s*\{\s*([^\s,]+)\s*,/i)
+    bad_keys = content.scan(/@InProceedings\s*\{\s*([\w-]+[^\s,]*)\s*,/i)
                       .flatten
                       .select { |k| k =~ /[^\x00-\x7F]/ }
 
