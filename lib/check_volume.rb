@@ -234,6 +234,7 @@ class VolumeChecker
       author_val.split(/\s+and\s+/i).each do |part|
         part = part.strip
         next if part.empty?
+        next if part =~ /\A\{[^{}]*(\{[^{}]*\}[^{}]*)?\}\z/  # organisation name wrapped in braces
 
         if part !~ /,/
           issues << "  [#{key}] No comma in name: '#{part}'"

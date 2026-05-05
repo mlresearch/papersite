@@ -281,17 +281,28 @@ module MLResearch
     puts "[VERBOSE] Authors for entry #{obj[:id]}: #{obj[:author]}" if verbose
     a = Array.new(obj[type].length)
     obj[type].each.with_index(0) do |name, index|
-      begin
-        given = detex(name.given)
-      rescue => e
-        raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
+      # Organisation names wrapped in braces (e.g. {The Consortium}) parse as
+      # a name with nil/empty given — treat the whole thing as family name only.
+      if name.given.nil? || name.given.to_s.strip.empty?
+        begin
+          family = detex(name.family)
+        rescue => e
+          raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
+        end
+        a[index] = {'given' => '', 'family' => family}
+      else
+        begin
+          given = detex(name.given)
+        rescue => e
+          raise "Error processing given name for entry #{obj[:id]}: The given name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
+        end
+        begin
+          family = detex(name.family)
+        rescue => e
+          raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
+        end
+        a[index] = {'given' => given, 'family' => family}
       end
-      begin
-        family = detex(name.family)
-      rescue => e
-        raise "Error processing family name for entry #{obj[:id]}: The family name field is empty or invalid. Author field: '#{obj[:author]}'. Please check the bibtex entry."
-      end
-      a[index] = {'given' => given, 'family' => family}
       puts "[VERBOSE] Name suffix: #{name.suffix}" if verbose && name.suffix
       puts "[VERBOSE] Name prefix: #{name.prefix}" if verbose && name.prefix
       
