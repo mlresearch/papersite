@@ -239,7 +239,16 @@ class VolumeChecker
         if part !~ /,/
           issues << "  [#{key}] No comma in name: '#{part}'"
         elsif part[0] =~ /[a-z]/
-          issues << "  [#{key}] Lowercase surname: '#{part}'"
+          # BibTeX "von Last, First" format: lowercase words at the start are
+          # valid von-prefixes (da, van, van der, d', etc.) as long as the
+          # surname part contains at least one word starting with an uppercase
+          # letter (the actual Last name). Only flag if every word before the
+          # comma is lowercase — that indicates a genuine uncapitalised surname.
+          surname_part = part.split(',', 2).first.strip
+          words = surname_part.split(/[\s']+/).reject(&:empty?)
+          unless words.any? { |w| w[0] =~ /[A-Z]/ }
+            issues << "  [#{key}] Lowercase surname: '#{part}'"
+          end
         end
       end
     end
