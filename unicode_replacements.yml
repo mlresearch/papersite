@@ -76,6 +76,8 @@
   name: LATIN SMALL LETTER I WITH DIAERESIS
 "→":
   replacement: "$\\rightarrow$"
+"⇒":
+  replacement: "$\\Rightarrow$"
   name: RIGHTWARDS ARROW
 Ł:
   replacement: "{\\L}"
