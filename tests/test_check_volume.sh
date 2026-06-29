@@ -173,6 +173,20 @@ assert_no_error "clean: no PDF subdir error"     "$OUT" "in subdirectory"
 assert_no_error "clean: no non-ASCII key"        "$OUT" "Non-ASCII character in key"
 assert_exit_pass "clean exits zero"              "$FIXTURES/clean_volume" 999
 
+# ---------------------------------------------------------------------------
+section "math_braces — \\left\\{ and \\right\\} must not be flagged as escaped braces"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 888 "$FIXTURES/math_braces")
+
+# \left\{ and \right\} are valid LaTeX math — must NOT trigger the escaped-brace check
+assert_no_error "math-braces: \\left\\{ not flagged" "$OUT" "should be unescaped"
+# Volume should pass cleanly
+assert_exit_pass "math-braces exits zero"            "$FIXTURES/math_braces" 888
+
+# v304 still catches genuine \emph\{...\} mistakes (regression guard)
+OUT=$(run_checker 304 "$FIXTURES/v304_original")
+assert_error "escaped-brace still caught after left/right fix" "$OUT" "should be unescaped"
+
 # =============================================================================
 # Summary
 # =============================================================================
