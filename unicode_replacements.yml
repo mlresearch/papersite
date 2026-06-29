@@ -202,3 +202,39 @@
 ‘:
   replacement: "`"
   name: LEFT SINGLE QUOTATION MARK
+"ρ":
+  replacement: "$\\rho$"
+  name: GREEK SMALL LETTER RHO
+"σ":
+  replacement: "$\\sigma$"
+  name: GREEK SMALL LETTER SIGMA
+"λ":
+  replacement: "$\\lambda$"
+  name: GREEK SMALL LETTER LAMDA
+"ε":
+  replacement: "$\\varepsilon$"
+  name: GREEK SMALL LETTER EPSILON
+"²":
+  replacement: "$^2$"
+  name: SUPERSCRIPT TWO
+"¹":
+  replacement: "$^1$"
+  name: SUPERSCRIPT ONE
+"⁻":
+  replacement: "$^{-}$"
+  name: SUPERSCRIPT MINUS
+"√":
+  replacement: "$\\sqrt{}$"
+  name: SQUARE ROOT
+"·":
+  replacement: "\\cdot"
+  name: MIDDLE DOT
+"∈":
+  replacement: "$\\in$"
+  name: ELEMENT OF
+"∗":
+  replacement: "$*$"
+  name: ASTERISK OPERATOR
+"ë":
+  replacement: "{\\\"e}"
+  name: LATIN SMALL LETTER E WITH DIAERESIS

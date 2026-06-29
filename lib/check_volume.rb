@@ -303,7 +303,11 @@ class VolumeChecker
 
       if in_field
         [['\\$', '\$'], ['\\{', '\{'], ['\\}', '\}'], ['\\_', '\_']].each do |pat, label|
-          if line.include?(pat)
+          # \left\{ and \right\{ / \right\} are legitimate LaTeX math commands — skip them
+          check_line = line
+          check_line = check_line.gsub(/\\left\\{|\\right\\{/, '') if pat == '\\{'
+          check_line = check_line.gsub(/\\left\\}|\\right\\}/, '') if pat == '\\}'
+          if check_line.include?(pat)
             issues << "  [#{current_key}] line #{lineno}: #{label} found — should be unescaped"
           end
         end
