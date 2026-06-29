@@ -135,19 +135,22 @@ class BibTeXCleaner
       issues_found.concat(percent_issues)
     end
     
-    # Check for empty author fields (double commas) - report only, don't fix
+    # Check for author/editor field comma issues - report only, don't fix
     if @options[:check_author_commas] || @options[:fix_all]
-      comma_issues = find_empty_author_fields(content)
+      comma_issues, comma_notices = find_empty_author_fields(content)
+      if comma_notices.any?
+        puts "Mononym author(s) noted (no action needed):" unless @options[:quiet]
+        comma_notices.each { |n| puts "  - #{n}" unless @options[:quiet] }
+      end
       if comma_issues.any?
         issues_found.concat(comma_issues)
-        puts "Found #{comma_issues.length} empty author fields that need manual review:" unless @options[:quiet]
-        comma_issues.each do |issue|
-          puts "  - #{issue}" unless @options[:quiet]
-        end
+        puts "Found #{comma_issues.length} potentially malformed author field(s) that need manual review:" unless @options[:quiet]
+        comma_issues.each { |issue| puts "  - #{issue}" unless @options[:quiet] }
       end
     else
-      comma_issues = find_empty_author_fields(content)
+      comma_issues, comma_notices = find_empty_author_fields(content)
       issues_found.concat(comma_issues)
+      # Notices are informational only — not added to issues_found
     end
     
     # Check for unmatched braces in title fields - report only, don't fix
@@ -218,7 +221,8 @@ class BibTeXCleaner
       puts "\nWarning: Issues found but no fixes applied."
       puts "  - Use --fix-percent or --fix-all to automatically fix unescaped % characters"
       puts "  - Unmatched braces in title fields REQUIRE MANUAL REVIEW AND FIXES"
-      puts "  - Empty author fields (double commas) REQUIRE MANUAL REVIEW AND FIXES"
+      puts "  - Malformed author fields (space between commas, e.g. \", ,\") REQUIRE MANUAL REVIEW AND FIXES"
+      puts "  - Mononym authors (no space between commas, e.g. \"Sukarno,,\") are CORRECT and need no fix"
       puts "  - Triple backslashes (e.g., \\\\\\\%) REQUIRE MANUAL FIXES (should be \\%)"
       puts "  - Double backslashes (e.g., \\\\%) should be REVIEWED (usually should be \\%)"
     end
@@ -261,16 +265,28 @@ class BibTeXCleaner
 
   def find_empty_author_fields(content)
     issues = []
+    notices = []
     lines = content.split("\n")
-    
+
     lines.each_with_index do |line, index|
-      # Look for author fields with empty fields (double commas)
-      if line.match(/^\s*author\s*=\s*\{.*,\s*,.*\}.*$/)
-        issues << "Line #{index + 1}: Empty author field (double comma) in author list"
+      next unless line.match(/^\s*(?:author|editor)\s*=\s*\{/)
+
+      # Mononym: double comma with no whitespace between (e.g. "Sukarno,,").
+      # This is correct BibTeX — the parser treats everything before the first
+      # comma as the family name and the (empty) part after as the given name,
+      # producing given: "" and family: "Sukarno".  No fix required.
+      if line.match(/[^,\s],,/)
+        notices << "Line #{index + 1}: Mononym (no given name) — \",,\" is correct BibTeX for a single-name author (given name will be stored as empty string)"
+      end
+
+      # Malformed: comma then whitespace then comma (e.g. "Doe, , and Smith").
+      # This usually indicates an accidental blank slot in the author list.
+      if line.match(/,\s+,/)
+        issues << "Line #{index + 1}: Possible malformed author field — space between commas may indicate an accidental blank entry in the author list"
       end
     end
-    
-    issues
+
+    [issues, notices]
   end
 
   # Removed fix_empty_author_fields method - we don't auto-fix author issues

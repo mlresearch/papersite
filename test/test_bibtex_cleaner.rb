@@ -64,12 +64,23 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     assert fixed_content.include?("title = {Machine Learning 100\\%}"), "Should have escaped % in title"
   end
 
-  def test_author_field_detection
+  def test_author_field_detection_malformed
     content = create_bib_with_author_issues
-    issues = @cleaner.send(:find_empty_author_fields, content)
-    
-    assert issues.length > 0, "Should find author field issues"
-    assert issues.any? { |issue| issue.include?("double comma") }, "Should detect double comma issues"
+    issues, notices = @cleaner.send(:find_empty_author_fields, content)
+
+    assert issues.length > 0, "Should find malformed author field issues"
+    assert issues.any? { |issue| issue.include?("malformed") }, "Should describe issue as malformed"
+    assert_equal 0, notices.length, "Should not produce mononym notices for malformed entry"
+  end
+
+  def test_author_field_detection_mononym
+    content = create_bib_with_mononym_author
+    issues, notices = @cleaner.send(:find_empty_author_fields, content)
+
+    assert_equal 0, issues.length, "Mononym should not be reported as an issue"
+    assert notices.length > 0, "Mononym should produce an informational notice"
+    assert notices.any? { |n| n.include?("Mononym") }, "Notice should mention mononym"
+    assert notices.any? { |n| n.include?("given name") }, "Notice should explain that given name is empty"
   end
 
   def test_unmatched_braces_detection
@@ -537,6 +548,17 @@ class TestBibTeXCleaner < Test::Unit::TestCase
       @article{test2024,
         title = {Test Paper},
         author = {John Doe, , and Jane Smith},
+        abstract = {This is a test},
+        year = {2024}
+      }
+    BIB
+  end
+
+  def create_bib_with_mononym_author
+    <<~BIB
+      @inproceedings{test2024,
+        title = {Test Paper},
+        author = {Sukarno,, and Smith, John},
         abstract = {This is a test},
         year = {2024}
       }
