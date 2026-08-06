@@ -238,3 +238,9 @@
 "ë":
   replacement: "{\\\"e}"
   name: LATIN SMALL LETTER E WITH DIAERESIS
+"ò":
+  replacement: "\\`{o}"
+  name: LATIN SMALL LETTER O WITH GRAVE
+"Ç":
+  replacement: "\\c{C}"
+  name: LATIN CAPITAL LETTER C WITH CEDILLA
