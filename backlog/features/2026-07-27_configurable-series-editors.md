@@ -1,12 +1,14 @@
 ---
-id: "2026-07-27_configurable-series-editors"
-title: "Configurable series editors via YAML data file"
-status: "Completed"
-priority: "Medium"
-created: "2026-07-27"
-last_updated: "2026-07-27"
-owner: ""
+category: features
+created: '2026-07-27'
 dependencies: []
+id: 2026-07-27_configurable-series-editors
+last_updated: '2026-07-27'
+owner: Neil Lawrence
+priority: Medium
+related_cips: []
+status: Completed
+title: Configurable series editors via YAML data file
 ---
 
 # Task: Configurable series editors via YAML data file

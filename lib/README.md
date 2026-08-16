@@ -94,6 +94,8 @@ This initially updates the main branch with the created files. Then creates a gh
 - **main branch**: Contains assets (PDFs) and README.md
 - **gh-pages branch**: Contains Jekyll site files for GitHub Pages
 
+BibTeX files (`.bib`, `_clean.bib`, `_cleaned.bib`) are committed to `gh-pages` once as an audit record and then removed. The rendered site is driven by `_posts/*.md` — editing a `.bib` file has no effect on the published output.
+
 ### Legacy Workflow (Deprecated)
 
 The site is created using Jekyll. There is a customised remote-theme for formating the proceedings which is referenced in the `_config.yml` file.
