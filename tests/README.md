@@ -39,6 +39,9 @@ tests/
         ├── proceedings.bib
         ├── *.pdf
         └── *-supp.pdf
+    └── double_braced_pages/        # Synthetic: pages = {{4-24}} instead of {4-24}
+        ├── proceedings.bib
+        └── *.pdf
 ```
 
 ## Fixtures
@@ -85,6 +88,11 @@ subdirectory error without triggering the PDF check.
 A well-formed two-paper bib with correct LaTeX (`$\delta$`, `\textit{...}`,
 `$\mathbb{R}^{d}$`) and all PDFs and supplementary files in the root.
 **Must produce zero errors and exit 0.**
+
+### `double_braced_pages/` — Synthetic pages-field fixture
+
+A minimal two-paper bib with `pages = {{4-24}}` double-braced page ranges.
+Must trigger the double-braced pages error and exit non-zero.
 
 ## Adding New Tests
 

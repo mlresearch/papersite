@@ -44,6 +44,7 @@ The checker validates:
 | Author name formatting | Missing comma separator (`YanjunXu` → `Xu, Yanjun`); lowercase surname; reversed `Given, Surname` order |
 | Double backslashes | `\\textit`, `\\Delta`, etc. that should be single backslash |
 | Escaped characters | `\$`, `\{`, `\}`, `\_` in abstracts/titles that should be unescaped |
+| Double-braced pages | `pages = {{4-24}}` instead of `{4-24}` — renders page numbers with literal braces on the site |
 | Non-ASCII BibTeX keys | Keys like `miñoza26` that will fail during processing |
 
 The script exits `0` if all checks pass, `1` if any errors are found.

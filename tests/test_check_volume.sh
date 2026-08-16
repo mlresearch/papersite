@@ -168,6 +168,7 @@ OUT=$(run_checker 999 "$FIXTURES/clean_volume")
 assert_no_error "clean: no author errors"        "$OUT" "No comma in name"
 assert_no_error "clean: no double backslash"     "$OUT" "] line "
 assert_no_error "clean: no escaped chars"        "$OUT" "should be unescaped"
+assert_no_error "clean: no double-braced pages"    "$OUT" "double braces"
 assert_no_error "clean: no missing PDF"          "$OUT" "Missing PDF for key"
 assert_no_error "clean: no PDF subdir error"     "$OUT" "in subdirectory"
 assert_no_error "clean: no non-ASCII key"        "$OUT" "Non-ASCII character in key"
@@ -186,6 +187,15 @@ assert_exit_pass "math-braces exits zero"            "$FIXTURES/math_braces" 888
 # v304 still catches genuine \emph\{...\} mistakes (regression guard)
 OUT=$(run_checker 304 "$FIXTURES/v304_original")
 assert_error "escaped-brace still caught after left/right fix" "$OUT" "should be unescaped"
+
+# ---------------------------------------------------------------------------
+section "double_braced_pages — pages = {{4-24}} must be flagged"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 888 "$FIXTURES/double_braced_pages")
+
+assert_error "double-braced pages: jones26a" "$OUT" "[jones26a]"
+assert_error "double-braced pages: smith26a" "$OUT" "[smith26a]"
+assert_exit_fail "double-braced pages exits non-zero" "$FIXTURES/double_braced_pages" 888
 
 # =============================================================================
 # Summary

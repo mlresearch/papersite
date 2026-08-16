@@ -14,6 +14,7 @@
 #   7. No escaped \$ \{ \} \_ in abstracts/titles
 #   8. No non-ASCII characters in BibTeX keys
 #   9. No double-quote delimited fields containing \" (silently drops entries in bibtex-ruby)
+#  10. No double-braced pages fields (e.g. pages = {{4-24}} renders with literal braces)
 #
 # Usage:
 #   ruby check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE] [--fix]
@@ -80,6 +81,7 @@ class VolumeChecker
     check_escaped_chars(content)
     check_non_ascii_keys(content)
     check_dq_fields_with_latex_umlauts(content)
+    check_double_braced_pages(content)
 
     print_summary
     @errors.empty? ? 0 : 1
@@ -361,6 +363,32 @@ class VolumeChecker
 
     if issues.empty?
       ok "  No double-quote fields with LaTeX umlauts found"
+    else
+      issues.each { |i| error i }
+    end
+  end
+
+  def check_double_braced_pages(content)
+    section "Double-braced pages fields"
+
+    # pages = {{4-24}} is a common LaTeX export mistake. bibtex-ruby preserves the
+    # inner braces, so create_volume.rb renders firstpage/lastpage with literal { }.
+    issues = []
+    current_key = nil
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
+
+    content.each_line.with_index(1) do |line, lineno|
+      if (m = line.match(entry_re))
+        current_key = m[2]
+      end
+
+      if line =~ /^\s*pages\s*=\s*\{\{/
+        issues << "  [#{current_key}] line #{lineno}: pages field uses double braces (e.g. {{4-24}}) — use single braces: {4-24}"
+      end
+    end
+
+    if issues.empty?
+      ok "  No double-braced pages fields found"
     else
       issues.each { |i| error i }
     end
