@@ -1,0 +1,18 @@
+---
+# Series editors for Proceedings of Machine Learning Research.
+# Each entry has given name, family name, and date/volume range.
+# - start/end: publication date bounds (inclusive), used when no volume bounds set
+# - start_volume/end_volume: volume number bounds (inclusive), take priority when present
+- given: "Neil D."
+  family: "Lawrence"
+  start: "2006-10-03"
+- given: "Mark"
+  family: "Reid"
+  start_volume: 27
+  end_volume: 165
+- given: "Hoel"
+  family: "Kervadec"
+  start: "2026-07-01"
+- given: "Tegan"
+  family: "Emerson"
+  start: "2026-07-01"

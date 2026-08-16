@@ -63,6 +63,24 @@ module MLResearch
     ''
   end
 
+  SERIES_EDITORS_FILE = File.expand_path('../../series_editors.yml', __FILE__)
+
+  def self.series_editors_for_date(date, volume=nil)
+    return [] unless File.exist?(SERIES_EDITORS_FILE)
+    editors = YAML.load_file(SERIES_EDITORS_FILE) || []
+    editors.select do |ed|
+      if volume && (ed.key?('start_volume') || ed.key?('end_volume'))
+        sv = ed['start_volume'] ? ed['start_volume'].to_i : 0
+        ev = ed['end_volume']   ? ed['end_volume'].to_i   : Float::INFINITY
+        volume.to_i >= sv && volume.to_i <= ev
+      else
+        start_date = ed['start'] ? Date.parse(ed['start'].to_s) : Date.new(1970, 1, 1)
+        end_date   = ed['end']   ? Date.parse(ed['end'].to_s)   : nil
+        date >= start_date && (end_date.nil? || date <= end_date)
+      end
+    end.sort_by { |ed| [ed['family'].to_s.downcase, ed['given'].to_s.downcase] }
+  end
+
   def self.detex(string_in)
     # Returning up to second end character is to deal with new line
     string = string_in.dup
@@ -586,9 +604,9 @@ module MLResearch
         ha['description'] += "  #{name['given']} #{family}\n"
       end
     end
-    ha['description'] += "\nSeries Editors:\n  Neil D. Lawrence\n"
-    if ha['published'] < Date.parse('2021-07-02') # Mark left after this date.
-      ha['description'] += "  * Mark Reid\n"
+    ha['description'] += "\nSeries Editors:\n"
+    MLResearch.series_editors_for_date(ha['published'], ha['volume']).each do |ed|
+      ha['description'] += "  #{ed['given']} #{ed['family']}\n"
     end
     ha['url'] = url
     ha['author'] = {'name' => 'PMLR'}
@@ -720,9 +738,9 @@ module MLResearch
         readme += "  * #{name['given']} #{family}\n"
       end
     end
-    readme += "\nSeries Editors:\n  * Neil D. Lawrence\n"
-    if ha['published'] > Date.parse('2011-07-02') and ha['published'] < Date.parse('2021-04-21') # Mark's dates
-      readme += "  * Mark Reid\n"
+    readme += "\nSeries Editors:\n"
+    MLResearch.series_editors_for_date(ha['published'], ha['volume']).each do |ed|
+      readme += "  * #{ed['given']} #{ed['family']}\n"
     end
     out.puts '# PMLR ' + ha['volume']
     out.puts
@@ -731,6 +749,8 @@ module MLResearch
     out.puts 'To edit the details of this conference work edit the [_config.yml](./_config.yml) file and submit a pull request.'
     out.puts
     out.puts 'To make changes to the individual paper details, edit the associated paper file in the [./_posts](./_posts) subdirectory.'
+    out.puts
+    out.puts 'Note: BibTeX (`.bib`) files are not tracked in this repository. They are preserved in git history but are not part of the rendered output. To correct a citation, edit the corresponding file in `_posts/` instead.'
     out.puts
     out.puts 'For details of how to publish in PMLR please check https://proceedings.mlr.press/faq.html'
     out.puts

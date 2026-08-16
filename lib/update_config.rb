@@ -60,9 +60,9 @@ else
       ha['description'] += "  #{name['given']} #{name['family']}\n"
     end
   end
-  ha['description'] += "\nSeries Editors:\n  Neil D. Lawrence\n"
-  if (volume.to_i>27)
-    ha['description'] += "  Mark Reid\n"
+  ha['description'] += "\nSeries Editors:\n"
+  MLResearch.series_editors_for_date(ha['published'], volume).each do |ed|
+    ha['description'] += "  #{ed['given']} #{ed['family']}\n"
   end
   ha['url'] = MLResearch.url
   ha['baseurl'] = '/' + reponame
