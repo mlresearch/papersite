@@ -8,6 +8,7 @@ require 'latex/decode'
 require 'fileutils'
 require 'pandoc-ruby'
 require_relative 'mlresearch'
+require_relative 'bibtex_keys'
 
 require 'optparse'
 
@@ -108,6 +109,9 @@ unless File.exist?(bib_file)
   STDERR.puts parser
   exit 1
 end
+
+# Refuse non-ASCII citekeys before unicode tidying, which would rewrite them.
+BibTeXKeys.abort_if_invalid!(bib_file)
 
 reponame = volume_prefix + volume_no.to_s
 if not supp_file.nil?

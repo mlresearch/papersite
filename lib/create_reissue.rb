@@ -8,6 +8,7 @@ require 'latex/decode'
 require 'fileutils'
 require 'pandoc-ruby'
 require_relative 'mlresearch'
+require_relative 'bibtex_keys'
 require 'optparse'
 
 procdir = '/Users/neil/mlresearch/'
@@ -74,6 +75,9 @@ unless File.exist?(bib_file)
   STDERR.puts options
   exit 1
 end
+
+# Refuse non-ASCII citekeys before unicode tidying, which would rewrite them.
+BibTeXKeys.abort_if_invalid!(bib_file)
 
 # Run tidy_bib_unicode.rb on the bib file, output to a temp cleaned file
 cleaned_bib_file = bib_file.sub(/\.bib$/, '_clean.bib')

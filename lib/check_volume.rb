@@ -21,6 +21,7 @@
 
 require 'optparse'
 require 'set'
+require_relative 'bibtex_keys'
 
 # =============================================================================
 # Colours
@@ -326,9 +327,7 @@ class VolumeChecker
   def check_non_ascii_keys(content)
     section "BibTeX key characters"
 
-    bad_keys = content.scan(/@InProceedings\s*\{\s*([\w-]+[^\s,]*)\s*,/i)
-                      .flatten
-                      .select { |k| k =~ /[^\x00-\x7F]/ }
+    bad_keys = BibTeXKeys.non_ascii_keys(content)
 
     if bad_keys.empty?
       ok "  All BibTeX keys are ASCII"

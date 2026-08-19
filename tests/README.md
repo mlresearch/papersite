@@ -8,9 +8,11 @@ pre-publication validation script for PMLR volumes.
 ```bash
 # From the papersite root
 bash tests/test_check_volume.sh
+bash tests/test_create_volume_keys.sh
 
 # Show every individual assertion (useful when adding new tests)
 bash tests/test_check_volume.sh --verbose
+bash tests/test_create_volume_keys.sh --verbose
 ```
 
 Exit code `0` means all assertions passed; `1` means at least one failed.
@@ -161,11 +163,11 @@ This directory (`tests/`) is distinct from `test/`:
 
 | Directory | Framework | Covers |
 |---|---|---|
-| `test/` | Ruby `Test::Unit` | `tidy_bibtex.rb` (BibTeX cleaner) |
-| `tests/` | Bash | `check_volume.rb` (pre-publication validator) |
+| `test/` | Ruby `Test::Unit` | `tidy_bibtex.rb`, `bibtex_keys.rb` |
+| `tests/` | Bash | `check_volume.rb`, `create_volume.rb` key refusal |
 
 Both suites are independent and can be run separately or together:
 
 ```bash
-ruby test/run_tests.rb && bash tests/test_check_volume.sh
+ruby test/run_tests.rb && bash tests/test_check_volume.sh && bash tests/test_create_volume_keys.sh
 ```

@@ -107,6 +107,9 @@ X:
 **Hyphenated BibTeX keys**
 Keys such as `hernandez-garcia25` are valid and fully supported by the checker and pipeline. They do not need to be renamed.
 
+**Non-ASCII BibTeX keys**
+Keys such as `miñoza26` are dropped silently by the BibTeX parser if they reach generation. `check_volume.rb` and `create_volume.rb` both refuse them and list every offending key. Rename the citekey to ASCII in the source `.bib` (do not rely on unicode tidying, which would change the identifier).
+
 **Permission/consent PDF directories**
 Directories named `*permissions*` or `*permission*` (e.g. `v330permissions/`) are excluded from the PDF-location check. They are also removed during deployment and do not appear in either published branch.
 
@@ -134,8 +137,8 @@ fixtures for file-location checks.
 
 ```bash
 cd ~/mlresearch/papersite
-bash tests/test_check_volume.sh           # run all regression tests
-bash tests/test_check_volume.sh --verbose # show every individual assertion
+bash tests/test_check_volume.sh           # check_volume.rb regression tests
+bash tests/test_create_volume_keys.sh     # create_volume.rb refuses non-ASCII keys
 ```
 
 **Fixtures** (`tests/fixtures/`):

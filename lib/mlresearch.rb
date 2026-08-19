@@ -20,6 +20,7 @@ require "active_support/inflector"
 
 require 'fileutils'
 require 'pandoc-ruby'
+require_relative 'bibtex_keys'
 
 
 PandocRuby.pandoc_path = '/usr/local/bin/pandoc'
@@ -373,7 +374,16 @@ module MLResearch
     file = File.open(bib_file, "rb")
     contents = file.read
 
+    BibTeXKeys.assert_valid_keys!(contents)
+
     bib = BibTeX.parse(contents)
+    parsed_keys = (bib['@inproceedings'] || []).map { |obj| obj.key.to_s }
+    dropped = BibTeXKeys.dropped_keys(contents, parsed_keys)
+    unless dropped.empty?
+      listed = dropped.map { |k| "'#{k}'" }.join(', ')
+      raise BibTeXKeys::InvalidKeyError,
+            "ERROR: BibTeX parser dropped entries (invalid keys or quoting): #{listed}"
+    end
     # do work on files ending in .rb in the desired directory
     ids = []
     processed = 0
