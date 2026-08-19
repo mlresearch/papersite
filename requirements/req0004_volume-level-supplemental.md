@@ -1,7 +1,7 @@
 ---
 id: "0004"
 title: "Volume-level supplemental material is visible on the proceedings page"
-status: "In Progress"
+status: "Implemented"
 priority: "Medium"
 created: "2026-08-19"
 last_updated: "2026-08-19"
@@ -57,3 +57,5 @@ Do not block on editor confirmation to restore links to files that are already i
 Requirement written after triaging the remaining open mlresearch issues. Updated the same day: a v1–v60 probe found the same leftover directory on v3, v6, v7, v16, and v27. Outcome is migration onto `{id}-supp.*`, not a new theme field.
 
 CIP-0005 accepted and moved to In Progress; v16/v27 implementation started.
+
+v3, v6, and v7 completed. Requirement Implemented; close after the volume pages show the new extras.

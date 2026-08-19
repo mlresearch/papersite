@@ -1,7 +1,7 @@
 ---
 id: "2026-08-19_v3-v6-v7-challenge-supp-extras"
 title: "Attach remaining W&CP supplemental PDFs (v3, v6, v7 cleanup)"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-08-19"
 last_updated: "2026-08-19"
@@ -33,10 +33,10 @@ Do this after v16/v27 are live.
 
 ## Acceptance Criteria
 
-- [ ] v3 `guyon08a` extras/software match CIP-0005 file mapping.
-- [ ] v6 `guyon10a` lists all nine fact sheets as extras.
-- [ ] v7 no longer advertises `supplementalurl` or an empty Supplemental heading.
-- [ ] HTML indexes remain unlinked.
+- [x] v3 `guyon08a` extras/software match CIP-0005 file mapping.
+- [x] v6 `guyon10a` lists all nine fact sheets as extras.
+- [x] v7 no longer advertises `supplementalurl` or an empty Supplemental heading.
+- [x] HTML indexes remain unlinked.
 
 ## Implementation Notes
 
@@ -52,3 +52,5 @@ Follow CIP-0005. `git mv` on `gh-pages`; extras YAML in the same `{label, link}`
 ### 2026-08-19
 
 Task created as Ready, blocked on v16/v27 going out first.
+
+Moved to In Progress after v16/v27. Pushed v3 `6a634ba`, v6 `54dc4bc`, v7 `d4ef821` to `gh-pages`. HTML indexes left unlinked. GitHub Pages may take a few minutes.
