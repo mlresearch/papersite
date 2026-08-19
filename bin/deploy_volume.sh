@@ -146,6 +146,21 @@ echo "Step 6: Pushing gh-pages to GitHub..."
 git commit -m "Remove assets from volume $VOLUME_NUMBER gh-pages" || echo "  → No changes to commit"
 git push origin gh-pages
 
+# Step 6b: Remove bib files from gh-pages
+# The bib files (including _clean and _cleaned variants) are now preserved in
+# git history above. Removing them here prevents editors from mistakenly editing
+# them — the rendered site is driven by _posts/*.md, not the bib files.
+echo "Step 6b: Removing bib files from gh-pages (preserved in git history)..."
+bib_files_present=$(git ls-files '*.bib')
+if [ -n "$bib_files_present" ]; then
+    git rm *.bib
+    git commit -m "Remove bib files from gh-pages for volume $VOLUME_NUMBER - retrieve via git history if needed"
+    git push origin gh-pages
+    echo "  → Bib files removed. Retrieve with: git show <commit>:v$VOLUME_NUMBER.bib"
+else
+    echo "  → No bib files tracked on gh-pages, skipping"
+fi
+
 # ============================================================================
 # Phase 3: Clean Main Branch (Assets + README Only)
 # ============================================================================
@@ -177,7 +192,7 @@ echo "Volume: $VOLUME_NUMBER"
 echo ""
 echo "Branch Structure:"
 echo "  • main branch: Assets (PDFs) + README.md"
-echo "  • gh-pages branch: Jekyll site files"
+echo "  • gh-pages branch: Jekyll site files (bib files removed, preserved in git history)"
 echo ""
 echo "GitHub Pages will be available at:"
 echo "  https://mlresearch.github.io/v$VOLUME_NUMBER/"
