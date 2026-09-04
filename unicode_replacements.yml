@@ -244,3 +244,12 @@
 "Ç":
   replacement: "\\c{C}"
   name: LATIN CAPITAL LETTER C WITH CEDILLA
+"î":
+  replacement: "\\^{i}"
+  name: LATIN SMALL LETTER I WITH CIRCUMFLEX
+"ė":
+  replacement: "\\.{e}"
+  name: LATIN SMALL LETTER E WITH DOT ABOVE
+"\xA0":
+  replacement: " "
+  name: NO-BREAK SPACE
