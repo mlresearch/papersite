@@ -180,17 +180,22 @@ else
   end
   if ha.has_key?('start') and ha.has_key?('end')
     ha['description'] += " on "
-    if (ha['start'].year == ha['end'].year) and (ha['start'].month == ha['end'].month)
-      if (ha['start'].day == ha['end'].day)
-        ha['description'] += "#{ha['end'].strftime('%d %B %Y')}"
-        ha['date_str'] = "#{ha['end'].strftime('%d %b')}"
+    if ha['start'].year == ha['end'].year
+      if ha['start'].month == ha['end'].month
+        if ha['start'].day == ha['end'].day
+          ha['description'] += "#{ha['end'].strftime('%d %B %Y')}"
+          ha['date_str'] = "#{ha['end'].strftime('%d %b')}"
+        else
+          ha['description'] += "#{ha['start'].strftime('%d')}-#{ha['end'].strftime('%d %B %Y')}"
+          ha['date_str'] = "#{ha['start'].strftime('%d')}--#{ha['end'].strftime('%d %b')}"
+        end
       else
-        ha['description'] += "#{ha['start'].strftime('%d')}-#{ha['end'].strftime('%d %B %Y')}"
-        ha['date_str'] = "#{ha['start'].strftime('%d')}--#{ha['end'].strftime('%d %b')}"
+        ha['description'] += "#{ha['start'].strftime('%d %B')} to #{ha['end'].strftime('%d %B %Y')}"
+        ha['date_str'] = "#{ha['start'].strftime('%d %b')}--#{ha['end'].strftime('%d %b')}"
       end
     else
-      ha['description'] += "#{ha['start'].strftime('%d %B')} to #{ha['end'].strftime('%d %B %Y')}"
-      ha['date_str'] = "#{ha['start'].strftime('%d %b')}--#{ha['end'].strftime('%d %b')}"
+      ha['description'] += "#{ha['start'].strftime('%d %B %Y')} to #{ha['end'].strftime('%d %B %Y')}"
+      ha['date_str'] = "#{ha['start'].strftime('%d %b %Y')}--#{ha['end'].strftime('%d %b %Y')}"
     end
   end
   if(ha['cycles'])

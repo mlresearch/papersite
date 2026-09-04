@@ -580,17 +580,22 @@ module MLResearch
     end
     if ha.has_key?('start') and ha.has_key?('end')
       ha['description'] += " on "
-      if (ha['start'].year == ha['end'].year) and (ha['start'].month == ha['end'].month)
-        if (ha['start'].day == ha['end'].day)
-          ha['description'] += "#{ha['end'].strftime('%d %B %Y')}"
-          ha['date_str'] = "#{ha['end'].strftime('%d %b')}"
+      if ha['start'].year == ha['end'].year
+        if ha['start'].month == ha['end'].month
+          if ha['start'].day == ha['end'].day
+            ha['description'] += "#{ha['end'].strftime('%d %B %Y')}"
+            ha['date_str'] = "#{ha['end'].strftime('%d %b')}"
+          else
+            ha['description'] += "#{ha['start'].strftime('%d')}-#{ha['end'].strftime('%d %B %Y')}"
+            ha['date_str'] = "#{ha['start'].strftime('%d')}--#{ha['end'].strftime('%d %b')}"
+          end
         else
-          ha['description'] += "#{ha['start'].strftime('%d')}-#{ha['end'].strftime('%d %B %Y')}"
-          ha['date_str'] = "#{ha['start'].strftime('%d')}--#{ha['end'].strftime('%d %b')}"
+          ha['description'] += "#{ha['start'].strftime('%d %B')} to #{ha['end'].strftime('%d %B %Y')}"
+          ha['date_str'] = "#{ha['start'].strftime('%d %b')}--#{ha['end'].strftime('%d %b')}"
         end
       else
-        ha['description'] += "#{ha['start'].strftime('%d %B')} to #{ha['end'].strftime('%d %B %Y')}"
-        ha['date_str'] = "#{ha['start'].strftime('%d %b')}--#{ha['end'].strftime('%d %b')}"
+        ha['description'] += "#{ha['start'].strftime('%d %B %Y')} to #{ha['end'].strftime('%d %B %Y')}"
+        ha['date_str'] = "#{ha['start'].strftime('%d %b %Y')}--#{ha['end'].strftime('%d %b %Y')}"
       end
     end
     if(ha['cycles'])
@@ -659,7 +664,14 @@ module MLResearch
     end
     ha['email'] = email
     address = detex(ha['address'])
-    ha['conference'] = {'name' => ha['name'], 'url' => ha['conference_url'], 'location' => address, 'dates'=>ha['start'].upto(ha['end']).collect{ |i| i}}
+    # For cross-year volumes (e.g. combined workshops), store endpoints only —
+    # enumerating every day would invent a continuous multi-month conference.
+    conference_dates = if ha['start'].year == ha['end'].year
+                         ha['start'].upto(ha['end']).to_a
+                       else
+                         [ha['start'], ha['end']]
+                       end
+    ha['conference'] = {'name' => ha['name'], 'url' => ha['conference_url'], 'location' => address, 'dates'=>conference_dates}
     ha.tap { |hs| hs.delete('address') }
     ha.tap { |hs| hs.delete('conference_url') }
     ha.tap { |hs| hs.delete('name') }
