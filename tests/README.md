@@ -88,8 +88,32 @@ subdirectory error without triggering the PDF check.
 ### `clean_volume/` — Synthetic passing fixture
 
 A well-formed two-paper bib with correct LaTeX (`$\delta$`, `\textit{...}`,
-`$\mathbb{R}^{d}$`) and all PDFs and supplementary files in the root.
+`$\mathbb{R}^{d}$`), legitimate UTF-8 punctuation (em dash, curly quotes,
+apostrophe), and all PDFs and supplementary files in the root.
 **Must produce zero errors and exit 0.**
+
+### `v283_original/` — Real submission with mojibake C1 controls
+
+Extracted from the v283 `l4dc2025.bib` (parent of commit `e457c05`),
+trimmed to a minimal `@Proceedings` plus the real `brindise25a` entry.
+
+**Known errors this fixture must trigger:**
+
+| Check | Expected error |
+|---|---|
+| Non-printable characters | `U+0080` and `U+009D` in the `brindise25a` title (mojibake of a curly closing quote) |
+
+### `v316_original/` — Real submission with STX PDF-extraction artifacts
+
+Extracted from the v316 `compayl25_cleaned_clean.bib` (parent of commit
+`13dd4a4`), trimmed to a minimal `@Proceedings` plus the real
+`lucassen25` entry.
+
+**Known errors this fixture must trigger:**
+
+| Check | Expected error |
+|---|---|
+| Non-printable characters | `U+0002` (STX) mid-word in the abstract (PDF line-break hyphenation artifact) |
 
 ### `double_braced_pages/` — Synthetic pages-field fixture
 

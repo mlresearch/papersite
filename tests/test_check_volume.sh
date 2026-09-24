@@ -12,10 +12,14 @@
 #                               (author errors, double backslashes, escaped chars)
 #   fixtures/v328_original/   — Real bib from v328 PR before fixes
 #                               (non-ASCII BibTeX keys)
+#   fixtures/v283_original/   — Real brindise25a entry from v283 before fixes
+#                               (mojibake C1 controls U+0080/U+009D in title)
+#   fixtures/v316_original/   — Real lucassen25 entry from v316 before fixes
+#                               (raw U+0002 STX PDF line-break artifacts)
 #   fixtures/pdfs_in_subdir/  — Synthetic: PDFs in pdfs/ not root
 #   fixtures/supps_in_subdir/ — Synthetic: supps in supplementary_material/
 #   fixtures/clean_volume/    — Synthetic: all checks should pass
-#
+#                               (includes legitimate UTF-8 punctuation)#
 # Usage:
 #   cd ~/mlresearch/papersite
 #   bash tests/test_check_volume.sh
@@ -172,7 +176,27 @@ assert_no_error "clean: no double-braced pages"    "$OUT" "double braces"
 assert_no_error "clean: no missing PDF"          "$OUT" "Missing PDF for key"
 assert_no_error "clean: no PDF subdir error"     "$OUT" "in subdirectory"
 assert_no_error "clean: no non-ASCII key"        "$OUT" "Non-ASCII character in key"
+assert_no_error "clean: no non-printable chars"  "$OUT" "non-printable character U+"
 assert_exit_pass "clean exits zero"              "$FIXTURES/clean_volume" 999
+
+# ---------------------------------------------------------------------------
+section "v283 original — mojibake C1 controls in title (U+0080/U+009D)"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 283 "$FIXTURES/v283_original")
+
+assert_error "v283 non-printable U+0080" "$OUT" "non-printable character U+0080"
+assert_error "v283 non-printable U+009D" "$OUT" "non-printable character U+009D"
+assert_error "v283 attributes to brindise25a" "$OUT" "[brindise25a]"
+assert_exit_fail "v283 exits non-zero" "$FIXTURES/v283_original" 283
+
+# ---------------------------------------------------------------------------
+section "v316 original — raw U+0002 STX PDF line-break artifacts"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 316 "$FIXTURES/v316_original")
+
+assert_error "v316 non-printable U+0002" "$OUT" "non-printable character U+0002"
+assert_error "v316 attributes to lucassen25" "$OUT" "[lucassen25]"
+assert_exit_fail "v316 exits non-zero" "$FIXTURES/v316_original" 316
 
 # ---------------------------------------------------------------------------
 section "math_braces — \\left\\{ and \\right\\} must not be flagged as escaped braces"

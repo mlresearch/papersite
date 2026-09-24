@@ -15,6 +15,9 @@
 #   8. No non-ASCII characters in BibTeX keys
 #   9. No double-quote delimited fields containing \" (silently drops entries in bibtex-ruby)
 #  10. No double-braced pages fields (e.g. pages = {{4-24}} renders with literal braces)
+#  11. No non-printable C0/C1 control characters in text fields (mojibake, PDF
+#      extraction artifacts) — UTF-8 code-point aware, so legitimate multi-byte
+#      punctuation (em dash, curly quotes, etc.) is not flagged
 #
 # Usage:
 #   ruby check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE] [--fix]
@@ -83,6 +86,7 @@ class VolumeChecker
     check_non_ascii_keys(content)
     check_dq_fields_with_latex_umlauts(content)
     check_double_braced_pages(content)
+    check_non_printable_characters(content)
 
     print_summary
     @errors.empty? ? 0 : 1
@@ -390,6 +394,42 @@ class VolumeChecker
       ok "  No double-braced pages fields found"
     else
       issues.each { |i| error i }
+    end
+  end
+
+  def check_non_printable_characters(content)
+    section "Non-printable characters"
+
+    # Scan decoded Unicode code points (not raw bytes) so legitimate multi-byte
+    # UTF-8 punctuation — em dash U+2014, curly quotes U+201C/U+201D, etc. —
+    # is not flagged just because its UTF-8 continuation bytes fall in 0x80–0xBF.
+    # Tab (U+0009), LF (U+000A), and CR (U+000D) are allowed; all other C0/C1
+    # controls are rejected. This catches:
+    #   - PDF line-break artifacts like U+0002 (v316)
+    #   - Mojibake C1 controls like U+0080/U+009D (v283)
+    issues = []
+    current_key = nil
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
+
+    content.each_line.with_index(1) do |line, lineno|
+      if (m = line.match(entry_re))
+        current_key = m[2]
+      end
+
+      line.each_char do |char|
+        cp = char.ord
+        next if cp == 0x09 || cp == 0x0A || cp == 0x0D
+        if cp <= 0x1F || (0x7F..0x9F).cover?(cp)
+          hex = format('U+%04X', cp)
+          issues << "  [#{current_key || '?'}] line #{lineno}: non-printable character #{hex} — check for mis-encoded Unicode (mojibake) or a stray extraction artifact"
+        end
+      end
+    end
+
+    if issues.empty?
+      ok "  No non-printable characters found"
+    else
+      issues.uniq.each { |i| error i }
     end
   end
 
