@@ -221,12 +221,19 @@ class VolumeChecker
     # Extract each entry key and its full author field value.
     # Author fields can span multiple lines; we collect everything between
     # 'author = {' and the matching closing brace.
-    entry_positions = {}
-    content.scan(/@\w+\s*\{\s*([\w-]+)\s*,/i) { entry_positions[$~.begin(0)] = $1 }
+    entry_positions = []
+    content.scan(/@\w+\s*\{\s*([\w-]+)\s*,/i) { entry_positions << [$~.begin(0), $1] }
+    entry_positions.sort_by!(&:first)
+    entry_idx = 0
 
     content.scan(/author\s*=\s*\{/i) do
+      author_pos = $~.begin(0)
       start = $~.end(0)
-      key   = entry_positions.select { |pos, _| pos <= $~.begin(0) }.max_by { |pos, _| pos }&.last || '?'
+      # Advance to the latest entry that starts at or before this author field (O(n) total).
+      while entry_idx + 1 < entry_positions.length && entry_positions[entry_idx + 1][0] <= author_pos
+        entry_idx += 1
+      end
+      key = entry_positions[entry_idx] ? entry_positions[entry_idx][1] : '?'
 
       # Walk forward counting braces to find the end of the field
       depth = 1
