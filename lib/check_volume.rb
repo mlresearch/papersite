@@ -235,17 +235,25 @@ class VolumeChecker
       end
       key = entry_positions[entry_idx] ? entry_positions[entry_idx][1] : '?'
 
-      # Walk forward counting braces to find the end of the field
+      # Walk a bounded slice with each_char. Indexing a UTF-8 String with [] is
+      # O(n) per access in Ruby, so content[i] over a 10MB file is unusable.
+      slice = content[start, 50_000] || ''
       depth = 1
-      i     = start
-      while i < content.length && depth > 0
-        case content[i]
-        when '{' then depth += 1 unless i > 0 && content[i - 1] == '\\'
-        when '}' then depth -= 1 unless i > 0 && content[i - 1] == '\\'
+      end_idx = 0
+      prev = nil
+      slice.each_char.with_index do |ch, idx|
+        if ch == '{' && prev != '\\'
+          depth += 1
+        elsif ch == '}' && prev != '\\'
+          depth -= 1
+          if depth == 0
+            end_idx = idx
+            break
+          end
         end
-        i += 1
+        prev = ch
       end
-      author_val = content[start..i - 2].gsub(/\s+/, ' ').strip
+      author_val = slice[0...end_idx].gsub(/\s+/, ' ').strip
 
       author_val.split(/\s+and\s+/i).each do |part|
         part = part.strip
