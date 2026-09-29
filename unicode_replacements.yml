@@ -253,3 +253,57 @@
 "\xA0":
   replacement: " "
   name: NO-BREAK SPACE
+"₀":
+  replacement: "$_0$"
+  name: SUBSCRIPT ZERO
+"₁":
+  replacement: "$_1$"
+  name: SUBSCRIPT ONE
+"₂":
+  replacement: "$_2$"
+  name: SUBSCRIPT TWO
+"Δ":
+  replacement: "$\\Delta$"
+  name: GREEK CAPITAL LETTER DELTA
+"τ":
+  replacement: "$\\tau$"
+  name: GREEK SMALL LETTER TAU
+"φ":
+  replacement: "$\\varphi$"
+  name: GREEK SMALL LETTER PHI
+"ℓ":
+  replacement: "$\\ell$"
+  name: SCRIPT SMALL L
+"∞":
+  replacement: "$\\infty$"
+  name: INFINITY
+"∧":
+  replacement: "$\\wedge$"
+  name: LOGICAL AND
+"̱":
+  replacement: ""
+  name: COMBINING MACRON BELOW
+"Ṟ":
+  replacement: "R"
+  name: LATIN CAPITAL LETTER R WITH LINE BELOW
+"Ḻ":
+  replacement: "L"
+  name: LATIN CAPITAL LETTER L WITH LINE BELOW
+"\u200C":
+  replacement: ""
+  name: ZERO WIDTH NON-JOINER
+"❶":
+  replacement: "(1)"
+  name: DINGBAT NEGATIVE CIRCLED DIGIT ONE
+"❷":
+  replacement: "(2)"
+  name: DINGBAT NEGATIVE CIRCLED DIGIT TWO
+"❸":
+  replacement: "(3)"
+  name: DINGBAT NEGATIVE CIRCLED DIGIT THREE
+"①":
+  replacement: "(1)"
+  name: CIRCLED DIGIT ONE
+"②":
+  replacement: "(2)"
+  name: CIRCLED DIGIT TWO
