@@ -175,6 +175,51 @@ else
 fi
 rm -rf "$TMP"
 
+# --- skip when gh-pages present (published volume) ---
+TMP=$(mktemp -d)
+cp -R "$FIXTURES/clean_volume" "$TMP/v996"
+(
+  cd "$TMP/v996"
+  git init -q
+  git config user.email "test@example.com"
+  git config user.name "Test"
+  git add -A
+  git commit -qm "main content"
+  git checkout -qb gh-pages
+  echo "title: test" > _config.yml
+  git add _config.yml
+  git commit -qm "site"
+  git checkout -q main
+)
+set +e
+(cd "$TMP/v996" && "$PMLINT" --check) >/tmp/pmlint_skip_out.txt 2>&1
+rc=$?
+set -e
+assert_eq "pmlint skips published volume" "$rc" "0"
+if grep -q "SKIPPED" /tmp/pmlint_skip_out.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: skip message present"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [missing SKIPPED message]")
+  echo "  ✗ FAIL: missing SKIPPED message"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_skip_out.txt; fi
+fi
+set +e
+(cd "$TMP/v996" && "$PMLINT" --check --force) >/tmp/pmlint_force_out.txt 2>&1
+rc=$?
+set -e
+assert_eq "pmlint --force still lints published volume" "$rc" "0"
+if grep -q "SKIPPED" /tmp/pmlint_force_out.txt; then
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [--force should not skip]")
+  echo "  ✗ FAIL: --force should not skip"
+else
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: --force does not skip"; fi
+fi
+rm -rf "$TMP"
+
 echo
 echo "Passed: $PASS  Failed: $FAIL"
 if [[ "$FAIL" -gt 0 ]]; then

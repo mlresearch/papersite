@@ -3,8 +3,9 @@
 # Copy this workflow into a volume repo as `.github/workflows/pmlint.yml`,
 # or call it via workflow_call after adjusting paths.
 #
-# Expects volume contents at the repository root (PDFs + .bib). The volume id
-# is inferred from the repo name: mlresearch/v304 → v304, mlresearch/r0 → r0.
+# Expects volume contents at the repository root (PDFs + .bib) for
+# pre-publication PRs. pmlint itself skips (exit 0) when gh-pages already
+# exists — i.e. the volume has been published.
 
 name: pmlint
 

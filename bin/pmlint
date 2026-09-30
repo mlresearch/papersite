@@ -27,22 +27,27 @@ set -euo pipefail
 DEFAULT_CACHE="${PMLINT_CACHE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/papersite}"
 MODE="check"
 UNICODE_CHECK=0
+FORCE=0
 VOLUME_ARG=""
 BIBFILE=""
 
 usage() {
   cat <<'EOF'
-Usage: pmlint [--check|--fix] [--unicode] [VOLUME] [BIBFILE]
+Usage: pmlint [--check|--fix] [--unicode] [--force] [VOLUME] [BIBFILE]
 
   --check     Read-only validation (default). Does not modify the volume tree.
   --fix       Apply safe non-interactive BibTeX repairs (percent escaping),
               then re-check.
   --unicode   Also run tidy_bib_unicode --strict (output only under /tmp;
               never under the volume tree).
+  --force     Run even if the volume looks already published (gh-pages present).
   -h, --help  Show this help.
 
 VOLUME is optional when the current directory (or origin repo name) is
 vNNN or rNNN (rereleases). A bare number means v<number>.
+
+If origin (or local) has a gh-pages branch — the usual signal that the volume
+has been published — pmlint exits 0 without checking, unless --force.
 
 Environment:
   PAPERSITE_ROOT      Papersite checkout (optional)
@@ -59,6 +64,7 @@ while [[ $# -gt 0 ]]; do
     --check) MODE="check"; shift ;;
     --fix) MODE="fix"; shift ;;
     --unicode) UNICODE_CHECK=1; shift ;;
+    --force) FORCE=1; shift ;;
     -h|--help) usage; exit 0 ;;
     -*)
       echo "ERROR: Unknown option: $1" >&2
@@ -315,12 +321,52 @@ self_update "$ROOT"
 LIB="$ROOT/lib"
 BIN="$ROOT/bin"
 VOL_DIR="$(resolve_volume_dir "$VOLUME")"
-BIB_PATH="$(find_bib "$VOL_DIR" "$BIBFILE")"
-BIB_BASE="$(basename "$BIB_PATH")"
 
 echo "pmlint mode=$MODE volume=$VOLUME"
 echo "  papersite: $ROOT"
 echo "  volume:    $VOL_DIR"
+
+# Skip lint once the volume has been published (gh-pages exists with site files).
+# Do this before requiring a .bib — published main often has assets only.
+volume_is_published() {
+  local dir="$1"
+  (
+    cd "$dir" || exit 1
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 1
+
+    local ref=""
+    if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+      if git fetch --depth 1 origin gh-pages >/dev/null 2>&1; then
+        ref="FETCH_HEAD"
+      fi
+    fi
+    if [[ -z "$ref" ]] && git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+      ref="refs/remotes/origin/gh-pages"
+    fi
+    if [[ -z "$ref" ]] && git show-ref --verify --quiet refs/heads/gh-pages; then
+      ref="refs/heads/gh-pages"
+    fi
+    [[ -n "$ref" ]] || exit 1
+
+    if git cat-file -e "$ref:_config.yml" 2>/dev/null \
+      || git cat-file -e "$ref:index.html" 2>/dev/null \
+      || git ls-tree -d --name-only "$ref" _posts >/dev/null 2>&1; then
+      exit 0
+    fi
+    exit 0
+  )
+}
+
+if [[ "$FORCE" -ne 1 ]] && volume_is_published "$VOL_DIR"; then
+  echo
+  echo "pmlint: SKIPPED — volume looks already published (gh-pages present)."
+  echo "         Intake lint is for pre-publication PRs only."
+  echo "         Re-run with --force to lint anyway."
+  exit 0
+fi
+
+BIB_PATH="$(find_bib "$VOL_DIR" "$BIBFILE")"
+BIB_BASE="$(basename "$BIB_PATH")"
 echo "  bib:       $BIB_PATH"
 
 set +e

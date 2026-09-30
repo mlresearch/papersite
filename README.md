@@ -53,6 +53,9 @@ A bare number still works (`304` → `v304`).
 `--check` must not modify the volume tree. `--fix` only applies non-interactive
 `tidy_bibtex --fix-percent` (not Unicode map edits or PDF moves).
 
+If the volume already has a **gh-pages** branch (published site), `pmlint` exits
+successfully without checking. Use `--force` to lint a published volume anyway.
+
 **PR CI:** volume repositories can copy
 [`.github/workflows/pmlint-volume-example.yml`](.github/workflows/pmlint-volume-example.yml)
 and adjust as needed. Papersite itself runs `tests/test_pmlint.sh` via
