@@ -221,7 +221,7 @@ class BibTeXCleaner
         STDERR.puts "\nError: Issues found in strict mode and no fixes applied"
         unless @options[:quiet]
           puts "\nHint: unescaped % can be fixed with:"
-          puts "  pmlint --fix <VOLUME>   # or: ruby tidy_bibtex.rb --fix-percent INPUT OUTPUT"
+          puts "  pmlint --fix   # or: ruby tidy_bibtex.rb --fix-percent INPUT OUTPUT"
         end
         exit 1
       end

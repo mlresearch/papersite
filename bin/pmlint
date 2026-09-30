@@ -271,6 +271,41 @@ section() {
   echo "==> $1"
 }
 
+# Stage results accumulated for the final rollup (name|pass|fail)
+STAGE_NAMES=()
+STAGE_RESULTS=()  # 0=pass, 1=fail
+
+record_stage() {
+  local name="$1" rc="$2"
+  STAGE_NAMES+=("$name")
+  STAGE_RESULTS+=("$rc")
+  if [[ "$rc" -ne 0 ]]; then
+    FAILED=1
+    echo "    → stage FAILED"
+  else
+    echo "    → stage passed"
+  fi
+}
+
+print_rollup() {
+  local i n fail_n=0
+  n=${#STAGE_NAMES[@]}
+  for ((i = 0; i < n; i++)); do
+    if [[ "${STAGE_RESULTS[$i]}" -ne 0 ]]; then
+      fail_n=$((fail_n + 1))
+    fi
+  done
+  echo
+  echo "pmlint stages: $((n - fail_n)) passed, ${fail_n} failed"
+  for ((i = 0; i < n; i++)); do
+    if [[ "${STAGE_RESULTS[$i]}" -eq 0 ]]; then
+      echo "  ✓ ${STAGE_NAMES[$i]}"
+    else
+      echo "  ✗ ${STAGE_NAMES[$i]}"
+    fi
+  done
+}
+
 FAILED=0
 
 ROOT="$(resolve_papersite_root)"
@@ -293,29 +328,31 @@ set +e
 if [[ "$MODE" == "fix" ]]; then
   section "Fix: tidy_bibtex --fix-percent"
   ruby "$LIB/tidy_bibtex.rb" --fix-percent --quiet "$BIB_PATH" "$BIB_PATH"
-  [[ $? -eq 0 ]] || FAILED=1
+  record_stage "tidy_bibtex --fix-percent" $?
 fi
 
 section "Check: tidy_bibtex --dry-run --strict --check-author-commas"
 ruby "$LIB/tidy_bibtex.rb" --dry-run --strict --check-author-commas "$BIB_PATH"
-[[ $? -eq 0 ]] || FAILED=1
+record_stage "tidy_bibtex (strict / author commas)" $?
 
-section "Check: check_volume"
+section "Check: check_volume (PDF placement, proceedings fields, …)"
 (
   cd "$VOL_DIR"
   bash "$BIN/check_volume.sh" "$VOLUME" "$BIB_BASE"
 )
-[[ $? -eq 0 ]] || FAILED=1
+record_stage "check_volume" $?
 
 if [[ "$UNICODE_CHECK" -eq 1 ]]; then
   section "Check: tidy_bib_unicode --strict"
   TMP_OUT="$(mktemp "${TMPDIR:-/tmp}/pmlint_unicode.XXXXXX.bib")"
   ruby "$LIB/tidy_bib_unicode.rb" --strict --quiet "$BIB_PATH" "$TMP_OUT"
-  [[ $? -eq 0 ]] || FAILED=1
+  record_stage "tidy_bib_unicode --strict" $?
   rm -f "$TMP_OUT"
 fi
 
 set -e
+
+print_rollup
 
 echo
 if [[ "$FAILED" -eq 0 ]]; then
@@ -324,6 +361,9 @@ if [[ "$FAILED" -eq 0 ]]; then
 else
   cat >&2 <<EOF
 pmlint: FAILED
+
+Note: check_volume's own \"Errors: 0 / ready for publication\" only covers
+PDF/supp/proceedings-structure checks. A tidy_bibtex failure still fails pmlint.
 
 How to fix
 ----------

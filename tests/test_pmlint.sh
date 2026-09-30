@@ -118,6 +118,15 @@ else
   echo "  ✗ FAIL: failure footer incomplete"
   if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_bad_out.txt; fi
 fi
+if grep -q "pmlint stages:" /tmp/pmlint_bad_out.txt && grep -q "✗ check_volume" /tmp/pmlint_bad_out.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: stage rollup present"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [stage rollup missing]")
+  echo "  ✗ FAIL: stage rollup missing"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_bad_out.txt; fi
+fi
 rm -rf "$TMP"
 
 # --- --fix percent then check (mutating only bib) ---
