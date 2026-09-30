@@ -4,8 +4,13 @@
 # =============================================================================
 #
 # USAGE:
-#   pmlint [--check|--fix] [--unicode] VOLUME [BIBFILE]
-#   pmlint --help
+#   cd ~/mlresearch/v350   # or r0, r201, …
+#   pmlint --check         # volume id inferred from directory / git remote
+#   pmlint --fix
+#   pmlint --check v350    # explicit id (also accepts bare 350 → v350)
+#   pmlint --check r0 proceedings.bib
+#
+# Volume ids: vNNN (normal) or rNNN (rerelease). Bare numbers mean v<number>.
 #
 # Environment:
 #   PAPERSITE_ROOT       Override papersite checkout
@@ -22,12 +27,12 @@ set -euo pipefail
 DEFAULT_CACHE="${PMLINT_CACHE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/papersite}"
 MODE="check"
 UNICODE_CHECK=0
-VOLUME=""
+VOLUME_ARG=""
 BIBFILE=""
 
 usage() {
   cat <<'EOF'
-Usage: pmlint [--check|--fix] [--unicode] VOLUME [BIBFILE]
+Usage: pmlint [--check|--fix] [--unicode] [VOLUME] [BIBFILE]
 
   --check     Read-only validation (default). Does not modify the volume tree.
   --fix       Apply safe non-interactive BibTeX repairs (percent escaping),
@@ -35,6 +40,9 @@ Usage: pmlint [--check|--fix] [--unicode] VOLUME [BIBFILE]
   --unicode   Also run tidy_bib_unicode --strict (output only under /tmp;
               never under the volume tree).
   -h, --help  Show this help.
+
+VOLUME is optional when the current directory (or origin repo name) is
+vNNN or rNNN (rereleases). A bare number means v<number>.
 
 Environment:
   PAPERSITE_ROOT      Papersite checkout (optional)
@@ -58,8 +66,8 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      if [[ -z "$VOLUME" ]]; then
-        VOLUME="$1"
+      if [[ -z "$VOLUME_ARG" ]]; then
+        VOLUME_ARG="$1"
       elif [[ -z "$BIBFILE" ]]; then
         BIBFILE="$1"
       else
@@ -71,12 +79,59 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$VOLUME" ]]; then
-  usage >&2
-  exit 1
-fi
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+normalize_volume_id() {
+  local raw="$1"
+  if [[ "$raw" =~ ^[0-9]+$ ]]; then
+    printf 'v%s\n' "$raw"
+  elif [[ "$raw" =~ ^[vr][0-9]+$ ]]; then
+    printf '%s\n' "$raw"
+  else
+    return 1
+  fi
+}
+
+infer_volume_id() {
+  local name="" remote=""
+  name="$(basename "$(pwd)")"
+  if normalize_volume_id "$name" >/dev/null 2>&1; then
+    normalize_volume_id "$name"
+    return
+  fi
+  if remote="$(git remote get-url origin 2>/dev/null)"; then
+    name="$(basename "$remote")"
+    name="${name%.git}"
+    if normalize_volume_id "$name" >/dev/null 2>&1; then
+      normalize_volume_id "$name"
+      return
+    fi
+  fi
+  if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
+    name="${GITHUB_REPOSITORY##*/}"
+    if normalize_volume_id "$name" >/dev/null 2>&1; then
+      normalize_volume_id "$name"
+      return
+    fi
+  fi
+  return 1
+}
+
+VOLUME=""
+if [[ -n "$VOLUME_ARG" ]]; then
+  if ! VOLUME="$(normalize_volume_id "$VOLUME_ARG")"; then
+    echo "ERROR: Volume must be vNNN, rNNN, or a bare number (got: $VOLUME_ARG)" >&2
+    usage >&2
+    exit 1
+  fi
+else
+  if ! VOLUME="$(infer_volume_id)"; then
+    echo "ERROR: Could not infer volume id from directory or git remote." >&2
+    echo "       Run from a vNNN/rNNN repo, or pass the id explicitly." >&2
+    usage >&2
+    exit 1
+  fi
+fi
 
 is_papersite_root() {
   local root="$1"
@@ -167,14 +222,14 @@ self_update() {
 
 resolve_volume_dir() {
   local vol="$1"
-  if [[ -d "v${vol}" ]]; then
-    printf '%s\n' "$(cd "v${vol}" && pwd)"
-  elif [[ "$(basename "$(pwd)")" == "v${vol}" ]]; then
+  if [[ -d "$vol" ]]; then
+    printf '%s\n' "$(cd "$vol" && pwd)"
+  elif [[ "$(basename "$(pwd)")" == "$vol" ]]; then
     printf '%s\n' "$(pwd)"
-  elif [[ -d "${vol}" ]]; then
-    printf '%s\n' "$(cd "${vol}" && pwd)"
+  elif [[ "$vol" == v* && -d "${vol#v}" ]]; then
+    printf '%s\n' "$(cd "${vol#v}" && pwd)"
   else
-    echo "ERROR: Cannot find volume directory for volume ${vol}" >&2
+    echo "ERROR: Cannot find volume directory for ${vol}" >&2
     exit 1
   fi
 }
@@ -233,7 +288,6 @@ echo "  papersite: $ROOT"
 echo "  volume:    $VOL_DIR"
 echo "  bib:       $BIB_PATH"
 
-# Disable errexit around check steps so we can aggregate failures
 set +e
 
 if [[ "$MODE" == "fix" ]]; then
@@ -274,10 +328,12 @@ pmlint: FAILED
 How to fix
 ----------
 Auto-fixable BibTeX issues (unescaped % in titles/abstracts):
-  pmlint --fix ${VOLUME}${BIBFILE:+ ${BIBFILE}}
+  pmlint --fix${BIBFILE:+ ${BIBFILE}}
 
 Then re-check:
-  pmlint --check ${VOLUME}${BIBFILE:+ ${BIBFILE}}
+  pmlint --check${BIBFILE:+ ${BIBFILE}}
+
+(Or pass the volume id explicitly: pmlint --check ${VOLUME})
 
 Manual fields (examples):
   - published = {YYYY-MM-DD}  — optional at submission; set when publishing
@@ -291,7 +347,7 @@ From a papersite checkout:
   export PATH="\$HOME/.local/bin:\$PATH"
 
 Or run without installing (sibling clone):
-  PMLINT_SKIP_UPDATE=1 PAPERSITE_ROOT=${ROOT} ${ROOT}/bin/pmlint --check ${VOLUME}
+  PMLINT_SKIP_UPDATE=1 PAPERSITE_ROOT=${ROOT} ${ROOT}/bin/pmlint --check
 
 Docs: https://github.com/mlresearch/papersite#lint-a-volume
 EOF

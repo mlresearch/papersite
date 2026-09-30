@@ -61,24 +61,51 @@ count=$(find "$TMP" -type f | wc -l | tr -d ' ')
 assert_eq "tidy --dry-run file count unchanged" "$count" "1"
 rm -rf "$TMP"
 
-# --- check passes on clean fixture; tree untouched ---
+# --- check passes on clean fixture; tree untouched; id inferred from dir ---
 TMP=$(mktemp -d)
 cp -R "$FIXTURES/clean_volume" "$TMP/v999"
 BEFORE=$(checksum_tree "$TMP/v999")
 set +e
-(cd "$TMP/v999" && "$PMLINT" --check 999) >/tmp/pmlint_clean_out.txt 2>&1
+(cd "$TMP/v999" && "$PMLINT" --check) >/tmp/pmlint_clean_out.txt 2>&1
 rc=$?
 set -e
-assert_eq "pmlint --check clean exit" "$rc" "0"
+assert_eq "pmlint --check clean exit (inferred v999)" "$rc" "0"
+if grep -q "volume=v999" /tmp/pmlint_clean_out.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: inferred volume=v999"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [did not infer volume=v999]")
+  echo "  ✗ FAIL: did not infer volume=v999"
+fi
 AFTER=$(checksum_tree "$TMP/v999")
 assert_eq "pmlint --check does not touch tree" "$BEFORE" "$AFTER"
+rm -rf "$TMP"
+
+# --- rerelease id r0 inferred from directory name ---
+TMP=$(mktemp -d)
+cp -R "$FIXTURES/clean_volume" "$TMP/r0"
+set +e
+(cd "$TMP/r0" && "$PMLINT" --check) >/tmp/pmlint_r0_out.txt 2>&1
+rc=$?
+set -e
+assert_eq "pmlint --check r0 exit" "$rc" "0"
+if grep -q "volume=r0" /tmp/pmlint_r0_out.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: inferred volume=r0"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [did not infer volume=r0]")
+  echo "  ✗ FAIL: did not infer volume=r0"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_r0_out.txt; fi
+fi
 rm -rf "$TMP"
 
 # --- check fails on pdfs-in-subdir fixture ---
 TMP=$(mktemp -d)
 cp -R "$FIXTURES/pdfs_in_subdir" "$TMP/v998"
 set +e
-(cd "$TMP/v998" && "$PMLINT" --check 998) >/tmp/pmlint_bad_out.txt 2>&1
+(cd "$TMP/v998" && "$PMLINT" --check) >/tmp/pmlint_bad_out.txt 2>&1
 rc=$?
 set -e
 assert_eq "pmlint --check bad exit" "$rc" "1"
@@ -124,7 +151,7 @@ EOF
 # empty PDF placeholder
 : > "$TMP/v997/doe26a.pdf"
 set +e
-(cd "$TMP/v997" && "$PMLINT" --fix 997) >/tmp/pmlint_fix_out.txt 2>&1
+(cd "$TMP/v997" && "$PMLINT" --fix) >/tmp/pmlint_fix_out.txt 2>&1
 rc=$?
 set -e
 # After fix-percent, tidy should pass; check_volume may still pass with empty pdf

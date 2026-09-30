@@ -1,29 +1,17 @@
-#!/bin/bash
-
-# ============================================================================
-# Check Volume Script - Pre-publication validation for PMLR volumes
-# ============================================================================
-#
-# PURPOSE:
-#   Validates that a volume directory is ready for publication by checking:
-#   - All BibTeX keys have matching PDF files in the repository root
-#   - No PDFs are stranded in subdirectories (e.g. pdfs/, supplementary_material/)
-#   - Supplementary files are in the root (not in subdirectories)
-#   - @Proceedings entry has required fields (published, name, volume in braces)
-#   - Author names are well-formed (Surname, Given format)
-#   - No double backslashes or escaped $ / { } / _ in abstracts
-#   - No non-ASCII characters in BibTeX keys
+#!/usr/bin/env bash
+# =============================================================================
+# check_volume.sh - Pre-publication validation for PMLR volumes
+# =============================================================================
 #
 # USAGE:
-#   cd ~/mlresearch/vNNN
-#   ../papersite/bin/check_volume.sh NNN [BIBFILE]
+#   cd ~/mlresearch/v304
+#   ../papersite/bin/check_volume.sh            # id from directory name
+#   ../papersite/bin/check_volume.sh v304
+#   ../papersite/bin/check_volume.sh 304        # same as v304
+#   ../papersite/bin/check_volume.sh r0         # rerelease repos
+#   ../papersite/bin/check_volume.sh v304 proceedings.bib
 #
-#   Or from anywhere:
-#   ~/mlresearch/papersite/bin/check_volume.sh NNN [BIBFILE]
-#
-# ARGUMENTS:
-#   NNN      Volume number (e.g. 304)
-#   BIBFILE  Optional: BibTeX filename (default: auto-detected)
+# Volume ids are vNNN or rNNN (rereleases). A bare number means v<number>.
 #
 # EXIT CODES:
 #   0  All checks passed
@@ -34,25 +22,55 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$SCRIPT_DIR/../lib"
 
-VOLUME="${1:-}"
+VOLUME_ARG="${1:-}"
 BIBFILE="${2:-}"
 
-if [[ -z "$VOLUME" ]]; then
-  echo "Usage: check_volume.sh VOLUME [BIBFILE]"
-  echo "  Must be run from the volume directory, or the volume directory must exist"
-  exit 1
+normalize_volume_id() {
+  local raw="$1"
+  if [[ "$raw" =~ ^[0-9]+$ ]]; then
+    printf 'v%s\n' "$raw"
+  elif [[ "$raw" =~ ^[vr][0-9]+$ ]]; then
+    printf '%s\n' "$raw"
+  else
+    return 1
+  fi
+}
+
+infer_volume_id() {
+  local name
+  name="$(basename "$(pwd)")"
+  if normalize_volume_id "$name" >/dev/null 2>&1; then
+    normalize_volume_id "$name"
+    return
+  fi
+  return 1
+}
+
+VOLUME_ID=""
+if [[ -n "$VOLUME_ARG" ]]; then
+  if ! VOLUME_ID="$(normalize_volume_id "$VOLUME_ARG")"; then
+    echo "ERROR: Volume must be vNNN, rNNN, or a bare number (got: $VOLUME_ARG)" >&2
+    exit 1
+  fi
+else
+  if ! VOLUME_ID="$(infer_volume_id)"; then
+    echo "Usage: check_volume.sh [VOLUME] [BIBFILE]" >&2
+    echo "  VOLUME  vNNN / rNNN / bare number (default: current directory name)" >&2
+    exit 1
+  fi
 fi
 
 # Determine volume directory
-if [[ -d "v${VOLUME}" ]]; then
-  VOL_DIR="$(pwd)/v${VOLUME}"
-elif [[ "$(basename $(pwd))" == "v${VOLUME}" ]]; then
+if [[ -d "$VOLUME_ID" ]]; then
+  VOL_DIR="$(cd "$VOLUME_ID" && pwd)"
+elif [[ "$(basename "$(pwd)")" == "$VOLUME_ID" ]]; then
   VOL_DIR="$(pwd)"
-elif [[ -d "${VOLUME}" ]]; then
-  VOL_DIR="$(pwd)/${VOLUME}"
+elif [[ "$VOLUME_ID" == v* && -d "${VOLUME_ID#v}" ]]; then
+  # rare: cwd layout uses bare number directory
+  VOL_DIR="$(cd "${VOLUME_ID#v}" && pwd)"
 else
-  echo "ERROR: Cannot find volume directory for volume ${VOLUME}"
+  echo "ERROR: Cannot find volume directory for ${VOLUME_ID}" >&2
   exit 1
 fi
 
-ruby "$LIB_DIR/check_volume.rb" -v "$VOLUME" -d "$VOL_DIR" ${BIBFILE:+-b "$BIBFILE"}
+ruby "$LIB_DIR/check_volume.rb" -v "$VOLUME_ID" -d "$VOL_DIR" ${BIBFILE:+-b "$BIBFILE"}

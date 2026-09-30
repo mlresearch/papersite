@@ -35,18 +35,21 @@ Or call the script directly from a sibling clone (still self-updates):
 
 ```bash
 cd ~/mlresearch/v304
-../papersite/bin/pmlint --check 304
+../papersite/bin/pmlint --check          # id inferred from directory name (v304)
+../papersite/bin/pmlint --check r0       # rerelease repos use rNNN
 ```
 
 ### Lint a volume
 
 ```bash
 cd ~/mlresearch/v304
-pmlint --check 304              # read-only; exit 1 on failure (use in PRs)
-pmlint --fix 304               # escape unescaped % in bib, then re-check
-PMLINT_SKIP_UPDATE=1 pmlint --check 304   # offline / dirty papersite tree
+pmlint --check              # read-only; exit 1 on failure (use in PRs)
+pmlint --fix               # escape unescaped % in bib, then re-check
+PMLINT_SKIP_UPDATE=1 pmlint --check   # offline / dirty papersite tree
 ```
 
+Volume id is inferred from the repo/directory name (`v350`, `r0`, `r201`, …).
+A bare number still works (`304` → `v304`).
 `--check` must not modify the volume tree. `--fix` only applies non-interactive
 `tidy_bibtex --fix-percent` (not Unicode map edits or PDF moves).
 
@@ -59,8 +62,8 @@ and adjust as needed. Papersite itself runs `tests/test_pmlint.sh` via
 
 The standard workflow for publishing a PMLR volume:
 
-1. **Pre-publication check**: `pmlint --check NNN` (or `check_volume.sh`)
-2. **BibTeX cleaning**: `pmlint --fix NNN` and/or `tidy_bibtex.rb`
+1. **Pre-publication check**: `pmlint --check` (or `check_volume.sh`)
+2. **BibTeX cleaning**: `pmlint --fix` and/or `tidy_bibtex.rb`
 3. **Volume creation**: Use `create_volume.rb` to generate Jekyll posts and organise assets
 4. **Deployment**: Use `deploy_volume.sh` for the two-branch separation strategy
 
@@ -70,9 +73,9 @@ Run this first to catch common submission errors before processing:
 
 ```bash
 cd ~/mlresearch/v304
-pmlint --check 304
+pmlint --check
 # equivalent lower-level tool:
-../papersite/bin/check_volume.sh 304
+../papersite/bin/check_volume.sh          # or: check_volume.sh v304
 ```
 
 The checker validates:

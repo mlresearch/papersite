@@ -51,4 +51,4 @@ jobs:
         env:
           PAPERSITE_ROOT: ${{ github.workspace }}/papersite
           PMLINT_SKIP_UPDATE: "1"
-        run: bash "${{ github.workspace }}/papersite/bin/pmlint" --check 999
+        run: bash "${{ github.workspace }}/papersite/bin/pmlint" --check
