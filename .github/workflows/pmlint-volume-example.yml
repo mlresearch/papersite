@@ -1,11 +1,7 @@
-# Reusable: pmlint check on a volume repository PR
-#
-# Copy this workflow into a volume repo as `.github/workflows/pmlint.yml`,
-# or call it via workflow_call after adjusting paths.
-#
-# Expects volume contents at the repository root (PDFs + .bib) for
-# pre-publication PRs. pmlint itself skips (exit 0) when gh-pages already
-# exists — i.e. the volume has been published.
+# pmlint — pre-publication volume check
+# Checks out latest mlresearch/papersite and runs pmlint --check.
+# Skips automatically once gh-pages exists (volume already published).
+# On proceedings-template itself the job is skipped (repo name is not vNNN/rNNN).
 
 name: pmlint
 
@@ -15,6 +11,7 @@ on:
 
 jobs:
   check:
+    if: startsWith(github.event.repository.name, 'v') || startsWith(github.event.repository.name, 'r')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout volume
@@ -25,7 +22,6 @@ jobs:
         with:
           repository: mlresearch/papersite
           path: .papersite-tools
-          # Pin for reproducibility if desired: ref: <sha>
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
