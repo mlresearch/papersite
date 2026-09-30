@@ -1,7 +1,7 @@
 ---
 id: "2026-09-30_pmlint-check-fix"
 title: "Wire pmlint --check and --fix to existing tidy + check_volume"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-09-30"
 last_updated: "2026-09-30"
@@ -37,12 +37,12 @@ auto-fixed. Unicode map edits and PDF moves are out of scope.
 
 ## Acceptance Criteria
 
-- [ ] `--check` exits `0`/`1` with a clear sectioned summary
-- [ ] `--check` leaves the volume directory bit-identical
-- [ ] `--fix` applies percent escaping via existing tidy, then re-checks
-- [ ] Optional unicode strict check documented; no interactive prompts in CI
-- [ ] No new validators invented — only compose existing CLIs
-- [ ] README documents check vs fix behaviour
+- [x] `--check` exits `0`/`1` with a clear sectioned summary
+- [x] `--check` leaves the volume directory bit-identical
+- [x] `--fix` applies percent escaping via existing tidy, then re-checks
+- [x] Optional unicode strict check documented; no interactive prompts in CI
+- [x] No new validators invented — only compose existing CLIs
+- [x] README documents check vs fix behaviour
 
 ## Implementation Notes
 
@@ -60,3 +60,6 @@ Depends on dry-run for tidy and the `pmlint` entrypoint. Do not implement
 ### 2026-09-30
 
 Task created as Ready when CIP-0008 was Accepted.
+
+Wired `--check` / `--fix` to compose tidy + `check_volume`. Marked
+Completed as part of CIP-0008 v1.

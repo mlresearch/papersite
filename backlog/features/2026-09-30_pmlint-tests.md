@@ -1,7 +1,7 @@
 ---
 id: "2026-09-30_pmlint-tests"
 title: "Add pmlint smoke and no-touch tests"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-09-30"
 last_updated: "2026-09-30"
@@ -31,13 +31,13 @@ possible.
 
 ## Acceptance Criteria
 
-- [ ] Smoke tests for `--check` pass/fail on fixtures
-- [ ] Assertion that `--check` leaves fixture tree unchanged (checksums or
+- [x] Smoke tests for `--check` pass/fail on fixtures
+- [x] Assertion that `--check` leaves fixture tree unchanged (checksums or
       recursive compare before/after)
-- [ ] `PMLINT_SKIP_UPDATE=1` path covered so CI does not need network git
+- [x] `PMLINT_SKIP_UPDATE=1` path covered so CI does not need network git
       update
-- [ ] Tests documented in `tests/README.md` (or equivalent)
-- [ ] Suite passes locally with existing check_volume tests still green
+- [x] Tests documented in `tests/README.md` (or equivalent)
+- [x] Suite passes locally with existing check_volume tests still green
 
 ## Implementation Notes
 
@@ -55,3 +55,6 @@ tidy_bibtex tests).
 ### 2026-09-30
 
 Task created as Ready when CIP-0008 was Accepted.
+
+Added `tests/test_pmlint.sh` (smoke, no-touch, skip-update). Marked
+Completed as part of CIP-0008 v1.

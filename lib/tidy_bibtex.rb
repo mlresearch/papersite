@@ -12,13 +12,14 @@ class BibTeXCleaner
       :interactive => false,
       :fix_percent => false,
       :fix_author_commas => false,
-      :fix_all => false
+      :fix_all => false,
+      :dry_run => false
     }
   end
 
   def parse_options
     parser = OptionParser.new do |parser|
-      parser.banner = "Usage: tidy_bibtex.rb [INPUT OUTPUT] [options]"
+      parser.banner = "Usage: tidy_bibtex.rb [INPUT [OUTPUT]] [options]"
       
       parser.on("--strict", "Strict mode - fail on any issues found") do
         @options[:strict] = true
@@ -47,6 +48,10 @@ class BibTeXCleaner
       parser.on("--fix-all", "Apply all automatic fixes") do
         @options[:fix_all] = true
       end
+
+      parser.on("--dry-run", "Report issues only; do not write any output file") do
+        @options[:dry_run] = true
+      end
       
       parser.on("-h", "--help", "Show this help message") do
         puts parser
@@ -65,6 +70,11 @@ class BibTeXCleaner
 
   def run
     parse_options
+
+    if @options[:dry_run] && (@options[:fix_percent] || @options[:fix_all] || @options[:interactive])
+      STDERR.puts "Error: --dry-run cannot be combined with --fix-percent, --fix-all, or --interactive"
+      exit 1
+    end
     
     # Auto-detect single BibTeX file if no arguments provided
     if ARGV.length == 0
@@ -80,11 +90,15 @@ class BibTeXCleaner
         input_file = bib_files[0]
         output_file = input_file.sub(/\.bib$/, '_cleaned.bib')
         puts "Auto-detected BibTeX file: #{input_file}" unless @options[:quiet]
-        puts "Output file: #{output_file}" unless @options[:quiet]
+        puts "Output file: #{output_file}" unless @options[:quiet] || @options[:dry_run]
       end
+    elsif ARGV.length == 1 && @options[:dry_run]
+      input_file = ARGV[0]
+      output_file = nil
     elsif ARGV.length < 2
-      STDERR.puts "Error: Input and output files required"
+      STDERR.puts "Error: Input and output files required (or use --dry-run with INPUT only)"
       STDERR.puts "Usage: tidy_bibtex.rb [INPUT OUTPUT] [options]"
+      STDERR.puts "       tidy_bibtex.rb INPUT --dry-run [options]"
       STDERR.puts "       tidy_bibtex.rb [options]  # Auto-detect single .bib file"
       exit 1
     else
@@ -98,7 +112,11 @@ class BibTeXCleaner
     end
     
     puts "Input file: #{input_file}" unless @options[:quiet]
-    puts "Output file: #{output_file}" unless @options[:quiet]
+    if @options[:dry_run]
+      puts "Dry run: no output file will be written" unless @options[:quiet]
+    else
+      puts "Output file: #{output_file}" unless @options[:quiet]
+    end
     
     # Try to read with UTF-8, fall back to other encodings if needed
     begin
@@ -213,9 +231,11 @@ class BibTeXCleaner
       end
     end
     
-    # Write cleaned file
-    File.write(output_file, content, encoding: 'UTF-8')
-    puts "Cleaned file written to #{output_file}" unless @options[:quiet]
+    unless @options[:dry_run]
+      # Write cleaned file
+      File.write(output_file, content, encoding: 'UTF-8')
+      puts "Cleaned file written to #{output_file}" unless @options[:quiet]
+    end
     
     if issues_found.any? && fixes_applied.empty?
       puts "\nWarning: Issues found but no fixes applied."

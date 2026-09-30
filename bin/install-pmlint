@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# =============================================================================
+# install-pmlint — Idempotent installer for pmlint
+# =============================================================================
+#
+# Clones (or updates) mlresearch/papersite into a cache directory and installs
+# a PATH shim so `pmlint` is available from any volume directory.
+#
+# USAGE:
+#   bash bin/install-pmlint
+#   bash bin/install-pmlint --prefix ~/.local
+#
+# Environment:
+#   PMLINT_CACHE_DIR   Override cache clone path
+#   PMLINT_BIN_DIR     Override shim install directory
+# =============================================================================
+
+set -euo pipefail
+
+PREFIX="${HOME}/.local"
+REPO_URL="${PMLINT_REPO_URL:-https://github.com/mlresearch/papersite.git}"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --prefix) PREFIX="$2"; shift 2 ;;
+    -h|--help)
+      cat <<'EOF'
+Usage: install-pmlint [--prefix DIR]
+
+  --prefix DIR   Base for bin/ and share/ (default: ~/.local)
+
+Installs:
+  $PREFIX/share/papersite   (or $PMLINT_CACHE_DIR) — papersite clone
+  $PREFIX/bin/pmlint        (or $PMLINT_BIN_DIR/pmlint) — PATH shim
+EOF
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+CACHE_DIR="${PMLINT_CACHE_DIR:-$PREFIX/share/papersite}"
+BIN_DIR="${PMLINT_BIN_DIR:-$PREFIX/bin}"
+
+echo "==> Cache directory: $CACHE_DIR"
+echo "==> Shim directory:  $BIN_DIR"
+
+mkdir -p "$(dirname "$CACHE_DIR")" "$BIN_DIR"
+
+if [[ -d "$CACHE_DIR/.git" ]]; then
+  echo "==> Updating existing papersite clone"
+  git -C "$CACHE_DIR" fetch origin
+  if [[ -n "$(git -C "$CACHE_DIR" status --porcelain 2>/dev/null)" ]]; then
+    echo "WARNING: cache working tree is dirty; leaving it as-is" >&2
+  elif git -C "$CACHE_DIR" show-ref --verify --quiet refs/remotes/origin/main; then
+    git -C "$CACHE_DIR" merge --ff-only origin/main
+  fi
+else
+  echo "==> Cloning $REPO_URL -> $CACHE_DIR"
+  git clone --depth 1 "$REPO_URL" "$CACHE_DIR"
+fi
+
+chmod +x "$CACHE_DIR/bin/pmlint" "$CACHE_DIR/bin/install-pmlint"
+
+SHIM="$BIN_DIR/pmlint"
+cat > "$SHIM" <<EOF
+#!/usr/bin/env bash
+# pmlint shim — installed by install-pmlint; delegates to papersite cache
+export PAPERSITE_ROOT="\${PAPERSITE_ROOT:-$CACHE_DIR}"
+exec "\$PAPERSITE_ROOT/bin/pmlint" "\$@"
+EOF
+chmod +x "$SHIM"
+
+echo
+echo "Installed:"
+echo "  papersite: $CACHE_DIR"
+echo "  pmlint:    $SHIM"
+echo
+if ! command -v pmlint >/dev/null 2>&1; then
+  echo "Ensure $BIN_DIR is on your PATH, e.g.:"
+  echo "  export PATH=\"$BIN_DIR:\$PATH\""
+fi
+echo "Verify:"
+echo "  PAPERSITE_ROOT=$CACHE_DIR PMLINT_SKIP_UPDATE=1 $SHIM --help"
+echo "Then from a volume directory:"
+echo "  pmlint --check NNN"

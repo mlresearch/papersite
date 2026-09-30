@@ -1,7 +1,7 @@
 ---
 id: "2026-09-30_tidy-bibtex-dry-run"
 title: "Add dry-run mode to tidy_bibtex so pmlint --check never writes"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-09-30"
 last_updated: "2026-09-30"
@@ -32,12 +32,12 @@ any file.
 
 ## Acceptance Criteria
 
-- [ ] `tidy_bibtex.rb` supports `--dry-run` (name may vary; behaviour fixed)
-- [ ] With `--dry-run`, no output BibTeX is created or overwritten
-- [ ] `--strict --dry-run` exits `1` when issues exist, `0` when clean
-- [ ] `--check-author-commas` still reports under dry-run
-- [ ] Existing non-dry-run behaviour unchanged (still writes output)
-- [ ] Unit/CLI tests cover dry-run no-write and exit codes
+- [x] `tidy_bibtex.rb` supports `--dry-run` (name may vary; behaviour fixed)
+- [x] With `--dry-run`, no output BibTeX is created or overwritten
+- [x] `--strict --dry-run` exits `1` when issues exist, `0` when clean
+- [x] `--check-author-commas` still reports under dry-run
+- [x] Existing non-dry-run behaviour unchanged (still writes output)
+- [x] Unit/CLI tests cover dry-run no-write and exit codes
 
 ## Implementation Notes
 
@@ -54,3 +54,6 @@ invariant. Keep the change surgical — do not redesign the cleaner.
 ### 2026-09-30
 
 Task created as Ready when CIP-0008 was Accepted.
+
+Implemented `--dry-run` on `tidy_bibtex.rb` so strict/author-comma checks
+report without writing. Marked Completed as part of CIP-0008 v1.

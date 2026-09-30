@@ -1,7 +1,7 @@
 ---
 id: "2026-09-30_pmlint-entrypoint"
 title: "Add bin/pmlint with install, always-auto-update, and PATH shim"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-09-30"
 last_updated: "2026-09-30"
@@ -54,16 +54,16 @@ that path still self-updates each run.
 
 ## Acceptance Criteria
 
-- [ ] `bin/pmlint` exists and shows usage / help
-- [ ] Resolves `PAPERSITE_ROOT` per CIP-0008 order
-- [ ] Every run fetches and fast-forwards when behind (default)
-- [ ] Already-up-to-date is a quiet no-op after fetch
-- [ ] Dirty tree that blocks update fails clearly
-- [ ] `PMLINT_SKIP_UPDATE=1` skips update (offline/dev/CI fixtures)
-- [ ] Installer clones cache path if needed and places PATH shim
-- [ ] Installer is idempotent (safe to re-run)
-- [ ] README documents install + `pmlint --check` / `--fix`
-- [ ] Stub or wire `--check` / `--fix` / volume args without crashing
+- [x] `bin/pmlint` exists and shows usage / help
+- [x] Resolves `PAPERSITE_ROOT` per CIP-0008 order
+- [x] Every run fetches and fast-forwards when behind (default)
+- [x] Already-up-to-date is a quiet no-op after fetch
+- [x] Dirty tree that blocks update fails clearly
+- [x] `PMLINT_SKIP_UPDATE=1` skips update (offline/dev/CI fixtures)
+- [x] Installer clones cache path if needed and places PATH shim
+- [x] Installer is idempotent (safe to re-run)
+- [x] README documents install + `pmlint --check` / `--fix`
+- [x] Stub or wire `--check` / `--fix` / volume args without crashing
       (full compose is `2026-09-30_pmlint-check-fix`)
 
 ## Implementation Notes
@@ -85,3 +85,6 @@ Task created as Ready when CIP-0008 was Accepted.
 
 Clarified: install + always-auto-update (fetch; FF when behind) are
 in scope for this task, not optional docs-only.
+
+Shipped `bin/pmlint`, `bin/install-pmlint`, self-update, and README
+install docs. Marked Completed as part of CIP-0008 v1.

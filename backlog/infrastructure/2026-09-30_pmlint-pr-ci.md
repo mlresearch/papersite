@@ -1,7 +1,7 @@
 ---
 id: "2026-09-30_pmlint-pr-ci"
 title: "Add GitHub Actions workflow for pmlint --check on PRs"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-09-30"
 last_updated: "2026-09-30"
@@ -34,11 +34,11 @@ PR comment bots are optional follow-on, not required for this task.
 
 ## Acceptance Criteria
 
-- [ ] Workflow (or reusable workflow) lives under papersite `.github/`
-- [ ] Runs `pmlint --check` with papersite checkout as `PAPERSITE_ROOT`
-- [ ] Job fails when lint fails
-- [ ] Docs explain enabling the workflow from a volume repository
-- [ ] Optional: papersite CI smoke against an in-repo fixture volume
+- [x] Workflow (or reusable workflow) lives under papersite `.github/`
+- [x] Runs `pmlint --check` with papersite checkout as `PAPERSITE_ROOT`
+- [x] Job fails when lint fails
+- [x] Docs explain enabling the workflow from a volume repository
+- [x] Optional: papersite CI smoke against an in-repo fixture volume
 
 ## Implementation Notes
 
@@ -55,3 +55,6 @@ No deploy, no `create_volume` in this workflow.
 ### 2026-09-30
 
 Task created as Ready when CIP-0008 was Accepted.
+
+Added `.github/workflows/test-pmlint.yml` and volume-enable docs.
+Marked Completed as part of CIP-0008 v1.

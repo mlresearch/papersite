@@ -522,6 +522,32 @@ class TestBibTeXCleaner < Test::Unit::TestCase
     assert output_content.include?("90\\%"), "Should fix percent in second entry"
   end
 
+  def test_dry_run_does_not_write_and_fails_strict
+    create_test_bib("dirty.bib", create_bib_with_percent_issues)
+    script = File.expand_path("../lib/tidy_bibtex.rb", __dir__)
+    ok = system("ruby", script, "--dry-run", "--strict", "dirty.bib",
+                out: File::NULL, err: File::NULL)
+    assert_equal false, ok, "strict dry-run should fail when issues exist"
+    assert !File.exist?("dirty_cleaned.bib"), "dry-run must not write output"
+    assert_equal ["dirty.bib"], Dir.glob("*.bib").sort
+  end
+
+  def test_dry_run_passes_on_clean_file
+    create_test_bib("clean.bib", <<~BIB)
+      @article{clean,
+        title = {Clean Paper},
+        author = {Doe, Jane},
+        abstract = {No percent issues},
+        year = {2024}
+      }
+    BIB
+    script = File.expand_path("../lib/tidy_bibtex.rb", __dir__)
+    ok = system("ruby", script, "--dry-run", "--strict", "--check-author-commas",
+                "clean.bib", out: File::NULL, err: File::NULL)
+    assert ok, "strict dry-run should pass on clean file"
+    assert_equal ["clean.bib"], Dir.glob("*.bib").sort
+  end
+
   private
 
   def create_test_bib(filename, content)

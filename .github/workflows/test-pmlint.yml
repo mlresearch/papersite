@@ -1,0 +1,54 @@
+name: Test pmlint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pmlint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout papersite
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+
+      - name: Run tidy_bibtex unit tests
+        run: |
+          gem install test-unit
+          ruby test/test_bibtex_cleaner.rb
+
+      - name: Run pmlint smoke tests
+        run: |
+          bash tests/test_pmlint.sh --verbose
+
+  # Example volume-repo style gate: checkout papersite as tooling, lint a fixture volume
+  volume-style-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout papersite (tooling)
+        uses: actions/checkout@v4
+        with:
+          path: papersite
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+
+      - name: Prepare fixture volume
+        run: |
+          mkdir -p volume/v999
+          cp -R papersite/tests/fixtures/clean_volume/. volume/v999/
+
+      - name: Run pmlint --check
+        working-directory: volume/v999
+        env:
+          PAPERSITE_ROOT: ${{ github.workspace }}/papersite
+          PMLINT_SKIP_UPDATE: "1"
+        run: bash "${{ github.workspace }}/papersite/bin/pmlint" --check 999

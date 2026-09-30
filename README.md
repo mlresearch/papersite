@@ -17,10 +17,50 @@ The repository is structured as follows:
 
 ## Volume Processing Workflow
 
+Prefer **`pmlint`** for pre-publication validation (and optional safe BibTeX fixes).
+It self-updates papersite from source on each run, then composes the existing
+tidy + `check_volume` checks.
+
+### Install `pmlint` (once)
+
+```bash
+# From a papersite checkout:
+bash bin/install-pmlint
+# Ensure ~/.local/bin is on PATH
+export PATH="$HOME/.local/bin:$PATH"
+pmlint --help
+```
+
+Or call the script directly from a sibling clone (still self-updates):
+
+```bash
+cd ~/mlresearch/v304
+../papersite/bin/pmlint --check 304
+```
+
+### Lint a volume
+
+```bash
+cd ~/mlresearch/v304
+pmlint --check 304              # read-only; exit 1 on failure (use in PRs)
+pmlint --fix 304               # escape unescaped % in bib, then re-check
+PMLINT_SKIP_UPDATE=1 pmlint --check 304   # offline / dirty papersite tree
+```
+
+`--check` must not modify the volume tree. `--fix` only applies non-interactive
+`tidy_bibtex --fix-percent` (not Unicode map edits or PDF moves).
+
+**PR CI:** volume repositories can copy
+[`.github/workflows/pmlint-volume-example.yml`](.github/workflows/pmlint-volume-example.yml)
+and adjust as needed. Papersite itself runs `tests/test_pmlint.sh` via
+`.github/workflows/test-pmlint.yml`.
+
+### Classic workflow steps
+
 The standard workflow for publishing a PMLR volume:
 
-1. **Pre-publication check**: Use `check_volume.sh` to validate the volume directory before touching anything
-2. **BibTeX cleaning**: Use `tidy_bibtex.rb` to fix common formatting issues
+1. **Pre-publication check**: `pmlint --check NNN` (or `check_volume.sh`)
+2. **BibTeX cleaning**: `pmlint --fix NNN` and/or `tidy_bibtex.rb`
 3. **Volume creation**: Use `create_volume.rb` to generate Jekyll posts and organise assets
 4. **Deployment**: Use `deploy_volume.sh` for the two-branch separation strategy
 
@@ -30,6 +70,8 @@ Run this first to catch common submission errors before processing:
 
 ```bash
 cd ~/mlresearch/v304
+pmlint --check 304
+# equivalent lower-level tool:
 ../papersite/bin/check_volume.sh 304
 ```
 

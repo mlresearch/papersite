@@ -1,0 +1,54 @@
+# Reusable: pmlint check on a volume repository PR
+#
+# Copy this workflow into a volume repo as `.github/workflows/pmlint.yml`,
+# or call it via workflow_call after adjusting paths.
+#
+# Expects the volume contents at the repository root (PDFs + .bib), with the
+# volume number matching the repo name (e.g. mlresearch/v304 → volume 304).
+
+name: pmlint
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      volume:
+        description: "Volume number (default: derived from repo name)"
+        required: false
+        type: string
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout volume
+        uses: actions/checkout@v4
+
+      - name: Checkout papersite tooling
+        uses: actions/checkout@v4
+        with:
+          repository: mlresearch/papersite
+          path: .papersite-tools
+          # Pin for reproducibility if desired: ref: <sha>
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+
+      - name: Determine volume number
+        id: vol
+        run: |
+          if [ -n "${{ inputs.volume }}" ]; then
+            echo "num=${{ inputs.volume }}" >> "$GITHUB_OUTPUT"
+          else
+            name="${GITHUB_REPOSITORY##*/}"
+            echo "num=${name#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run pmlint --check
+        env:
+          PAPERSITE_ROOT: ${{ github.workspace }}/.papersite-tools
+          PMLINT_SKIP_UPDATE: "1"
+        run: |
+          bash "$PAPERSITE_ROOT/bin/pmlint" --check "${{ steps.vol.outputs.num }}"

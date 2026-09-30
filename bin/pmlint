@@ -1,0 +1,273 @@
+#!/usr/bin/env bash
+# =============================================================================
+# pmlint — PMLR volume lint (check / fix)
+# =============================================================================
+#
+# USAGE:
+#   pmlint [--check|--fix] [--unicode] VOLUME [BIBFILE]
+#   pmlint --help
+#
+# Environment:
+#   PAPERSITE_ROOT       Override papersite checkout
+#   PMLINT_SKIP_UPDATE=1   Skip git fetch / fast-forward (CI / offline)
+#   PMLINT_CACHE_DIR     Cache clone path (default: ~/.local/share/papersite)
+#
+# Exit codes:
+#   0  All checks passed
+#   1  One or more checks failed (or usage / update error)
+# =============================================================================
+
+set -euo pipefail
+
+DEFAULT_CACHE="${PMLINT_CACHE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/papersite}"
+MODE="check"
+UNICODE_CHECK=0
+VOLUME=""
+BIBFILE=""
+
+usage() {
+  cat <<'EOF'
+Usage: pmlint [--check|--fix] [--unicode] VOLUME [BIBFILE]
+
+  --check     Read-only validation (default). Does not modify the volume tree.
+  --fix       Apply safe non-interactive BibTeX repairs (percent escaping),
+              then re-check.
+  --unicode   Also run tidy_bib_unicode --strict (output only under /tmp;
+              never under the volume tree).
+  -h, --help  Show this help.
+
+Environment:
+  PAPERSITE_ROOT      Papersite checkout (optional)
+  PMLINT_SKIP_UPDATE=1  Skip git fetch / fast-forward
+  PMLINT_CACHE_DIR    Cache clone (default: ~/.local/share/papersite)
+
+Install once:
+  bash path/to/papersite/bin/install-pmlint
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check) MODE="check"; shift ;;
+    --fix) MODE="fix"; shift ;;
+    --unicode) UNICODE_CHECK=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    -*)
+      echo "ERROR: Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      if [[ -z "$VOLUME" ]]; then
+        VOLUME="$1"
+      elif [[ -z "$BIBFILE" ]]; then
+        BIBFILE="$1"
+      else
+        echo "ERROR: Unexpected argument: $1" >&2
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$VOLUME" ]]; then
+  usage >&2
+  exit 1
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+is_papersite_root() {
+  local root="$1"
+  [[ -f "$root/lib/check_volume.rb" && -f "$root/lib/tidy_bibtex.rb" ]]
+}
+
+resolve_papersite_root() {
+  if [[ -n "${PAPERSITE_ROOT:-}" ]]; then
+    if ! is_papersite_root "$PAPERSITE_ROOT"; then
+      echo "ERROR: PAPERSITE_ROOT=$PAPERSITE_ROOT does not look like a papersite checkout" >&2
+      exit 1
+    fi
+    printf '%s\n' "$PAPERSITE_ROOT"
+    return
+  fi
+
+  local sibling
+  sibling="$(cd .. 2>/dev/null && pwd)/papersite"
+  if is_papersite_root "$sibling"; then
+    printf '%s\n' "$sibling"
+    return
+  fi
+
+  local from_script
+  from_script="$(cd "$SCRIPT_DIR/.." && pwd)"
+  if is_papersite_root "$from_script"; then
+    printf '%s\n' "$from_script"
+    return
+  fi
+
+  if is_papersite_root "$DEFAULT_CACHE"; then
+    printf '%s\n' "$DEFAULT_CACHE"
+    return
+  fi
+
+  echo "ERROR: Cannot find papersite. Set PAPERSITE_ROOT, keep a sibling ../papersite," >&2
+  echo "       or run: bash <papersite>/bin/install-pmlint" >&2
+  exit 1
+}
+
+self_update() {
+  local root="$1"
+  if [[ "${PMLINT_SKIP_UPDATE:-}" == "1" ]]; then
+    echo "==> Skipping papersite update (PMLINT_SKIP_UPDATE=1)"
+    return
+  fi
+
+  if [[ ! -d "$root/.git" ]]; then
+    echo "ERROR: $root is not a git checkout; cannot self-update" >&2
+    echo "       Set PMLINT_SKIP_UPDATE=1 to continue without updating" >&2
+    exit 1
+  fi
+
+  echo "==> Updating papersite at $root"
+  (
+    cd "$root"
+    if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+      echo "ERROR: papersite working tree is dirty; refuse to auto-update:" >&2
+      git status --short >&2
+      echo "       Commit/stash changes, or set PMLINT_SKIP_UPDATE=1" >&2
+      exit 1
+    fi
+    git fetch origin
+    local branch remote_ref
+    branch="$(git rev-parse --abbrev-ref HEAD)"
+    if [[ "$branch" == "HEAD" ]]; then
+      branch="main"
+    fi
+    if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+      remote_ref="origin/$branch"
+    elif git show-ref --verify --quiet "refs/remotes/origin/main"; then
+      remote_ref="origin/main"
+    else
+      echo "ERROR: No origin/main (or origin/$branch) after fetch" >&2
+      exit 1
+    fi
+    local local_sha remote_sha
+    local_sha="$(git rev-parse HEAD)"
+    remote_sha="$(git rev-parse "$remote_ref")"
+    if [[ "$local_sha" == "$remote_sha" ]]; then
+      echo "    Already up to date (${local_sha:0:12})"
+    else
+      echo "    Fast-forwarding ${local_sha:0:12} -> ${remote_sha:0:12}"
+      git merge --ff-only "$remote_ref"
+    fi
+  )
+}
+
+resolve_volume_dir() {
+  local vol="$1"
+  if [[ -d "v${vol}" ]]; then
+    printf '%s\n' "$(cd "v${vol}" && pwd)"
+  elif [[ "$(basename "$(pwd)")" == "v${vol}" ]]; then
+    printf '%s\n' "$(pwd)"
+  elif [[ -d "${vol}" ]]; then
+    printf '%s\n' "$(cd "${vol}" && pwd)"
+  else
+    echo "ERROR: Cannot find volume directory for volume ${vol}" >&2
+    exit 1
+  fi
+}
+
+find_bib() {
+  local vol_dir="$1"
+  local explicit="$2"
+  if [[ -n "$explicit" ]]; then
+    if [[ -f "$vol_dir/$explicit" ]]; then
+      printf '%s\n' "$vol_dir/$explicit"
+      return
+    fi
+    if [[ -f "$explicit" ]]; then
+      printf '%s\n' "$(cd "$(dirname "$explicit")" && pwd)/$(basename "$explicit")"
+      return
+    fi
+    echo "ERROR: BibTeX file not found: $explicit" >&2
+    exit 1
+  fi
+  local found=""
+  local f
+  for f in "$vol_dir"/*.bib; do
+    [[ -e "$f" ]] || continue
+    case "$(basename "$f")" in
+      *_clean.bib|*_cleaned.bib) continue ;;
+    esac
+    found="$f"
+    break
+  done
+  if [[ -z "$found" ]]; then
+    echo "ERROR: No .bib file found in $vol_dir" >&2
+    exit 1
+  fi
+  printf '%s\n' "$found"
+}
+
+section() {
+  echo
+  echo "==> $1"
+}
+
+FAILED=0
+
+ROOT="$(resolve_papersite_root)"
+export PAPERSITE_ROOT="$ROOT"
+self_update "$ROOT"
+
+LIB="$ROOT/lib"
+BIN="$ROOT/bin"
+VOL_DIR="$(resolve_volume_dir "$VOLUME")"
+BIB_PATH="$(find_bib "$VOL_DIR" "$BIBFILE")"
+BIB_BASE="$(basename "$BIB_PATH")"
+
+echo "pmlint mode=$MODE volume=$VOLUME"
+echo "  papersite: $ROOT"
+echo "  volume:    $VOL_DIR"
+echo "  bib:       $BIB_PATH"
+
+# Disable errexit around check steps so we can aggregate failures
+set +e
+
+if [[ "$MODE" == "fix" ]]; then
+  section "Fix: tidy_bibtex --fix-percent"
+  ruby "$LIB/tidy_bibtex.rb" --fix-percent --quiet "$BIB_PATH" "$BIB_PATH"
+  [[ $? -eq 0 ]] || FAILED=1
+fi
+
+section "Check: tidy_bibtex --dry-run --strict --check-author-commas"
+ruby "$LIB/tidy_bibtex.rb" --dry-run --strict --check-author-commas "$BIB_PATH"
+[[ $? -eq 0 ]] || FAILED=1
+
+section "Check: check_volume"
+(
+  cd "$VOL_DIR"
+  bash "$BIN/check_volume.sh" "$VOLUME" "$BIB_BASE"
+)
+[[ $? -eq 0 ]] || FAILED=1
+
+if [[ "$UNICODE_CHECK" -eq 1 ]]; then
+  section "Check: tidy_bib_unicode --strict"
+  TMP_OUT="$(mktemp "${TMPDIR:-/tmp}/pmlint_unicode.XXXXXX.bib")"
+  ruby "$LIB/tidy_bib_unicode.rb" --strict --quiet "$BIB_PATH" "$TMP_OUT"
+  [[ $? -eq 0 ]] || FAILED=1
+  rm -f "$TMP_OUT"
+fi
+
+set -e
+
+echo
+if [[ "$FAILED" -eq 0 ]]; then
+  echo "pmlint: PASSED"
+  exit 0
+else
+  echo "pmlint: FAILED" >&2
+  exit 1
+fi
