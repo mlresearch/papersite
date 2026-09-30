@@ -44,7 +44,8 @@ end
 
 class VolumeChecker
 
-  REQUIRED_PROCEEDINGS_FIELDS = %w[published name shortname year editor start end address volume]
+  # published is set at publication time, not required at submission/lint
+  REQUIRED_PROCEEDINGS_FIELDS = %w[name shortname year editor start end address volume]
   SUPP_PATTERN = /-supp\.(pdf|zip|tar\.gz)$/i
   PDF_PATTERN  = /\.pdf$/i
 
@@ -127,11 +128,14 @@ class VolumeChecker
       error "  volume value not wrapped in braces (e.g. volume = {304})"
     end
 
-    # published date looks like a date
+    # published is optional at submission; editors set it when publishing.
+    # If present, it must be YYYY-MM-DD (empty published = {} is still an error).
     if block =~ /published\s*=\s*\{(\d{4}-\d{2}-\d{2})\}/i
       ok "  published date format OK (#{$1})"
     elsif block =~ /published\s*=/i
       error "  published field present but not in YYYY-MM-DD format"
+    else
+      ok "  published not set (OK at submission; set YYYY-MM-DD when publishing)"
     end
   end
 

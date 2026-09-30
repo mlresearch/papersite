@@ -219,6 +219,10 @@ class BibTeXCleaner
       
       if @options[:strict] && fixes_applied.empty?
         STDERR.puts "\nError: Issues found in strict mode and no fixes applied"
+        unless @options[:quiet]
+          puts "\nHint: unescaped % can be fixed with:"
+          puts "  pmlint --fix <VOLUME>   # or: ruby tidy_bibtex.rb --fix-percent INPUT OUTPUT"
+        end
         exit 1
       end
     end
@@ -237,7 +241,7 @@ class BibTeXCleaner
       puts "Cleaned file written to #{output_file}" unless @options[:quiet]
     end
     
-    if issues_found.any? && fixes_applied.empty?
+    if issues_found.any? && fixes_applied.empty? && !@options[:strict]
       puts "\nWarning: Issues found but no fixes applied."
       puts "  - Use --fix-percent or --fix-all to automatically fix unescaped % characters"
       puts "  - Unmatched braces in title fields REQUIRE MANUAL REVIEW AND FIXES"

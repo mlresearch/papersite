@@ -49,7 +49,7 @@ assert_error() {
   local test_name="$1" output="$2" pattern="$3"
   if echo "$output" | grep -qF "$pattern"; then
     PASS=$((PASS + 1))
-    [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: $test_name"
+    if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: $test_name"; fi
   else
     FAIL=$((FAIL + 1))
     ERRORS+=("FAIL [$test_name]: expected to find '${pattern}'")
@@ -67,7 +67,7 @@ assert_no_error() {
     echo "         unexpected: $pattern"
   else
     PASS=$((PASS + 1))
-    [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: $test_name"
+    if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: $test_name"; fi
   fi
 }
 
@@ -79,7 +79,7 @@ assert_exit_fail() {
     echo "  ✗ FAIL: $test_name (expected failure exit)"
   else
     PASS=$((PASS + 1))
-    [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: $test_name (correctly exits non-zero)"
+    if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: $test_name (correctly exits non-zero)"; fi
   fi
 }
 
@@ -87,7 +87,7 @@ assert_exit_pass() {
   local test_name="$1" dir="$2" vol="$3"
   if ruby "$CHECKER" -v "$vol" -d "$dir" > /dev/null 2>&1; then
     PASS=$((PASS + 1))
-    [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: $test_name (correctly exits zero)"
+    if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: $test_name (correctly exits zero)"; fi
   else
     FAIL=$((FAIL + 1))
     ERRORS+=("FAIL [$test_name]: expected zero exit but got non-zero")
@@ -136,6 +136,32 @@ section "v304 original — proceedings entry"
 # ---------------------------------------------------------------------------
 assert_error  "v304 volume not in braces" "$OUT" "volume value not wrapped in braces"
 assert_no_error "v304 published present"  "$OUT" "Missing required field: published"
+
+# ---------------------------------------------------------------------------
+section "missing published — optional at submission"
+# ---------------------------------------------------------------------------
+TMP_PUB=$(mktemp -d)
+cp -R "$FIXTURES/clean_volume/." "$TMP_PUB/"
+# Strip published line from proceedings.bib
+sed -i.bak '/published/d' "$TMP_PUB/proceedings.bib"
+rm -f "$TMP_PUB/proceedings.bib.bak"
+OUT=$(run_checker 999 "$TMP_PUB")
+assert_no_error "no-published: not a missing-field error" "$OUT" "Missing required field: published"
+assert_error    "no-published: notes optional" "$OUT" "published not set"
+assert_exit_pass "no-published exits zero" "$TMP_PUB" 999
+rm -rf "$TMP_PUB"
+
+# ---------------------------------------------------------------------------
+section "empty published = {} — still an error"
+# ---------------------------------------------------------------------------
+TMP_EMPTY=$(mktemp -d)
+cp -R "$FIXTURES/clean_volume/." "$TMP_EMPTY/"
+sed -i.bak 's/published.*=.*/published = {},/' "$TMP_EMPTY/proceedings.bib"
+rm -f "$TMP_EMPTY/proceedings.bib.bak"
+OUT=$(run_checker 999 "$TMP_EMPTY")
+assert_error "empty-published: bad format" "$OUT" "published field present but not in YYYY-MM-DD format"
+assert_exit_fail "empty-published exits non-zero" "$TMP_EMPTY" 999
+rm -rf "$TMP_EMPTY"
 
 # ---------------------------------------------------------------------------
 section "v328 original — non-ASCII BibTeX keys"

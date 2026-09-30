@@ -268,6 +268,32 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo "pmlint: PASSED"
   exit 0
 else
-  echo "pmlint: FAILED" >&2
+  cat >&2 <<EOF
+pmlint: FAILED
+
+How to fix
+----------
+Auto-fixable BibTeX issues (unescaped % in titles/abstracts):
+  pmlint --fix ${VOLUME}${BIBFILE:+ ${BIBFILE}}
+
+Then re-check:
+  pmlint --check ${VOLUME}${BIBFILE:+ ${BIBFILE}}
+
+Manual fields (examples):
+  - published = {YYYY-MM-DD}  — optional at submission; set when publishing
+  - PDF/supp placement, author commas, non-ASCII keys — edit files, then re-check
+  - Unicode without a mapping — add to papersite lib/unicode_replacements.yml
+
+If pmlint is not installed
+--------------------------
+From a papersite checkout:
+  bash ${ROOT}/bin/install-pmlint
+  export PATH="\$HOME/.local/bin:\$PATH"
+
+Or run without installing (sibling clone):
+  PMLINT_SKIP_UPDATE=1 PAPERSITE_ROOT=${ROOT} ${ROOT}/bin/pmlint --check ${VOLUME}
+
+Docs: https://github.com/mlresearch/papersite#lint-a-volume
+EOF
   exit 1
 fi

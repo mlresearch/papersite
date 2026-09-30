@@ -79,7 +79,7 @@ The checker validates:
 
 | Check | What it catches |
 |---|---|
-| `@Proceedings` entry | Missing required fields (`published`, `name`, `volume`, …); `volume` not in braces; date not in `YYYY-MM-DD` format; `published = {}` (empty date — a common editor omission) |
+| `@Proceedings` entry | Missing required fields (`name`, `volume`, …); `volume` not in braces; if `published` is present it must be `YYYY-MM-DD` (missing `published` is OK at submission — set when publishing); `published = {}` is an error |
 | PDF locations | PDFs in subdirectories (e.g. `pdfs/`) instead of the repository root; permission/consent PDF directories (e.g. `v304permissions/`) are ignored |
 | Supplementary locations | Supp files in subdirectories (e.g. `supplementary_material/`) instead of root |
 | BibTeX key / PDF match | Keys without a matching PDF; orphaned PDFs with no BibTeX entry; hyphenated keys (e.g. `hernandez-garcia25`) are fully supported |
@@ -131,8 +131,9 @@ Both branches are pushed to GitHub. The published site will be available at `htt
 
 Issues that have occurred in real submissions and are worth fixing before running the pipeline:
 
-**Empty or missing publication date**
-`published = {}` (empty braces) is a common omission. Must be `published = {YYYY-MM-DD}`.
+**Empty or malformed publication date**
+`published` may be omitted at submission (set when the volume goes live).
+If present, it must be `published = {YYYY-MM-DD}`. Empty `published = {}` is an error.
 
 **LaTeX formatting commands in abstracts**
 Commands such as `{\color{blue}{...}}` or `\textcolor` in abstracts cause BibTeX parse failures due to unbalanced braces. Strip all LaTeX colour/formatting commands from abstracts before submission — they are not rendered in the proceedings HTML anyway.

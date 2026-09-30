@@ -26,7 +26,7 @@ assert_eq() {
   local name="$1" got="$2" want="$3"
   if [[ "$got" == "$want" ]]; then
     PASS=$((PASS + 1))
-    [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: $name"
+    if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: $name"; fi
   else
     FAIL=$((FAIL + 1))
     ERRORS+=("FAIL [$name]: got='$got' want='$want'")
@@ -45,7 +45,7 @@ echo "PAPERSITE_ROOT=$PAPERSITE_ROOT"
 # --- help ---
 if "$PMLINT" --help >/dev/null 2>&1; then
   PASS=$((PASS + 1))
-  [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: --help"
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: --help"; fi
 else
   FAIL=$((FAIL + 1))
   ERRORS+=("FAIL [--help]")
@@ -82,6 +82,15 @@ set +e
 rc=$?
 set -e
 assert_eq "pmlint --check bad exit" "$rc" "1"
+if grep -q "How to fix" /tmp/pmlint_bad_out.txt && grep -q "install-pmlint" /tmp/pmlint_bad_out.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: failure footer present"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [failure footer missing How to fix / install-pmlint]")
+  echo "  ✗ FAIL: failure footer incomplete"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_bad_out.txt; fi
+fi
 rm -rf "$TMP"
 
 # --- --fix percent then check (mutating only bib) ---
@@ -121,12 +130,12 @@ set -e
 # After fix-percent, tidy should pass; check_volume may still pass with empty pdf
 if grep -q '\\\\%' "$TMP/v997/proceedings.bib" || grep -q '\\%' "$TMP/v997/proceedings.bib"; then
   PASS=$((PASS + 1))
-  [[ -n "$VERBOSE" ]] && echo "  ✓ PASS: --fix escaped percents"
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: --fix escaped percents"; fi
 else
   FAIL=$((FAIL + 1))
   ERRORS+=("FAIL [--fix did not escape percents]")
   echo "  ✗ FAIL: --fix did not escape percents"
-  [[ -n "$VERBOSE" ]] && cat /tmp/pmlint_fix_out.txt
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_fix_out.txt; fi
 fi
 rm -rf "$TMP"
 
