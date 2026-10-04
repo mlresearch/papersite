@@ -3,7 +3,7 @@ author: "Neil D. Lawrence"
 created: "2026-10-04"
 id: "000B"
 last_updated: "2026-10-04"
-status: "Accepted"
+status: "In Progress"
 compressed: false
 related_requirements: ["0003"]
 related_cips: ["0001", "0003", "0008"]
@@ -27,7 +27,7 @@ title: "Proper-name bracing in titles ({B}ayes, {M}arkov, …)"
 
 - [x] Proposed - Initial idea documented
 - [x] Accepted - Approved, ready to start work
-- [ ] In Progress - Actively being implemented
+- [x] In Progress - Actively being implemented
 - [ ] Implemented - Work complete, awaiting verification
 - [ ] Closed - Verified and complete
 - [ ] Rejected - Will not be implemented
@@ -210,8 +210,8 @@ not a silent global require-brace-all-acronyms rule.
 
 - [x] Phase 1: title scan — [`2026-10-04_proper-names-title-scan`](../backlog/features/2026-10-04_proper-names-title-scan.md)
 - [x] Phase 1: curated YAML — [`lib/proper_names.yml`](../lib/proper_names.yml) / [`2026-10-04_proper-names-yml`](../backlog/features/2026-10-04_proper-names-yml.md)
-- [ ] Phase 2: checker — [`2026-10-04_proper-names-checker`](../backlog/features/2026-10-04_proper-names-checker.md)
-- [ ] Phase 2: fixtures + soak — [`2026-10-04_proper-names-tests-soak`](../backlog/features/2026-10-04_proper-names-tests-soak.md)
+- [x] Phase 2: checker — [`2026-10-04_proper-names-checker`](../backlog/features/2026-10-04_proper-names-checker.md)
+- [ ] Phase 2: fixtures + soak — [`2026-10-04_proper-names-tests-soak`](../backlog/features/2026-10-04_proper-names-tests-soak.md) (fixtures done; broader soak optional)
 - [ ] Editor-facing note — [`2026-10-04_proper-names-editor-note`](../backlog/documentation/2026-10-04_proper-names-editor-note.md)
 
 ## References

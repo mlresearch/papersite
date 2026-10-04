@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_proper-names-tests-soak"
 title: "Fixtures and soak for proper-name bracing checker (CIP-000B Phase 2)"
-status: "Ready"
+status: "In Progress"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -32,9 +32,9 @@ match-rule tweaks; freeze v1 severity/policy afterward.
 
 ## Acceptance Criteria
 
-- [ ] Fixtures: protected OK; unprotected stem fails; word-boundary negative;
+- [x] Fixtures: protected OK; unprotected stem fails; word-boundary negative;
       braced forms pass
-- [ ] Automated test wired like other `check_volume` / `pmlint` smoke tests
+- [x] Automated test wired like other `check_volume` / `pmlint` smoke tests
 - [ ] Soak notes (in CIP or this task) for at least a representative local
       sample; YAML updated if needed
 - [ ] CIP-000B policy table confirmed or amended from soak findings
@@ -55,3 +55,9 @@ volume repos during soak — report only.
 ### 2026-10-04
 
 Task created as Ready when CIP-000B was Accepted.
+
+### 2026-10-04
+
+Fixtures `proper_names_unprotected` / `proper_names_ok` + tests in
+`tests/test_check_volume.sh`. Sample soak on `lawrennd/r13` surfaces many
+unprotected dictionary stems plus unknown acronyms (ABC, AIXI, …).

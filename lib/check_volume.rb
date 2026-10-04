@@ -18,12 +18,16 @@
 #  11. No non-printable C0/C1 control characters in text fields (mojibake, PDF
 #      extraction artifacts) — UTF-8 code-point aware, so legitimate multi-byte
 #      punctuation (em dash, curly quotes, etc.) is not flagged
+#  12. Proper names / acronyms in titles are LaTeX-braced when listed in
+#      lib/proper_names.yml (CIP-000B); unknown all-caps tokens warn and can be
+#      offered for addition to the YAML (--add-proper-names)
 #
 # Usage:
-#   ruby check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE] [--fix]
+#   ruby check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE] [--add-proper-names]
 
 require 'optparse'
 require 'set'
+require 'yaml'
 require_relative 'bibtex_keys'
 
 # =============================================================================
@@ -48,6 +52,14 @@ class VolumeChecker
   REQUIRED_PROCEEDINGS_FIELDS = %w[name shortname year editor start end address volume]
   SUPP_PATTERN = /-supp\.(pdf|zip|tar\.gz)$/i
   PDF_PATTERN  = /\.pdf$/i
+  PROPER_NAMES_PATH = File.expand_path('proper_names.yml', __dir__)
+
+  # Venue / boilerplate all-caps — do not suggest adding these to the YAML.
+  ACRONYM_NOISE = %w[
+    II III IV VI IX XI XII USA UK EU PDF URL HTTP HTTPS ISBN DOI IEEE ACM
+    NIPS ICML ICLR AISTATS UAI AAAI IJCAI CVPR ECCV ICCV ACL EMNLP NeurIPS
+    PMLR JMLR arXiv ARXIV CORL RSS IROS ICRA COLT ALT MIDL CHIL CoRL
+  ].to_set
 
   def initialize(options)
     @options   = options
@@ -56,6 +68,7 @@ class VolumeChecker
     @errors    = []
     @warnings  = []
     @ok        = []
+    @unknown_acronyms = Hash.new(0) # stem => count
   end
 
   # ---------------------------------------------------------------------------
@@ -88,8 +101,10 @@ class VolumeChecker
     check_dq_fields_with_latex_umlauts(content)
     check_double_braced_pages(content)
     check_non_printable_characters(content)
+    check_proper_name_bracing(content)
 
     print_summary
+    maybe_add_proper_names
     @errors.empty? ? 0 : 1
   end
 
@@ -452,6 +467,192 @@ class VolumeChecker
     end
   end
 
+  def check_proper_name_bracing(content)
+    section "Proper-name / acronym bracing in titles (CIP-000B)"
+
+    stems = load_proper_name_stems
+    if stems.nil?
+      warn_msg "  Could not load #{PROPER_NAMES_PATH} — skipping"
+      return
+    end
+    if stems.empty?
+      warn_msg "  No stems in proper_names.yml — skipping"
+      return
+    end
+
+    titles = extract_title_fields(content)
+    if titles.empty?
+      ok "  No title fields to check"
+      return
+    end
+
+    known_set = stems.to_set
+    issues = []
+    titles.each do |key, title, lineno|
+      stems.each do |stem|
+        next if title_stem_protected?(title, stem)
+        next unless title_stem_plain?(title, stem)
+        hint = if stem == stem.upcase && stem.length >= 2
+                 "{#{stem}}"
+               else
+                 "{#{stem[0]}}#{stem[1..]} or {#{stem}}"
+               end
+        issues << "  [#{key}] line #{lineno}: unprotected #{stem.inspect} in title — use #{hint}"
+      end
+      scan_unknown_acronyms(title, known_set).each do |acro|
+        @unknown_acronyms[acro] += 1
+      end
+    end
+
+    if issues.empty?
+      ok "  All listed proper names/acronyms in titles are braced (#{stems.size} stems, #{titles.size} titles)"
+    else
+      issues.uniq.each { |i| error i }
+    end
+
+    if @unknown_acronyms.empty?
+      ok "  No unknown all-caps acronym candidates outside proper_names.yml"
+    else
+      @unknown_acronyms.sort_by { |a, n| [-n, a] }.each do |acro, n|
+        warn_msg "  unknown acronym #{acro.inspect} (#{n}×) — not in proper_names.yml" \
+                 " (re-run with --add-proper-names to append)"
+      end
+      puts Colour.yellow("  Suggested YAML entries:")
+      @unknown_acronyms.keys.sort.each do |acro|
+        puts Colour.yellow("    - stem: #{acro}")
+        puts Colour.yellow("      kind: acronym")
+      end
+    end
+  end
+
+  def load_proper_name_stems
+    return [] unless File.file?(PROPER_NAMES_PATH)
+    data = YAML.safe_load(File.read(PROPER_NAMES_PATH), aliases: true)
+    return [] unless data.is_a?(Hash) && data['stems'].is_a?(Array)
+    data['stems'].map { |e| e.is_a?(Hash) ? e['stem'].to_s : e.to_s }.reject(&:empty?)
+  rescue Psych::SyntaxError, Psych::DisallowedClass => e
+    warn_msg "  YAML error loading proper_names.yml: #{e.message}"
+    nil
+  end
+
+  def extract_title_fields(content)
+    # [[key, title, lineno], ...]
+    out = []
+    entry_positions = []
+    content.scan(/@\w+\s*\{\s*([\w-]+)\s*,/i) { entry_positions << [$~.begin(0), $1] }
+    entry_positions.sort_by!(&:first)
+    entry_idx = 0
+
+    content.scan(/title\s*=\s*\{/i) do
+      title_pos = $~.begin(0)
+      lineno = content[0...title_pos].count("\n") + 1
+      start = $~.end(0)
+      while entry_idx + 1 < entry_positions.length && entry_positions[entry_idx + 1][0] <= title_pos
+        entry_idx += 1
+      end
+      key = entry_positions[entry_idx] ? entry_positions[entry_idx][1] : '?'
+
+      slice = content[start, 50_000] || ''
+      depth = 1
+      end_idx = 0
+      prev = nil
+      slice.each_char.with_index do |ch, idx|
+        if ch == '{' && prev != '\\'
+          depth += 1
+        elsif ch == '}' && prev != '\\'
+          depth -= 1
+          if depth == 0
+            end_idx = idx
+            break
+          end
+        end
+        prev = ch
+      end
+      title = slice[0...end_idx]
+      next if title.nil? || title.strip.empty?
+      # Skip proceedings booktitle-as-title noise: only InProceedings-ish keys
+      # still check all titles including proceedings if present — fine.
+      out << [key, title, lineno]
+    end
+    out
+  end
+
+  def title_stem_protected?(title, stem)
+    return false if stem.nil? || stem.empty?
+    # {Bayes} or {SVM}
+    return true if title.match?(/\{#{Regexp.escape(stem)}\}/)
+    # {B}ayes — first letter braced, remainder follows immediately
+    return true if stem.length >= 2 && title.match?(/\{#{Regexp.escape(stem[0])}\}#{Regexp.escape(stem[1..])}\b/)
+    false
+  end
+
+  def title_stem_plain?(title, stem)
+    return false if stem.nil? || stem.empty?
+    title.match?(/\b#{Regexp.escape(stem)}\b/)
+  end
+
+  def scan_unknown_acronyms(title, known_set)
+    # Remove already-braced acronyms / {X}REST so we only see unprotected caps
+    stripped = title.gsub(/\{[A-Z]{2,}\}/, ' ')
+    stripped = stripped.gsub(/\{[A-Z]\}[A-Z]+/, ' ')
+    stripped.scan(/\b([A-Z]{2,})\b/).flatten.uniq.reject do |a|
+      known_set.include?(a) || ACRONYM_NOISE.include?(a) || a.length > 12
+    end
+  end
+
+  def maybe_add_proper_names
+    return if @unknown_acronyms.empty?
+    return unless @options[:add_proper_names]
+
+    unless File.file?(PROPER_NAMES_PATH)
+      warn_msg "  --add-proper-names: #{PROPER_NAMES_PATH} missing"
+      return
+    end
+
+    candidates = @unknown_acronyms.keys.sort
+    puts
+    puts Colour.bold("  Add unknown acronyms to proper_names.yml?")
+    to_add = []
+    candidates.each do |acro|
+      n = @unknown_acronyms[acro]
+      print "    Add #{acro} (#{n}×)? [y/N/a(all)/q(quit)] "
+      unless $stdin.tty?
+        puts "(non-interactive — skip; pass stems via future non-TTY API)"
+        break
+      end
+      ans = $stdin.gets
+      break if ans.nil?
+      ans = ans.strip.downcase
+      case ans
+      when 'q' then break
+      when 'a'
+        to_add = candidates
+        break
+      when 'y', 'yes'
+        to_add << acro
+      end
+    end
+
+    return if to_add.empty?
+
+    existing = load_proper_name_stems || []
+    existing_set = existing.to_set
+    added = []
+    File.open(PROPER_NAMES_PATH, 'a') do |f|
+      to_add.each do |acro|
+        next if existing_set.include?(acro)
+        f.write("\n  - stem: #{acro}\n    kind: acronym\n")
+        existing_set << acro
+        added << acro
+      end
+    end
+    if added.empty?
+      puts Colour.yellow("  Nothing new to add (already present).")
+    else
+      puts Colour.green("  Appended to #{PROPER_NAMES_PATH}: #{added.join(', ')}")
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
@@ -516,11 +717,14 @@ end
 options = {}
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE]"
+  opts.banner = "Usage: check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE] [--add-proper-names]"
 
   opts.on('-v', '--volume VOLUME', 'Volume number') { |v| options[:volume] = v }
   opts.on('-d', '--directory DIR', 'Path to volume directory') { |d| options[:directory] = d }
   opts.on('-b', '--bibfile FILE',  'BibTeX filename (auto-detected if omitted)') { |b| options[:bibfile] = b }
+  opts.on('--add-proper-names', 'Interactively append unknown acronyms to lib/proper_names.yml') do
+    options[:add_proper_names] = true
+  end
   opts.on('-h', '--help', 'Show this help') { puts opts; exit }
 end.parse!
 

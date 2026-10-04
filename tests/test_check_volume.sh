@@ -247,6 +247,26 @@ assert_error "double-braced pages: jones26a" "$OUT" "[jones26a]"
 assert_error "double-braced pages: smith26a" "$OUT" "[smith26a]"
 assert_exit_fail "double-braced pages exits non-zero" "$FIXTURES/double_braced_pages" 888
 
+# ---------------------------------------------------------------------------
+section "proper_names_unprotected — CIP-000B bracing errors + unknown acronym warn"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 99002 "$FIXTURES/proper_names_unprotected")
+
+assert_error "proper-names: unprotected Bayesian" "$OUT" 'unprotected "Bayesian"'
+assert_error "proper-names: unprotected Markov"   "$OUT" 'unprotected "Markov"'
+assert_error "proper-names: mentions FOOBAR warn"  "$OUT" 'unknown acronym "FOOBAR"'
+assert_exit_fail "proper-names unprotected exits non-zero" "$FIXTURES/proper_names_unprotected" 99002
+
+# ---------------------------------------------------------------------------
+section "proper_names_ok — braced stems pass"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 99003 "$FIXTURES/proper_names_ok")
+
+assert_no_error "proper-names-ok: no unprotected Bayesian" "$OUT" 'unprotected "Bayesian"'
+assert_no_error "proper-names-ok: no unprotected Markov"   "$OUT" 'unprotected "Markov"'
+assert_no_error "proper-names-ok: no unknown FOOBAR"       "$OUT" 'unknown acronym "FOOBAR"'
+assert_exit_pass "proper-names-ok exits zero"              "$FIXTURES/proper_names_ok" 99003
+
 # =============================================================================
 # Summary
 # =============================================================================
