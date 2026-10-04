@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_fleet-new-volume-templates"
 title: "Wire create_volume / templates so new volumes ship fleet artifacts"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -33,13 +33,13 @@ fleet apply finishes.
 
 ## Acceptance Criteria
 
-- [ ] New unpublished volume from current tooling includes intake workflow
+- [x] New unpublished volume from current tooling includes intake workflow
       (or documented equivalent)
-- [ ] Published-volume scaffolding path includes posts workflow when
+- [x] Published-volume scaffolding path includes posts workflow when
       applicable
-- [ ] Source-of-truth note: papersite owns the canonical file; volumes hold
+- [x] Source-of-truth note: papersite owns the canonical file; volumes hold
       a copy/thin wrapper
-- [ ] Does not re-open CIP-0007 deploy behaviour
+- [x] Does not re-open CIP-0007 deploy behaviour
 
 ## Implementation Notes
 
@@ -56,3 +56,8 @@ fleet and birth path do not drift.
 ### 2026-10-04
 
 Task created as Ready when CIP-000A was Accepted.
+
+### 2026-10-04
+
+Added `bin/install_volume_workflows.sh`; `create_volume.rb` installs intake;
+`deploy_volume.sh` installs posts on `gh-pages`. Documented in `fleet/README.md`.

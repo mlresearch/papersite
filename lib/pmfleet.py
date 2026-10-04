@@ -762,8 +762,7 @@ def _emit_apply_results(
     else:
         print(f"apply campaign={payload['campaign']} (--open-prs)")
         for r in results:
-            extra = f" {r.pr_url}" if r.pr_url else ""
-            print(f"- {r.repo}: {r.outcome} — {r.detail}{extra}")
+            print(f"- {r.repo}: {r.outcome} — {r.detail}")
         counts: Dict[str, int] = {}
         for r in results:
             counts[r.outcome] = counts.get(r.outcome, 0) + 1

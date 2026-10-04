@@ -159,3 +159,19 @@ out.puts "---"
 out.puts "layout: home"
 out.puts "---"
 
+# CIP-000A: install intake pmlint workflow for unpublished volumes (source of
+# truth remains papersite .github/workflows/pmlint-volume-example.yml).
+papersite_root = File.expand_path('..', __dir__)
+install_wf = File.join(papersite_root, 'bin', 'install_volume_workflows.sh')
+if File.executable?(install_wf) || File.exist?(install_wf)
+  cmd = ['bash', install_wf, 'intake', Dir.pwd]
+  ok = system({ 'PAPERSITE_ROOT' => papersite_root }, *cmd)
+  if ok
+    puts "Installed intake pmlint workflow (.github/workflows/pmlint.yml)" unless quiet
+  else
+    warn "Warning: failed to install intake pmlint workflow via #{install_wf}"
+  end
+else
+  warn "Warning: missing #{install_wf}; skip intake workflow install"
+end
+

@@ -250,13 +250,13 @@ First campaigns touch [REQ-0005](../requirements/req0005_post-yaml-edits-validat
   → `backlog/features/2026-10-04_pmfleet-apply-status.md`
 - [x] Campaign config schema + `fleet/` docs
   → `backlog/documentation/2026-10-04_fleet-campaign-schema-docs.md`
-- [ ] Campaign `pmlint-posts-ci` (config, pilot, bulk)
+- [ ] Campaign `pmlint-posts-ci` (config, pilot done; bulk remaining)
   → `backlog/infrastructure/2026-10-04_fleet-campaign-pmlint-posts.md`
 - [ ] Campaign `pmlint-intake-ci` (config, pilot, bulk)
   → `backlog/infrastructure/2026-10-04_fleet-campaign-pmlint-intake.md`
-- [ ] New-volume templates (`create_volume` / checked-in examples)
+- [x] New-volume templates (`create_volume` / deploy install helpers)
   → `backlog/features/2026-10-04_fleet-new-volume-templates.md`
-- [ ] Checklist for “next campaign”
+- [x] Checklist for “next campaign”
   → `backlog/documentation/2026-10-04_fleet-next-campaign-checklist.md`
 - [ ] CIP Closed (tool stable; further campaigns via backlog)
 

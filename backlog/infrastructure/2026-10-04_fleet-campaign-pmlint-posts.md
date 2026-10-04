@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_fleet-campaign-pmlint-posts"
 title: "Fleet campaign pmlint-posts-ci: config, pilot, bulk PRs"
-status: "Ready"
+status: "In Progress"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -40,10 +40,10 @@ Finishes the fleet half of REQ-0005 / CIP-0009 soak follow-on.
 
 ## Acceptance Criteria
 
-- [ ] Campaign YAML committed and loadable by `pmfleet`
-- [ ] Pilot PRs opened and validated (workflow runs on `_posts` changes)
+- [x] Campaign YAML committed and loadable by `pmfleet`
+- [x] Pilot PRs opened and validated (workflow runs on `_posts` changes)
 - [ ] Bulk apply completed or remaining gaps explicitly skip/custom
-- [ ] No force-push; custom repos left alone unless strategy documented
+- [x] No force-push; custom repos left alone unless strategy documented
 
 ## Implementation Notes
 
@@ -72,3 +72,13 @@ Campaign YAML landed with inventory/plan work
 ### 2026-10-04
 
 Unblocked: `pmfleet apply`/`status` Complete. Status → Ready for pilot.
+
+### 2026-10-04
+
+Pilot `--limit 5` opened PRs:
+https://github.com/mlresearch/v139/pull/23
+https://github.com/mlresearch/v141/pull/1
+https://github.com/mlresearch/v142/pull/1
+https://github.com/mlresearch/v145/pull/1
+https://github.com/mlresearch/v146/pull/1
+Bulk apply still outstanding.

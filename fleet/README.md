@@ -46,6 +46,32 @@ merged PR on the campaign head branch.
 
 Classifiers: `missing` \| `match` \| `custom` \| `skip`.
 
+## Birth path (stop the bleeding)
+
+| When | Installs | How |
+|---|---|---|
+| `create_volume.rb` (unpublished) | intake `pmlint.yml` | `bin/install_volume_workflows.sh intake` |
+| `deploy_volume.sh` → `gh-pages` | posts `pmlint-posts.yml` | `bin/install_volume_workflows.sh posts` |
+
+Canonical sources stay under papersite `.github/workflows/*-example.yml`.
+Volumes hold copies; fleet campaigns close the gap for existing repos.
+
+## Adding the next campaign
+
+1. Add `fleet/campaigns/<id>.yml` (see schema above).
+2. Point `source[]` at papersite-owned files (do not fork copies in the YAML).
+3. Add classifier fixtures under `tests/fixtures/fleet/v9900x` if needed; extend
+   `tests/python/test_pmfleet.py`.
+4. `pmfleet inventory` / `plan` on a local clones dir.
+5. Pilot: `pmfleet apply --open-prs --limit 5`.
+6. Bulk: raise/omit `--limit`; track with `pmfleet status`.
+7. Update birth path (`install_volume_workflows.sh` / create_volume / deploy)
+   so new volumes do not re-open the hole.
+8. Backlog task with `related_cips: ["000A"]` (and the motivating CIP/REQ).
+
+If a CIP adds volume-local files but fleet is unnecessary, document that
+rationale in the CIP before Closed.
+
 ## Boundary
 
 `pmfleet` installs files via PR. It does **not** letter-batch deploy PDFs or

@@ -141,9 +141,22 @@ echo "Step 5: Removing assets from gh-pages..."
 echo "  → PDFs will be served from main branch only"
 git rm -r assets/ 2>/dev/null || true
 
+# Step 5b: CIP-000A — posts lint workflow on gh-pages (where _posts live)
+# Source of truth: papersite .github/workflows/pmlint-posts-volume-example.yml
+echo "Step 5b: Installing pmlint posts workflow on gh-pages..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PAPERSITE_ROOT="${PAPERSITE_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+if [[ -x "${PAPERSITE_ROOT}/bin/install_volume_workflows.sh" ]] || \
+   [[ -f "${PAPERSITE_ROOT}/bin/install_volume_workflows.sh" ]]; then
+    bash "${PAPERSITE_ROOT}/bin/install_volume_workflows.sh" posts .
+    git add .github/workflows/pmlint-posts.yml
+else
+    echo "  → Warning: install_volume_workflows.sh missing; skip posts workflow"
+fi
+
 # Step 6: Commit and push gh-pages
 echo "Step 6: Pushing gh-pages to GitHub..."
-git commit -m "Remove assets from volume $VOLUME_NUMBER gh-pages" || echo "  → No changes to commit"
+git commit -m "Remove assets from volume $VOLUME_NUMBER gh-pages; add pmlint posts CI" || echo "  → No changes to commit"
 git push origin gh-pages
 
 # Step 6b: Remove bib files from gh-pages

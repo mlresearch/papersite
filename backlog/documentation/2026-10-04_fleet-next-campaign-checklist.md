@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_fleet-next-campaign-checklist"
 title: "Document checklist for adding the next fleet campaign"
-status: "Ready"
+status: "Completed"
 priority: "Low"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -30,9 +30,9 @@ CIPs that introduce volume-local files.
 
 ## Acceptance Criteria
 
-- [ ] Checklist covers inventory → plan → pilot → apply → status → birth path
-- [ ] Reminds authors to link `related_cips: ["000A"]` on campaign backlog
-- [ ] States CIP-0007 boundary (not a deploy engine)
+- [x] Checklist covers inventory → plan → pilot → apply → status → birth path
+- [x] Reminds authors to link `related_cips: ["000A"]` on campaign backlog
+- [x] States CIP-0007 boundary (not a deploy engine)
 
 ## Implementation Notes
 
@@ -49,3 +49,7 @@ reference.
 ### 2026-10-04
 
 Task created as Ready when CIP-000A was Accepted.
+
+### 2026-10-04
+
+Checklist added to `fleet/README.md`.
