@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# pmfleet — fleet artifact inventory / plan (CIP-000A)
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PAPERSITE_ROOT="${PAPERSITE_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+export PAPERSITE_ROOT
+
+PYTHON="${PMFLEET_PYTHON:-}"
+if [[ -z "$PYTHON" ]]; then
+  if [[ -x "${PAPERSITE_ROOT}/.venv/bin/python" ]]; then
+    PYTHON="${PAPERSITE_ROOT}/.venv/bin/python"
+  else
+    PYTHON="python3"
+  fi
+fi
+
+exec "$PYTHON" "${PAPERSITE_ROOT}/lib/pmfleet.py" "$@"

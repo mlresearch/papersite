@@ -1,0 +1,11 @@
+name: legacy-posts-check
+# Custom volume CI that already mentions check_posts
+on:
+  pull_request:
+    paths:
+      - "_posts/**"
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "runs check_posts somehow"

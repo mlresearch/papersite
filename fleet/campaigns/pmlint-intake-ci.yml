@@ -1,0 +1,21 @@
+id: pmlint-intake-ci
+title: "Install pmlint intake workflow on unpublished volumes"
+related_cips: ["0008", "0004", "000A"]
+related_requirements: []
+source:
+  - papersite: .github/workflows/pmlint-volume-example.yml
+    dest: .github/workflows/pmlint.yml
+target_branch: default
+classify:
+  match_markers:
+    - "name: pmlint"
+    - "pmlint --check"
+  custom_regexes:
+    - "tidy_bibtex|check_volume"
+  require_unpublished: true
+pilot:
+  published: 0
+  unpublished: 5
+pr:
+  branch: chore/fleet-pmlint-intake-ci
+  title: "Install pmlint intake CI (CIP-000A / CIP-0008)"

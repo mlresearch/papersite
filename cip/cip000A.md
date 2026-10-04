@@ -244,11 +244,11 @@ First campaigns touch [REQ-0005](../requirements/req0005_post-yaml-edits-validat
 
 - [x] CIP Proposed as **general** fleet mechanism (not pmlint-only)
 - [x] Accepted (2026-10-04); backlog tasks created
-- [ ] Fleet tool `inventory` / `plan`
+- [x] Fleet tool `inventory` / `plan`
   → `backlog/features/2026-10-04_pmfleet-inventory-plan.md`
 - [ ] Fleet tool `apply --open-prs` / `status`
   → `backlog/features/2026-10-04_pmfleet-apply-status.md`
-- [ ] Campaign config schema + `fleet/` docs
+- [x] Campaign config schema + `fleet/` docs
   → `backlog/documentation/2026-10-04_fleet-campaign-schema-docs.md`
 - [ ] Campaign `pmlint-posts-ci` (config, pilot, bulk)
   → `backlog/infrastructure/2026-10-04_fleet-campaign-pmlint-posts.md`

@@ -1,0 +1,21 @@
+id: pmlint-posts-ci
+title: "Install pmlint posts workflow on published volumes"
+related_cips: ["0009", "000A"]
+related_requirements: ["0005"]
+source:
+  - papersite: .github/workflows/pmlint-posts-volume-example.yml
+    dest: .github/workflows/pmlint-posts.yml
+target_branch: gh-pages-if-posts
+classify:
+  match_markers:
+    - "pmlint-posts"
+    - "_posts/**"
+  custom_regexes:
+    - "check_posts|pmlint posts"
+  require_published: true
+pilot:
+  published: 5
+  unpublished: 0
+pr:
+  branch: chore/fleet-pmlint-posts-ci
+  title: "Install pmlint posts CI (CIP-000A / CIP-0009)"

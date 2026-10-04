@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_fleet-campaign-schema-docs"
 title: "Document fleet campaign YAML schema and fleet/ layout"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -32,12 +32,12 @@ apply → status, and the 0007 boundary (fleet does not deploy volumes).
 
 ## Acceptance Criteria
 
-- [ ] Schema fields documented with the CIP sketch as the baseline
-- [ ] `fleet/campaigns/` (or chosen path) exists with a placeholder or
+- [x] Schema fields documented with the CIP sketch as the baseline
+- [x] `fleet/campaigns/` (or chosen path) exists with a placeholder or
       example pointing at first campaigns
-- [ ] Target branch policies (`default`, `gh-pages-if-posts`, `explicit`)
+- [x] Target branch policies (`default`, `gh-pages-if-posts`, `explicit`)
       explained
-- [ ] Invariants (PR-only, no force-push, custom not overwritten) stated
+- [x] Invariants (PR-only, no force-push, custom not overwritten) stated
 
 ## Implementation Notes
 
@@ -54,3 +54,8 @@ for the posts/intake campaign YAMLs.
 ### 2026-10-04
 
 Task created as Ready when CIP-000A was Accepted.
+
+### 2026-10-04
+
+Landed `fleet/README.md` plus `pmlint-posts-ci.yml` /
+`pmlint-intake-ci.yml` campaign configs.

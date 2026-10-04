@@ -62,3 +62,8 @@ fixes.
 ### 2026-10-04
 
 Task created as Proposed when CIP-000A was Accepted (blocked on pmfleet apply).
+
+### 2026-10-04
+
+Campaign YAML landed with inventory/plan work
+(`fleet/campaigns/pmlint-posts-ci.yml`). Pilot/bulk still blocked on apply.

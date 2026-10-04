@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_pmfleet-inventory-plan"
 title: "Implement pmfleet inventory and plan (read-only fleet classify)"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -36,10 +36,10 @@ land in parallel docs task; tool should tolerate the sketch in the CIP).
 
 ## Acceptance Criteria
 
-- [ ] `inventory` and `plan` default to read-only (no pushes, no PRs)
-- [ ] Per-repo classifier labels emitted in a machine-readable report
-- [ ] Works against a fixture/local clone set without network
-- [ ] Documented invocation in tool `--help` or short README pointer
+- [x] `inventory` and `plan` default to read-only (no pushes, no PRs)
+- [x] Per-repo classifier labels emitted in a machine-readable report
+- [x] Works against a fixture/local clone set without network
+- [x] Documented invocation in tool `--help` or short README pointer
 
 ## Implementation Notes
 
@@ -57,3 +57,9 @@ publish (CIP-0007 boundary). Name is flexible (`pmfleet` preferred).
 ### 2026-10-04
 
 Task created as Ready when CIP-000A was Accepted.
+
+### 2026-10-04
+
+Implemented `bin/pmfleet` + `lib/pmfleet.py` with `inventory` / `plan`,
+campaign YAML load, fixture suite (`tests/python/test_pmfleet.py`).
+`apply` still stubs exit 2.

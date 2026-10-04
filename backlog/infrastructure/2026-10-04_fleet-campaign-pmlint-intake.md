@@ -56,3 +56,8 @@ gap. Same tool invariants as posts campaign.
 ### 2026-10-04
 
 Task created as Proposed when CIP-000A was Accepted (blocked on pmfleet apply).
+
+### 2026-10-04
+
+Campaign YAML landed (`fleet/campaigns/pmlint-intake-ci.yml`).
+Pilot/bulk still blocked on apply.

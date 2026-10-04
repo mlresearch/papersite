@@ -71,6 +71,17 @@ pmlint posts --check --changed --base origin/gh-pages
 (`_posts` corrections). Papersite runs `tests/test_pmlint.sh` and
 `tests/test_check_posts.sh` via `.github/workflows/test-pmlint.yml`.
 
+**Fleet rollout (CIP-000A):** classify which volume clones already have a
+workflow (read-only):
+
+```bash
+bin/pmfleet inventory --campaign pmlint-posts-ci --clones-dir ~/mlresearch
+bin/pmfleet plan --campaign pmlint-posts-ci --clones-dir ~/mlresearch
+```
+
+Campaign YAML and schema: [`fleet/README.md`](fleet/README.md).
+`apply --open-prs` is not implemented yet.
+
 ### Lint published posts
 
 After publication, citation fixes go in `_posts/*.md` (not BibTeX). Validate with:
