@@ -732,7 +732,10 @@ module MLResearch
     out.puts 'gem \'jekyll\''
     out.puts
     out.puts 'group :jekyll_plugins do'
-    out.puts '  gem \'github-pages\''
+    # Pin >= 228 so Bundler does not resolve github-pages 222 (liquid 4.0.3),
+    # which crashes on Ruby 3.2+ with undefined method `tainted?`.
+    # Unpinned jekyll-include-cache otherwise prefers 0.3.1 and forces that downgrade.
+    out.puts '  gem \'github-pages\', \'>= 228\''
     out.puts '  gem \'jekyll-remote-theme\''
     out.puts '  gem \'jekyll-include-cache\''
     out.puts '  gem \'webrick\'' # bug means that webrick dependency is not loaded
