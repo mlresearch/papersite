@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_fleet-campaign-pmlint-intake"
 title: "Fleet campaign pmlint-intake-ci: config, pilot, bulk PRs"
-status: "Proposed"
+status: "Ready"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -61,3 +61,7 @@ Task created as Proposed when CIP-000A was Accepted (blocked on pmfleet apply).
 
 Campaign YAML landed (`fleet/campaigns/pmlint-intake-ci.yml`).
 Pilot/bulk still blocked on apply.
+
+### 2026-10-04
+
+Unblocked: `pmfleet apply`/`status` Complete. Status → Ready.

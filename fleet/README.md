@@ -15,10 +15,18 @@ bin/pmfleet inventory --campaign pmlint-posts-ci --repo tests/fixtures/fleet/v99
 
 # Dry-run actions for missing repos
 bin/pmfleet plan --campaign pmlint-posts-ci --clones-dir ~/mlresearch --format json
+
+# PR progress (classification + gh pr state for campaign head branch)
+bin/pmfleet status --campaign pmlint-posts-ci --clones-dir ~/mlresearch
+
+# Open PRs (explicit flag required; never force-pushes main/gh-pages)
+bin/pmfleet apply --campaign pmlint-posts-ci --clones-dir ~/mlresearch \
+  --open-prs --limit 5 --rate-limit 2
 ```
 
-`inventory` and `plan` are read-only. `apply --open-prs` is a separate
-backlog task and is not implemented yet.
+`inventory`, `plan`, and `status` are read-only. `apply` refuses to run
+without `--open-prs`. Re-runs skip repos that already have an open or
+merged PR on the campaign head branch.
 
 ## Campaign YAML schema
 

@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_fleet-campaign-pmlint-posts"
 title: "Fleet campaign pmlint-posts-ci: config, pilot, bulk PRs"
-status: "Proposed"
+status: "Ready"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -11,6 +11,7 @@ owner: "Neil Lawrence"
 dependencies:
 - "2026-10-04_pmfleet-apply-status"
 - "2026-10-04_fleet-campaign-schema-docs"
+# both dependencies Completed
 tags:
 - backlog
 - fleet
@@ -67,3 +68,7 @@ Task created as Proposed when CIP-000A was Accepted (blocked on pmfleet apply).
 
 Campaign YAML landed with inventory/plan work
 (`fleet/campaigns/pmlint-posts-ci.yml`). Pilot/bulk still blocked on apply.
+
+### 2026-10-04
+
+Unblocked: `pmfleet apply`/`status` Complete. Status → Ready for pilot.

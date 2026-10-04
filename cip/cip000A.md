@@ -246,7 +246,7 @@ First campaigns touch [REQ-0005](../requirements/req0005_post-yaml-edits-validat
 - [x] Accepted (2026-10-04); backlog tasks created
 - [x] Fleet tool `inventory` / `plan`
   → `backlog/features/2026-10-04_pmfleet-inventory-plan.md`
-- [ ] Fleet tool `apply --open-prs` / `status`
+- [x] Fleet tool `apply --open-prs` / `status`
   → `backlog/features/2026-10-04_pmfleet-apply-status.md`
 - [x] Campaign config schema + `fleet/` docs
   → `backlog/documentation/2026-10-04_fleet-campaign-schema-docs.md`

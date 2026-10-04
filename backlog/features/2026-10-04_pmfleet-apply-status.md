@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_pmfleet-apply-status"
 title: "Implement pmfleet apply --open-prs and status"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -37,11 +37,11 @@ campaign defines a merge strategy.
 
 ## Acceptance Criteria
 
-- [ ] `apply` without `--open-prs` (or equivalent) refuses to mutate
-- [ ] Changes land only via branch + PR
-- [ ] Re-run skips repos already PR’d or merged
-- [ ] `custom` / `skip` repos are not clobbered by default
-- [ ] `status` summarises remaining gap
+- [x] `apply` without `--open-prs` (or equivalent) refuses to mutate
+- [x] Changes land only via branch + PR
+- [x] Re-run skips repos already PR’d or merged
+- [x] `custom` / `skip` repos are not clobbered by default
+- [x] `status` summarises remaining gap
 
 ## Implementation Notes
 
@@ -59,3 +59,8 @@ remotes before any bulk run on mlresearch volumes.
 ### 2026-10-04
 
 Task created as Ready when CIP-000A was Accepted.
+
+### 2026-10-04
+
+Implemented `apply --open-prs` / `status` with `--limit` and `--rate-limit`,
+resume via `gh pr list`, no `--force` push. Tests use real git + stubbed `gh`.

@@ -77,10 +77,13 @@ workflow (read-only):
 ```bash
 bin/pmfleet inventory --campaign pmlint-posts-ci --clones-dir ~/mlresearch
 bin/pmfleet plan --campaign pmlint-posts-ci --clones-dir ~/mlresearch
+bin/pmfleet status --campaign pmlint-posts-ci --clones-dir ~/mlresearch
+bin/pmfleet apply --campaign pmlint-posts-ci --clones-dir ~/mlresearch \
+  --open-prs --limit 5
 ```
 
 Campaign YAML and schema: [`fleet/README.md`](fleet/README.md).
-`apply --open-prs` is not implemented yet.
+`apply` requires `--open-prs` and opens branch+PR only (no force-push).
 
 ### Lint published posts
 
