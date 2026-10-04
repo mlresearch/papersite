@@ -141,3 +141,92 @@ stems:
   - stem: ABC
     kind: acronym
     notes: "Approximate Bayesian computation"
+  - stem: AUC
+    kind: acronym
+    notes: "Area under the ROC curve"
+  - stem: ROC
+    kind: acronym
+    notes: "Receiver operating characteristic"
+  - stem: MRF
+    kind: acronym
+    notes: "Markov random field"
+  - stem: DBN
+    kind: acronym
+    notes: "Deep belief / dynamic Bayesian network"
+  - stem: ADMM
+    kind: acronym
+    notes: "Alternating direction method of multipliers"
+  - stem: IBP
+    kind: acronym
+    notes: "Indian buffet process"
+  - stem: MMD
+    kind: acronym
+    notes: "Maximum mean discrepancy"
+  - stem: NMF
+    kind: acronym
+    notes: "Non-negative matrix factorization"
+  - stem: BFGS
+    kind: acronym
+    notes: "Broyden–Fletcher–Goldfarb–Shanno; also L-BFGS"
+  - stem: SAT
+    kind: acronym
+    notes: "Boolean satisfiability"
+  - stem: MPE
+    kind: acronym
+    notes: "Most probable explanation"
+  - stem: LP
+    kind: acronym
+    notes: "Linear programming"
+  - stem: TD
+    kind: acronym
+    notes: "Temporal difference"
+  - stem: CNF
+    kind: acronym
+    notes: "Conjunctive normal form"
+  - stem: STRIPS
+    kind: acronym
+    notes: "Classic AI planning formalism"
+  - stem: AIXI
+    kind: acronym
+    notes: "Universal artificial intelligence"
+  - stem: GTD
+    kind: acronym
+    notes: "Gradient temporal difference"
+  - stem: MIPS
+    kind: acronym
+    notes: "Maximum inner product search"
+  - stem: WTA
+    kind: acronym
+    notes: "Winner-take-all"
+  - stem: NN
+    kind: acronym
+    notes: "Neural network / nearest neighbour; short — watch false friends"
+  - stem: NP
+    kind: acronym
+    notes: "Complexity class; common in NP-hard"
+  - stem: GPU
+    kind: acronym
+    notes: "Graphics processing unit"
+
+  # --- additional eponyms from UAI reissue soak (r9–r16) ---
+  - stem: Bethe
+    kind: name
+  - stem: Thompson
+    kind: name
+  - stem: Stein
+    kind: name
+  - stem: Newton
+    kind: name
+  - stem: Viterbi
+    kind: name
+  - stem: Fisher
+    kind: name
+  - stem: Bernstein
+    kind: name
+  - stem: Frank
+    kind: name
+    notes: "Usually Frank–Wolfe"
+  - stem: Wolfe
+    kind: name
+  - stem: Lagrangian
+    kind: name
