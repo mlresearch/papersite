@@ -171,11 +171,33 @@ Further campaigns (PR templates, deploy helpers, compile workflows from
 CIP-0004, …) are new YAML + backlog tasks under this CIP’s tool, or
 thin child CIPs that only describe the artifact if design is non-trivial.
 
+### Boundary with CIP-0007 (batched deploy)
+
+[CIP-0007](cip0007.md) and this CIP look similar at a glance (dry-run,
+resume, many pushes) but operate on different axes:
+
+| | [CIP-0007](cip0007.md) | [CIP-000A](cip000A.md) (this CIP) |
+|---|---|---|
+| **Job** | Publish **one** volume (batched assets/posts) | Roll out shared **files** to **many** volumes |
+| **Unit of work** | Letter batches inside one repo | PRs across the fleet |
+| **Mutates** | `main` / `gh-pages` content for publish | Artifact paths (workflows, templates, …) via PR |
+| **Entrypoint** | `deploy_volume.sh` | `pmfleet` campaign apply |
+| **Success** | Branch invariants for that volume | Campaign inventory gap closed |
+
+**Rule:** `pmfleet` never letter-batches PDFs or posts onto `gh-pages`.
+`deploy_volume.sh` never opens fleet PRs to install workflows.
+
+**Deferred hand-off:** if CIP-0004 Phase 3 (or editors) need a
+volume-local deploy workflow/helper that *calls* CIP-0007’s script, that
+file is an **artifact** and gets a campaign under this CIP. Designing
+batched publish remains entirely CIP-0007. Do not expand 0007’s
+implementation plan with fleet inventory, or 000A’s tool with deploy
+branch surgery.
+
 ### Out of scope
 
 - Designing the linters themselves (0008 / 0009)
-- Batched large-volume deploy mechanics ([CIP-0007](cip0007.md)) — though
-  a future campaign might distribute a deploy wrapper
+- Batched large-volume deploy mechanics and branch cleanup (0007)
 - Auto-merge of fleet PRs
 - Changing org-level GitHub Actions permissions
 
@@ -234,5 +256,6 @@ First campaigns touch [REQ-0005](../requirements/req0005_post-yaml-edits-validat
 
 - Motivating instances: [CIP-0008](cip0008.md), [CIP-0009](cip0009.md)
 - Umbrella CI/CD: [CIP-0004](cip0004.md)
+- Batched deploy (separate axis): [CIP-0007](cip0007.md)
 - Example workflow sources under papersite `.github/workflows/`
 - Tenets: `automation-with-guardrails`, `reproducible-auditable-pipeline`
