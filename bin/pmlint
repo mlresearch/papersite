@@ -482,6 +482,33 @@ if [[ "$FORCE" -ne 1 ]] && volume_is_published "$VOL_DIR"; then
   exit 0
 fi
 
+# Empty template volumes (README + workflows only) have no .bib yet. Do not
+# fail CI on workflow-only PRs; fail once PDFs or an incomplete drop appear
+# without a .bib, or when a .bib is present and checks fail.
+volume_awaits_submission() {
+  local dir="$1"
+  local f
+  for f in "$dir"/*.bib; do
+    [[ -e "$f" ]] || continue
+    case "$(basename "$f")" in
+      *_clean.bib|*_cleaned.bib) continue ;;
+    esac
+    return 1
+  done
+  for f in "$dir"/*.pdf; do
+    [[ -e "$f" ]] || continue
+    return 1
+  done
+  return 0
+}
+
+if [[ -z "$BIBFILE" ]] && volume_awaits_submission "$VOL_DIR"; then
+  echo
+  echo "pmlint: SKIPPED — no .bib or paper PDFs yet (empty volume awaiting submission)."
+  echo "         Intake lint runs once proceedings files are added."
+  exit 0
+fi
+
 BIB_PATH="$(find_bib "$VOL_DIR" "$BIBFILE")"
 BIB_BASE="$(basename "$BIB_PATH")"
 echo "  bib:       $BIB_PATH"

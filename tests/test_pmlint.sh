@@ -220,6 +220,34 @@ else
 fi
 rm -rf "$TMP"
 
+# --- empty template volume (no .bib / PDF) skips rather than failing ---
+TMP=$(mktemp -d)
+mkdir -p "$TMP/v349/.github/workflows"
+echo "# empty template" > "$TMP/v349/README.md"
+cp "$ROOT/.github/workflows/pmlint-volume-example.yml" "$TMP/v349/.github/workflows/pmlint.yml"
+set +e
+(cd "$TMP/v349" && "$PMLINT" --check) >/tmp/pmlint_empty_out.txt 2>&1
+rc=$?
+set -e
+assert_eq "pmlint skips empty awaiting-submission volume" "$rc" "0"
+if grep -q "awaiting submission" /tmp/pmlint_empty_out.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: empty-volume skip message"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [missing awaiting submission message]")
+  echo "  ✗ FAIL: missing awaiting submission message"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_empty_out.txt; fi
+fi
+# PDF without .bib should still fail
+echo "%PDF-1.4" > "$TMP/v349/orphan.pdf"
+set +e
+(cd "$TMP/v349" && "$PMLINT" --check) >/tmp/pmlint_orphan_out.txt 2>&1
+rc=$?
+set -e
+assert_eq "pmlint fails when PDFs present without .bib" "$rc" "1"
+rm -rf "$TMP"
+
 echo
 echo "Passed: $PASS  Failed: $FAIL"
 if [[ "$FAIL" -gt 0 ]]; then
