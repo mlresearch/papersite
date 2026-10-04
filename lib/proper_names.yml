@@ -129,3 +129,15 @@ stems:
   - stem: EM
     kind: acronym
     notes: "Expectation-maximisation; short — watch false friends in soak"
+  - stem: MEG
+    kind: acronym
+    notes: "Magnetoencephalography"
+  - stem: EEG
+    kind: acronym
+    notes: "Electroencephalography"
+  - stem: BIC
+    kind: acronym
+    notes: "Bayesian information criterion"
+  - stem: ABC
+    kind: acronym
+    notes: "Approximate Bayesian computation"
