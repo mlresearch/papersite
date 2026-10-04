@@ -12,6 +12,9 @@ bash tests/test_check_volume.sh
 bash tests/test_create_volume_keys.sh
 bash tests/test_pmlint.sh
 bash tests/test_check_posts.sh
+# covers clean / bad YAML / extras / author mismatch / missing pdf /
+# control chars / title mismatch, plus soak pass fixtures (LaTeX fold,
+# software placeholders, legacy URL shapes)
 
 # Show every individual assertion (useful when adding new tests)
 bash tests/test_check_volume.sh --verbose

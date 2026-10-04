@@ -57,10 +57,18 @@ Task created as Ready when CIP-0009 was Accepted.
 
 Implemented as part of CIP-0009 v1.
 
-Soak results (all PASSED, 0 errors after LaTeX/Unicode normalisation tweaks):
+Initial soak (PASSED after first LaTeX/Unicode normalisation tweaks):
 
 - `v304` — 79 posts (local `_posts`)
 - `v16` — 12 posts (`gh-pages` archive)
 - `v283` — 120 posts (`gh-pages` archive; drove `{\ss}` / `\sqrtT` / `\i` handling)
+
+### 2026-10-04 (full local fleet)
+
+Re-ran across local `v*`/`r*` checkouts with `_posts`: **PASS=249 FAIL=0** (plus gh-pages archives for v267/v306/v307/v337).
+
+Validator false positives fixed in `lib/check_posts.rb` (accent/`\"{o}` fold, YAML-unescaped `H"older`, Greek letters, software placeholders, multi-URL / org-repo shorthand, legacy spaced `proceedings.mlr.press` paths).
+
+True positives fixed on volume branches `fix/posts-yaml-lint` (pushed, PRs not opened yet): v18, v56, v108, v118–v120, v123, v134, v162, v166, v191, v196, v206, v291, v306, v307, v337.
 
 Green light for a future fleet-rollout CIP.

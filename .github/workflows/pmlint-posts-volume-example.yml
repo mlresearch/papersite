@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout volume
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Checkout papersite tooling
         uses: actions/checkout@v4
@@ -35,4 +37,10 @@ jobs:
         env:
           PAPERSITE_ROOT: ${{ github.workspace }}/.papersite-tools
           PMLINT_SKIP_UPDATE: "1"
-        run: bash "$PAPERSITE_ROOT/bin/pmlint" posts --check
+        run: |
+          # Full tree on workflow_dispatch; PR path uses changed posts vs base
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            bash "$PAPERSITE_ROOT/bin/pmlint" posts --check --changed --base "origin/${{ github.base_ref }}"
+          else
+            bash "$PAPERSITE_ROOT/bin/pmlint" posts --check
+          fi

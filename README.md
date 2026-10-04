@@ -82,7 +82,8 @@ pmlint posts --check
 
 Checks: YAML/frontmatter fences, required keys (`layout`, `title`, `author`,
 `id`, `pdf`), `extras` shape, display vs `bibtex_author` / `tex_title`
-consistency, and non-printable characters.
+consistency (with LaTeX/Unicode folding), software URL hygiene (placeholders
+allowed), and non-printable characters.
 
 ### Classic workflow steps
 

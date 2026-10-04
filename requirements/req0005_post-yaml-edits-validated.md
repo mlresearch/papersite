@@ -1,7 +1,7 @@
 ---
 id: "0005"
 title: "Post-publication paper YAML edits are validated before merge"
-status: "Implemented"
+status: "Validated"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -37,12 +37,12 @@ Intake validation of BibTeX and PDF placement (REQ-0003 / CIP-0008) remains the 
 
 ## Acceptance Criteria
 
-- [ ] A pull request that changes `_posts/` on a published volume is checked automatically before merge.
-- [ ] Invalid YAML / frontmatter that would break Jekyll (or citeproc-style consumers) fails the check with an actionable message identifying the file.
-- [ ] Posts are checked against the documented paper frontmatter contract (required keys and shapes the theme expects).
-- [ ] Within-post citation consistency is checked where the post carries both display and BibTeX-derived fields (e.g. display `author`/`title` vs `bibtex_author` / related fields), without requiring a live `.bib` on the branch.
-- [ ] Known classes of silent corruption (e.g. non-printable / bad UTF-8 in text fields) fail the check.
-- [ ] Bypass requires explicit intent; a clean published volume with no `_posts` changes is not forced through intake BibTeX lint.
+- [ ] A pull request that changes `_posts/` on a published volume is checked automatically before merge. *(Tooling + example workflow shipped; default-on fleet install is a separate CIP.)*
+- [x] Invalid YAML / frontmatter that would break Jekyll (or citeproc-style consumers) fails the check with an actionable message identifying the file.
+- [x] Posts are checked against the documented paper frontmatter contract (required keys and shapes the theme expects).
+- [x] Within-post citation consistency is checked where the post carries both display and BibTeX-derived fields (e.g. display `author`/`title` vs `bibtex_author` / related fields), without requiring a live `.bib` on the branch.
+- [x] Known classes of silent corruption (e.g. non-printable / bad UTF-8 in text fields) fail the check.
+- [x] Bypass requires explicit intent; a clean published volume with no `_posts` changes is not forced through intake BibTeX lint.
 
 ## Notes (Optional)
 
@@ -63,3 +63,5 @@ Requirement recorded; CIP-0009 proposed as the HOW.
 CIP-0009 Accepted; backlog tasks created. Status → In Progress.
 
 CIP-0009 Implemented (`pmlint posts --check`); soak on v304 and v16 clean. Status → Implemented. Fleet enablement still open.
+
+CIP-0009 Closed after full-fleet soak hardening and fixture coverage. Status → Validated for the tooling outcome; automatic PR gating still awaits fleet workflow install.

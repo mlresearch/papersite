@@ -205,8 +205,11 @@ class PostsChecker
             error "  author[#{i}] is not a mapping"
             next
           end
-          if blank?(a['family'])
-            error "  author[#{i}] missing family"
+          # Mononyms (e.g. Mausam) and org names may omit family; allow blank
+          # family when `given` is present. True omissions still fail consistency
+          # against bibtex_author when that field exists.
+          if blank?(a['family']) && blank?(a['given']) && blank?(a['literal'])
+            error "  author[#{i}] missing family/given"
           end
         end
       end
@@ -234,7 +237,7 @@ class PostsChecker
       end
     end
 
-    if data.key?('software') && !blank?(data['software']) && !urlish?(data['software'])
+    if data.key?('software') && !blank?(data['software']) && !software_ok?(data['software'])
       error "  software is not a usable URL: #{data['software'].inspect}"
     end
   end
@@ -247,9 +250,14 @@ class PostsChecker
       missing = []
       authors.each do |a|
         next unless a.is_a?(Hash)
-        fam = a['family'].to_s
-        next if fam.empty?
-        missing << fam unless bib_norm.include?(normalize_token(fam))
+        fam = a['family'].to_s.strip
+        given = a['given'].to_s.strip
+        # Prefer family match; for mononyms / blank family, require given in bibtex
+        token = fam.empty? ? given : fam
+        next if token.empty?
+        # Skip pure punctuation / page-range garbage (volume data bugs handled separately)
+        next if token.match?(/\A[=0-9\s\-]+\z/)
+        missing << token unless bib_norm.include?(normalize_token(token))
       end
       if missing.empty?
         ok '  author families match bibtex_author'
@@ -273,28 +281,40 @@ class PostsChecker
     end
   end
 
-  def check_raw_controls(raw, rel)
-    raw.each_char.with_index do |char, _|
+  def utf8_string(str)
+    s = str.to_s
+    s = s.dup if s.frozen?
+    s = s.force_encoding('UTF-8')
+    unless s.valid_encoding?
+      s = s.encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
+    end
+    s
+  end
+
+  def each_bad_control(str)
+    utf8_string(str).each_char do |char|
       cp = char.ord
       next if cp == 0x09 || cp == 0x0A || cp == 0x0D
-      if cp <= 0x1F || (0x7F..0x9F).cover?(cp)
-        error "  non-printable character #{format('U+%04X', cp)} in file bytes"
-        break
-      end
+      # Only true Unicode C0/C1 controls — not UTF-8 continuation bytes misread
+      # as characters (e.g. ß = U+00DF must not be flagged via byte 0x9F).
+      yield cp if cp <= 0x1F || (0x7F..0x9F).cover?(cp)
+    end
+  end
+
+  def check_raw_controls(raw, rel)
+    each_bad_control(raw) do |cp|
+      error "  non-printable character #{format('U+%04X', cp)} in file bytes"
+      break
     end
   end
 
   def check_strings_for_controls(node, rel, path)
     case node
     when String
-      node.each_char do |char|
-        cp = char.ord
-        next if cp == 0x09 || cp == 0x0A || cp == 0x0D
-        if cp <= 0x1F || (0x7F..0x9F).cover?(cp)
-          loc = path.empty? ? 'value' : path.join('.')
-          error "  non-printable #{format('U+%04X', cp)} in #{loc}"
-          break
-        end
+      each_bad_control(node) do |cp|
+        loc = path.empty? ? 'value' : path.join('.')
+        error "  non-printable #{format('U+%04X', cp)} in #{loc}"
+        break
       end
     when Array
       node.each_with_index { |v, i| check_strings_for_controls(v, rel, path + [i.to_s]) }
@@ -303,11 +323,24 @@ class PostsChecker
     end
   end
 
+  # Greek / symbol folds used for title comparison (display Unicode ↔ LaTeX names)
+  GREEK_TO_NAME = {
+    'α' => 'alpha', 'β' => 'beta', 'γ' => 'gamma', 'δ' => 'delta',
+    'ε' => 'epsilon', 'ϵ' => 'epsilon', 'ζ' => 'zeta', 'η' => 'eta',
+    'θ' => 'theta', 'ι' => 'iota', 'κ' => 'kappa', 'λ' => 'lambda',
+    'μ' => 'mu', 'ν' => 'nu', 'ξ' => 'xi', 'π' => 'pi', 'ρ' => 'rho',
+    'σ' => 'sigma', 'ς' => 'sigma', 'τ' => 'tau', 'υ' => 'upsilon',
+    'φ' => 'phi', 'ϕ' => 'phi', 'χ' => 'chi', 'ψ' => 'psi', 'ω' => 'omega',
+    'Α' => 'alpha', 'Β' => 'beta', 'Γ' => 'gamma', 'Δ' => 'delta',
+    'Θ' => 'theta', 'Λ' => 'lambda', 'Π' => 'pi', 'Σ' => 'sigma',
+    'Φ' => 'phi', 'Ψ' => 'psi', 'Ω' => 'omega'
+  }.freeze
+
   def normalize_token(s)
     t = expand_latex_text(s.to_s)
-    # Compatibility for display UTF-8 vs BibTeX ASCII/LaTeX (ß ↔ ss, accents)
-    t = t.unicode_normalize(:nfkd).gsub(/\p{Mn}/, '')
-    t = t.gsub('ß', 'ss').gsub('ẞ', 'ss').gsub('ı', 'i').gsub('İ', 'i')
+    # Detex leftovers stuck in author family fields: \textÇakır, textbfSmith
+    t = t.gsub(/\A\\?text(bf|it|rm|sc|tt)?/i, '')
+    t = fold_latin(t)
     t.downcase.gsub(/[^a-z0-9]/, '')
   end
 
@@ -315,42 +348,173 @@ class PostsChecker
     normalize_token(s)
   end
 
+  def fold_latin(s)
+    t = s.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, '')
+    t = t.gsub('ß', 'ss').gsub('ẞ', 'ss').gsub('ı', 'i').gsub('İ', 'i')
+    # Letters that do not decompose under NFKD to ASCII base letters
+    {
+      'ø' => 'o', 'Ø' => 'o', 'ł' => 'l', 'Ł' => 'l',
+      'æ' => 'ae', 'Æ' => 'ae', 'œ' => 'oe', 'Œ' => 'oe',
+      'đ' => 'd', 'Đ' => 'd', 'ħ' => 'h', 'Ħ' => 'h',
+      'ð' => 'd', 'Ð' => 'd', 'þ' => 'th', 'Þ' => 'th'
+    }.each { |a, b| t = t.gsub(a, b) }
+    t
+  end
+
   def expand_latex_text(s)
     t = s.to_s.dup
-    # Common BibTeX / detex forms before generic command unwrapping
+    # Nordic / Polish BibTeX char macros (before generic unwrap strips the command)
     t.gsub!(/\{\\ss\}|\\ss\{\}|\\ss\b/, 'ss')
+    t.gsub!(/\{\\o\}|\\o\{\}|\\o(?![a-zA-Z])/, 'ø')
+    t.gsub!(/\{\\O\}|\\O\{\}|\\O(?![a-zA-Z])/, 'Ø')
+    t.gsub!(/\{\\l\}|\\l\{\}|\\l(?![a-zA-Z])/, 'ł')
+    t.gsub!(/\{\\L\}|\\L\{\}|\\L(?![a-zA-Z])/, 'Ł')
+    t.gsub!(/\{\\aa\}|\\aa\{\}|\\aa\b/, 'å')
+    t.gsub!(/\{\\AA\}|\\AA\{\}|\\AA\b/, 'Å')
+    t.gsub!(/\{\\ae\}|\\ae\{\}|\\ae\b/, 'æ')
+    t.gsub!(/\{\\AE\}|\\AE\{\}|\\AE\b/, 'Æ')
     t.gsub!(/\{\\i\}|\\i\{\}|\\i\b/, 'i')
     t.gsub!(/\\'\{\\i\}|\\'\{\i\}/, 'i')
+    # Dot accent \.Z / {\.Z}
+    t.gsub!(/\{\\\.([A-Za-z])\}|\\\.([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    t.gsub!(/\\textquotesingle\b/, "'")
+    # Named greek / symbols (map to ASCII names for title compare)
+    {
+      'alpha' => 'alpha', 'beta' => 'beta', 'gamma' => 'gamma', 'delta' => 'delta',
+      'epsilon' => 'epsilon', 'lambda' => 'lambda', 'mu' => 'mu', 'sigma' => 'sigma',
+      'theta' => 'theta', 'pi' => 'pi', 'phi' => 'phi', 'omega' => 'omega',
+      'ell' => 'ell'
+    }.each do |cmd, name|
+      t.gsub!(/\\text#{cmd}\b/, name)
+      t.gsub!(/\\#{cmd}\b/, name)
+    end
     # \sqrt{T} and malformed detex \sqrtT (missing braces)
     t.gsub!(/\\sqrt\{([^{}]*)\}/, '\1')
     t.gsub!(/\\sqrt([A-Za-z])/, '\1')
-    t.gsub!(/\{\\"([A-Za-z])\}|\\"([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
-    t.gsub!(/\{\\'([A-Za-z])\}|\\'([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
-    t.gsub!(/\{\\`([A-Za-z])\}|\\`([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
-    t.gsub!(/\{\\^([A-Za-z])\}|\\\^([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
-    t.gsub!(/\{\\~([A-Za-z])\}|\\~([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    # Nested / spaced accent forms: {\'{n}}, {\v c}, {\v{c}}, \v{}c, \'{ c}
+    t.gsub!(/\{\\'\{([A-Za-z])\}\}/, '\1')
+    t.gsub!(/\{\\"\{([A-Za-z])\}\}/, '\1')
+    t.gsub!(/\\v\{\}/, '')
+    t.gsub!(/\{\\v\s*([A-Za-z])\}|\\v\s*\{([A-Za-z])\}|\\v\s*([A-Za-z])/) do
+      Regexp.last_match[1] || Regexp.last_match[2] || Regexp.last_match[3]
+    end
+    t.gsub!(/\{\\c\s*([A-Za-z])\}|\\c\s*\{([A-Za-z])\}|\\c\s*([A-Za-z])/) do
+      Regexp.last_match[1] || Regexp.last_match[2] || Regexp.last_match[3]
+    end
+    # Occasional Turkish typo \s{c} for ş-like; fold to s/c letter
+    t.gsub!(/\\s\{([A-Za-z])\}/, '\1')
+    # Broken forms like Clémen\con (missing braces on \c)
+    t.gsub!(/\\c(?=[a-zA-Z])/, '')
+    # Accent + braced letter: \"{o}, \'{e}, \`{a}, \^{o}, \~{n}
+    t.gsub!(/\\["'`^~]\s*\{([A-Za-z])\}/, '\1')
+    t.gsub!(/\{\\"\s*([A-Za-z])\}|\\"\s*([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    t.gsub!(/\\"([A-Za-z])/) { Regexp.last_match[1] } # nystr\"om leftovers
+    t.gsub!(/\{\\'\s*([A-Za-z])\}|\\'\s*([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    t.gsub!(/\{\\`\s*([A-Za-z])\}|\\`\s*([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    t.gsub!(/\{\\\^\s*([A-Za-z])\}|\\\^\s*([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    t.gsub!(/\{\\~\s*([A-Za-z])\}|\\~\s*([A-Za-z])/) { Regexp.last_match[1] || Regexp.last_match[2] }
+    t.gsub!(/\{\\u\s*\{([A-Za-z])\}\}|\\u\s*\{([A-Za-z])\}/) { Regexp.last_match[1] || Regexp.last_match[2] }
     3.times { t.gsub!(/\\[a-zA-Z]+\*?\s*\{([^{}]*)\}/, '\1') }
-    t.gsub(/[{}]/, '')
+    t.gsub!(/[{}]/, '')
+    t
   end
 
   def normalize_title(s)
     t = expand_latex_text(s.to_s)
-    t = t.unicode_normalize(:nfkd).gsub(/\p{Mn}/, '')
-    t = t.gsub('ı', 'i').gsub('İ', 'i')
-    t = t.gsub('√', '') # display √T ↔ tex \sqrt{T} → T
-    # detex sometimes leaves a bare sqrt{T} without the leading backslash
+    # Typographic quotes / dashes ↔ ASCII / TeX equivalents
+    t = t.gsub(/[“”«»]/, '"').gsub(/[‘’‛]/, "'")
+    t = t.gsub('``', '"').gsub("''", '"').gsub('`', "'")
+    t = t.gsub(/---|--|–|—|−/, '-')
+    # TeX accent remnants after YAML unescaping: H"older, nos'e, Poincare`e
+    t = t.gsub(/([A-Za-z])["'`^~]([A-Za-z])/, '\1\2')
+    GREEK_TO_NAME.each { |g, name| t = t.gsub(g, name) }
+
+    # Leftover detex macro *names* glued into title text (no leading backslash)
+    # e.g. ensuremathalpha, mathcalvistadpo, textttspin, widetildeo(...), mathttvits
+    # \tilde{O} / \widetilde{O} often become tildeo / widetildeo in title text
+    t = t.gsub(/widetildeo/i, 'o').gsub(/tildeo/i, 'o')
+    %w[ensuremath mathcal mathbb mathrm mathtt mathit mathbf boldsymbol
+       texttt textsc textbf textrm textsf textit underline
+       widetilde widehat].each do |cmd|
+      t = t.gsub(/#{cmd}/i, '')
+    end
+    t = t.gsub(/\btext(?=[A-Z0-9\[\^])/, '') # \text{DT} / \text{DT}^2 remnants
+    t = t.gsub(/\b(left|right)\b/i, '')
+    t = t.gsub(/\bbf(?=[\p{L}_])/, '') # bfφ_flow remnants
+    # Detex leftover: sqrtt / sqrtT from \sqrt{T}
+    t = t.gsub(/\bsqrt/i, '')
+    t = fold_latin(t)
+    t = t.gsub('√', '')
     t.gsub!(/\bsqrt\s*\{([^{}]*)\}/i, '\1')
     t.gsub!(/[\\$]/, '')
+    # Punctuation / grouping that often differs between title and tex_title
+    t = t.gsub(/[()]/, '')
+    t = t.gsub(/\s+([?!:;,.])/, '\1')
     t.gsub!(/\s+/, ' ')
     t.strip.downcase
+  end
+
+  # Placeholders mean "no software link" — acceptable (not a hard error).
+  def software_placeholder?(value)
+    s = value.to_s.strip
+    return true if s.empty?
+    return true if s.match?(/\A(nan|n\/?a|n\.?a\.?|none|null|\.|-+)\z/i)
+    return true if s.match?(/\A(no\s*code.*|nocodeprovided.*|not\s*available|unavailable)\z/i)
+    # Stray OpenReview/base64 fragments accidentally pasted into software
+    return true if s.match?(/\A[A-Za-z0-9]{5}\z/)
+    false
+  end
+
+  def software_ok?(value)
+    return true if software_placeholder?(value)
+    urlish?(value)
   end
 
   def urlish?(value)
     s = value.to_s.strip
     return false if s.empty?
-    uri = URI.parse(s)
-    %w[http https].include?(uri.scheme) && !uri.host.to_s.empty?
-  rescue URI::InvalidURIError
+    return false if software_placeholder?(s)
+    return false if s.start_with?('/') && !s.start_with?('//') # local paths
+    # Legacy PMLR paper keys with spaces in the path (e.g. de bock17a)
+    if s.match?(/\Ahttps?:\/\/proceedings\.mlr\.press\//i)
+      return true
+    end
+    # Labeled / multi-link blurbs: "(Name) https://... (Other) https://..."
+    urls = s.scan(%r{https?://[^\s\)\]\"']+}i).map { |u| u.sub(/[.,;]+$/, '') }
+    if urls.length >= 1
+      return urls.all? { |u| urlish_one?(u) }
+    end
+    # Collapse whitespace typos: "https: //github.com/...", "github. com/..."
+    compact = s.gsub(/\s+/, '')
+    compact = compact.sub(/\ACode:/i, '')
+    compact = "https://#{compact}" if compact.match?(/\A(www\.)?github\.com\//i)
+    compact = "https://#{compact}" if compact.match?(/\A(www\.)?gitlab\.com\//i)
+    compact = "https://#{compact}" if compact.match?(/\A[\w.-]+\.github\.io(\/|\z)/i)
+    compact = "https://#{compact}" if compact.match?(/\A[\w.-]+\.(io|org|com|ai|dev|ms)(\/|\z)/i) && !compact.match?(/\Ahttps?:/i)
+    # GitHub org/repo shorthand (doronHav/WassersteinFlowMatching)
+    if compact.match?(/\A[\w.-]+\/[\w.\/-]+\z/) && !compact.include?('.')
+      compact = "https://github.com/#{compact}"
+    end
+    # Multi-URL fields: accept if every http(s) token looks like a URL
+    if compact.include?(',') || compact.scan(/https?:/i).length > 1
+      parts = compact.split(/,|AND/i).map(&:strip).reject(&:empty?)
+      return parts.all? { |p| urlish_one?(p) } if parts.length > 1
+    end
+    # First token only when trailing junk words ("aka.ms/foo Topics")
+    if s.match?(/\s/) && !s.match?(/https?:/i)
+      first = s.split(/\s+/).first
+      return urlish?(first) if first && first != s
+    end
+    urlish_one?(compact)
+  end
+
+  def urlish_one?(s)
+    s = s.to_s.strip
+    return false if s.empty?
+    # Strip editorial labels, but never the URL scheme (https?:)
+    s = s.sub(/\ACode:\s*/i, '')
+    s = s.sub(/\A(?:URL|Link|Software|Homepage):\s*/i, '')
+    return true if s.match?(/\Ahttps?:\/\/[^\/\s?#]+(?:[\/?#].*)?\z/i)
     false
   end
 

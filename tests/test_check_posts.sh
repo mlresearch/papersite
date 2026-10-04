@@ -73,13 +73,26 @@ else
 fi
 rm -rf "$TMP"
 
+# --- soak-learned pass fixtures (LaTeX fold, placeholders, legacy URLs) ---
+for fix in posts_title_fold posts_software_placeholder; do
+  TMP=$(mktemp -d)
+  cp -R "$FIXTURES/$fix" "$TMP/vol"
+  set +e
+  ruby "$CHECK" -d "$TMP/vol" >/tmp/check_posts_pass.txt 2>&1
+  rc=$?
+  set -e
+  assert_eq "check_posts $fix exit" "$rc" "0"
+  rm -rf "$TMP"
+done
+
 # --- failure classes ---
 for pair in \
   "posts_bad_yaml:invalid YAML" \
   "posts_bad_extras:extras must be a list" \
   "posts_author_mismatch:family not found in bibtex_author" \
   "posts_missing_pdf:missing required key: pdf" \
-  "posts_control_char:non-printable"
+  "posts_control_char:non-printable" \
+  "posts_title_mismatch:title and tex_title diverge"
 do
   fix="${pair%%:*}"
   needle="${pair#*:}"
