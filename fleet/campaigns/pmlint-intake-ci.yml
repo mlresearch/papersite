@@ -1,15 +1,22 @@
 id: pmlint-intake-ci
-title: "Install pmlint intake workflow on unpublished volumes"
-related_cips: ["0008", "0004", "000A"]
+title: "Install pmlint intake + posts workflows on unpublished volumes"
+related_cips: ["0008", "0004", "0009", "000A"]
 related_requirements: []
 source:
   - papersite: .github/workflows/pmlint-volume-example.yml
     dest: .github/workflows/pmlint.yml
+  - papersite: .github/workflows/pmlint-posts-volume-example.yml
+    dest: .github/workflows/pmlint-posts.yml
 target_branch: default
 classify:
+  # Require both workflows and the template allow-list so outdated intake
+  # copies (pre proceedings-template if) are reclassified as missing.
   match_markers:
     - "name: pmlint"
     - "pmlint --check"
+    - "proceedings-template"
+    - "pmlint-posts"
+    - "_posts/**"
   custom_regexes:
     - "tidy_bibtex|check_volume"
   require_unpublished: true
@@ -18,4 +25,4 @@ pilot:
   unpublished: 5
 pr:
   branch: chore/fleet-pmlint-intake-ci
-  title: "Install pmlint intake CI (CIP-000A / CIP-0008)"
+  title: "Install pmlint CI workflows (intake + posts) for unpublished volume"
