@@ -75,10 +75,7 @@ Unblocked: `pmfleet apply`/`status` Complete. Status → Ready for pilot.
 
 ### 2026-10-04
 
-Pilot `--limit 5` opened PRs:
-https://github.com/mlresearch/v139/pull/23
-https://github.com/mlresearch/v141/pull/1
-https://github.com/mlresearch/v142/pull/1
-https://github.com/mlresearch/v145/pull/1
-https://github.com/mlresearch/v146/pull/1
+Pilot `--limit 5` opened PRs on clean volumes (v139/v141/v142/v145/v146),
+then **closed and branches deleted** — prefer proving CI on a volume that
+already has a `fix/posts-yaml-lint` data PR before fleet rollout.
 Bulk apply still outstanding.
