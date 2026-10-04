@@ -40,48 +40,48 @@ def intake_campaign():
 
 
 def test_classify_posts_missing(posts_campaign):
-    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v901", ROOT)
+    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v99001", ROOT)
     assert r.classification == "missing"
     assert r.actions and r.actions[0]["action"] == "open_pr"
     assert r.target_branch == "gh-pages"
 
 
 def test_classify_posts_match(posts_campaign):
-    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v902", ROOT)
+    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v99002", ROOT)
     assert r.classification == "match"
 
 
 def test_classify_posts_custom(posts_campaign):
-    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v903", ROOT)
+    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v99003", ROOT)
     assert r.classification == "custom"
 
 
 def test_classify_posts_skip_unpublished(posts_campaign):
-    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v904", ROOT)
+    r = pmfleet.classify_repo(posts_campaign, FIXTURES / "v99004", ROOT)
     assert r.classification == "skip"
 
 
 def test_classify_intake_missing(intake_campaign):
-    r = pmfleet.classify_repo(intake_campaign, FIXTURES / "v905", ROOT)
+    r = pmfleet.classify_repo(intake_campaign, FIXTURES / "v99005", ROOT)
     assert r.classification == "missing"
     assert r.target_branch == "default"
 
 
 def test_classify_intake_skip_published(intake_campaign):
-    r = pmfleet.classify_repo(intake_campaign, FIXTURES / "v906", ROOT)
+    r = pmfleet.classify_repo(intake_campaign, FIXTURES / "v99006", ROOT)
     assert r.classification == "skip"
 
 
 def test_plan_only_missing(posts_campaign):
     repos = [
-        FIXTURES / "v901",
-        FIXTURES / "v902",
-        FIXTURES / "v903",
-        FIXTURES / "v904",
+        FIXTURES / "v99001",
+        FIXTURES / "v99002",
+        FIXTURES / "v99003",
+        FIXTURES / "v99004",
     ]
     results = [pmfleet.classify_repo(posts_campaign, r, ROOT) for r in repos]
     plan = pmfleet.build_plan(results)
-    assert [p["repo"] for p in plan] == ["v901"]
+    assert [p["repo"] for p in plan] == ["v99001"]
 
 
 def test_cli_inventory_json():
@@ -107,10 +107,10 @@ def test_cli_inventory_json():
     data = json.loads(proc.stdout)
     assert data["read_only"] is True
     by_name = {r["name"]: r["classification"] for r in data["repos"]}
-    assert by_name["v901"] == "missing"
-    assert by_name["v902"] == "match"
-    assert by_name["v903"] == "custom"
-    assert by_name["v904"] == "skip"
+    assert by_name["v99001"] == "missing"
+    assert by_name["v99002"] == "match"
+    assert by_name["v99003"] == "custom"
+    assert by_name["v99004"] == "skip"
 
 
 def test_cli_plan_json():
@@ -121,9 +121,9 @@ def test_cli_plan_json():
             "--campaign",
             "pmlint-posts-ci",
             "--repo",
-            str(FIXTURES / "v901"),
+            str(FIXTURES / "v99001"),
             "--repo",
-            str(FIXTURES / "v902"),
+            str(FIXTURES / "v99002"),
             "--format",
             "json",
             "--papersite-root",
@@ -138,7 +138,7 @@ def test_cli_plan_json():
     data = json.loads(proc.stdout)
     assert data["would_mutate"] is False
     assert len(data["planned"]) == 1
-    assert data["planned"][0]["repo"] == "v901"
+    assert data["planned"][0]["repo"] == "v99001"
 
 
 def test_cli_apply_not_implemented():
@@ -149,7 +149,7 @@ def test_cli_apply_not_implemented():
             "--campaign",
             "pmlint-posts-ci",
             "--repo",
-            str(FIXTURES / "v901"),
+            str(FIXTURES / "v99001"),
             "--open-prs",
             "--papersite-root",
             str(ROOT),

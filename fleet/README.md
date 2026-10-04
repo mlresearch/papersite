@@ -11,7 +11,7 @@ repositories with `bin/pmfleet`. Campaigns are YAML files under
 bin/pmfleet inventory --campaign pmlint-posts-ci --clones-dir ~/mlresearch
 
 # Same, single repo or fixture
-bin/pmfleet inventory --campaign pmlint-posts-ci --repo tests/fixtures/fleet/v901
+bin/pmfleet inventory --campaign pmlint-posts-ci --repo tests/fixtures/fleet/v99001
 
 # Dry-run actions for missing repos
 bin/pmfleet plan --campaign pmlint-posts-ci --clones-dir ~/mlresearch --format json
