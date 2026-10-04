@@ -78,4 +78,8 @@ Unblocked: `pmfleet apply`/`status` Complete. Status → Ready for pilot.
 Pilot `--limit 5` opened PRs on clean volumes (v139/v141/v142/v145/v146),
 then **closed and branches deleted** — prefer proving CI on a volume that
 already has a `fix/posts-yaml-lint` data PR before fleet rollout.
-Bulk apply still outstanding.
+
+Proved on v18 (`mlresearch/v18#1`, Actions green), then opened the same
+combined data-fix + workflow PRs for the other 16 soak volumes (see
+progress / GH). Remaining fleet work: volumes that need workflow-only
+install (no data fix).
