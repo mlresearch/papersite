@@ -319,3 +319,37 @@
 "②":
   replacement: "(2)"
   name: CIRCLED DIGIT TWO
+
+­:
+  replacement: ""
+  name: SOFT HYPHEN
+‐:
+  replacement: "-"
+  name: HYPHEN
+‑:
+  replacement: "-"
+  name: NON-BREAKING HYPHEN
+©:
+  replacement: "(c)"
+  name: COPYRIGHT SIGN
+≫:
+  replacement: "$\\gg$"
+  name: MUCH GREATER-THAN
+ǫ:
+  replacement: "$\\epsilon$"
+  name: LATIN SMALL LETTER O WITH OGONEK
+˘:
+  replacement: ""
+  name: BREVE
+∇:
+  replacement: "$\\nabla$"
+  name: NABLA
+⊤:
+  replacement: "$\\top$"
+  name: DOWN TACK
+Ω:
+  replacement: "$\\Omega$"
+  name: GREEK CAPITAL LETTER OMEGA
+˜:
+  replacement: "$\\tilde{}$"
+  name: SMALL TILDE
