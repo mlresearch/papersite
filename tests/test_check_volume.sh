@@ -16,6 +16,7 @@
 #                               (mojibake C1 controls U+0080/U+009D in title)
 #   fixtures/v316_original/   — Real lucassen25 entry from v316 before fixes
 #                               (raw U+0002 STX PDF line-break artifacts)
+#   fixtures/pdf_ligatures/   — Synthetic: Unicode ﬁ/ﬂ/ﬃ from PDF extraction
 #   fixtures/pdfs_in_subdir/  — Synthetic: PDFs in pdfs/ not root
 #   fixtures/supps_in_subdir/ — Synthetic: supps in supplementary_material/
 #   fixtures/clean_volume/    — Synthetic: all checks should pass
@@ -203,7 +204,20 @@ assert_no_error "clean: no missing PDF"          "$OUT" "Missing PDF for key"
 assert_no_error "clean: no PDF subdir error"     "$OUT" "in subdirectory"
 assert_no_error "clean: no non-ASCII key"        "$OUT" "Non-ASCII character in key"
 assert_no_error "clean: no non-printable chars"  "$OUT" "non-printable character U+"
+assert_no_error "clean: no PDF ligatures"        "$OUT" "PDF ligature"
 assert_exit_pass "clean exits zero"              "$FIXTURES/clean_volume" 999
+
+# ---------------------------------------------------------------------------
+section "pdf_ligatures — presentation-form ligatures from PDF extraction"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 888 "$FIXTURES/pdf_ligatures")
+
+assert_error "pdf-ligatures: ffi (U+FB03)" "$OUT" "PDF ligature ﬃ (U+FB03)"
+assert_error "pdf-ligatures: fi (U+FB01)"  "$OUT" "PDF ligature ﬁ (U+FB01)"
+assert_error "pdf-ligatures: fl (U+FB02)"  "$OUT" "PDF ligature ﬂ (U+FB02)"
+assert_error "pdf-ligatures: attributes to adams10a" "$OUT" "[adams10a]"
+assert_no_error "pdf-ligatures: clean abstract not flagged" "$OUT" "[agovic10a]"
+assert_exit_fail "pdf-ligatures exits non-zero" "$FIXTURES/pdf_ligatures" 888
 
 # ---------------------------------------------------------------------------
 section "v283 original — mojibake C1 controls in title (U+0080/U+009D)"

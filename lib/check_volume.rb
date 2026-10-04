@@ -18,7 +18,9 @@
 #  11. No non-printable C0/C1 control characters in text fields (mojibake, PDF
 #      extraction artifacts) — UTF-8 code-point aware, so legitimate multi-byte
 #      punctuation (em dash, curly quotes, etc.) is not flagged
-#  12. Proper names / acronyms in titles are LaTeX-braced when listed in
+#  12. No Unicode presentation-form ligatures (ﬀ ﬁ ﬂ ﬃ ﬄ …) — classic PDF
+#      text-extraction artifacts; replace with ASCII ff/fi/fl/ffi/ffl
+#  13. Proper names / acronyms in titles are LaTeX-braced when listed in
 #      lib/proper_names.yml (CIP-000B); unknown all-caps tokens warn and can be
 #      offered for addition to the YAML (--add-proper-names)
 #
@@ -61,6 +63,19 @@ class VolumeChecker
     PMLR JMLR arXiv ARXIV CORL RSS IROS ICRA COLT ALT MIDL CHIL CoRL
   ].to_set
 
+  # Alphabetic Presentation Forms commonly emitted by PDF text extractors when
+  # the source used a ligature glyph. Legitimate typographic æ/œ in names are
+  # not in this set — only the FB0x “fi/ff/fl” family that should be ASCII.
+  PDF_EXTRACTION_LIGATURES = {
+    0xFB00 => ['ﬀ', 'ff'],
+    0xFB01 => ['ﬁ', 'fi'],
+    0xFB02 => ['ﬂ', 'fl'],
+    0xFB03 => ['ﬃ', 'ffi'],
+    0xFB04 => ['ﬄ', 'ffl'],
+    0xFB05 => ['ﬅ', 'st'], # long s + t
+    0xFB06 => ['ﬆ', 'st'],
+  }.freeze
+
   def initialize(options)
     @options   = options
     @vol_dir   = options[:directory]
@@ -101,6 +116,7 @@ class VolumeChecker
     check_dq_fields_with_latex_umlauts(content)
     check_double_braced_pages(content)
     check_non_printable_characters(content)
+    check_pdf_extraction_ligatures(content)
     check_proper_name_bracing(content)
 
     print_summary
@@ -462,6 +478,37 @@ class VolumeChecker
 
     if issues.empty?
       ok "  No non-printable characters found"
+    else
+      issues.uniq.each { |i| error i }
+    end
+  end
+
+  def check_pdf_extraction_ligatures(content)
+    section "PDF extraction ligatures"
+
+    # Presentation-form ligatures (U+FB00–FB06) almost always mean the abstract
+    # was copied from a PDF that used a ligature glyph. Fail explicitly rather
+    # than waiting for create_volume's unicode tidy (or relying on --unicode).
+    issues = []
+    current_key = nil
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
+
+    content.each_line.with_index(1) do |line, lineno|
+      if (m = line.match(entry_re))
+        current_key = m[2]
+      end
+
+      line.each_char do |char|
+        info = PDF_EXTRACTION_LIGATURES[char.ord]
+        next unless info
+        glyph, ascii = info
+        hex = format('U+%04X', char.ord)
+        issues << "  [#{current_key || '?'}] line #{lineno}: PDF ligature #{glyph} (#{hex}) — replace with ASCII \"#{ascii}\" (common PDF text-extraction artifact)"
+      end
+    end
+
+    if issues.empty?
+      ok "  No PDF extraction ligatures found"
     else
       issues.uniq.each { |i| error i }
     end

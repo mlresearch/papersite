@@ -196,6 +196,18 @@
 ﬀ:
   replacement: "ff"
   name: LATIN SMALL LIGATURE FF
+ﬁ:
+  replacement: "fi"
+  name: LATIN SMALL LIGATURE FI
+ﬂ:
+  replacement: "fl"
+  name: LATIN SMALL LIGATURE FL
+ﬃ:
+  replacement: "ffi"
+  name: LATIN SMALL LIGATURE FFI
+ﬄ:
+  replacement: "ffl"
+  name: LATIN SMALL LIGATURE FFL
 É:
   replacement: "\\'{E}"
   name: LATIN CAPITAL LETTER E WITH ACUTE
