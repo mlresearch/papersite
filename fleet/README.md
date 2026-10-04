@@ -50,8 +50,11 @@ Classifiers: `missing` \| `match` \| `custom` \| `skip`.
 
 | When | Installs | How |
 |---|---|---|
+| `proceedings-template` | both workflows | kept in sync with papersite examples (`vNNN`/`rNNN` **or** `proceedings-template`) |
 | `create_volume.rb` (unpublished) | intake `pmlint.yml` | `bin/install_volume_workflows.sh intake` |
 | `deploy_volume.sh` → `gh-pages` | posts `pmlint-posts.yml` | `bin/install_volume_workflows.sh posts` |
+
+On the template, intake runs for initial BibTeX/PDF PRs; posts is path-filtered to `_posts/**` so it stays quiet until corrections exist.
 
 Canonical sources stay under papersite `.github/workflows/*-example.yml`.
 Volumes hold copies; fleet campaigns close the gap for existing repos.
