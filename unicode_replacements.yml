@@ -353,3 +353,11 @@
 ˜:
   replacement: "$\\tilde{}$"
   name: SMALL TILDE
+
+ˆ:
+  replacement: "\\^{}"
+  name: MODIFIER LETTER CIRCUMFLEX ACCENT
+
+Ω:
+  replacement: "$\\Omega$"
+  name: OHM SIGN
