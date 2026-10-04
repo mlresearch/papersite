@@ -205,11 +205,16 @@ class PostsChecker
             error "  author[#{i}] is not a mapping"
             next
           end
-          # Mononyms (e.g. Mausam) and org names may omit family; allow blank
-          # family when `given` is present. True omissions still fail consistency
-          # against bibtex_author when that field exists.
+          # Official mononym form: family: Name with empty/absent given
+          # (BibTeX Name,,). Inverted given-only mononyms still parse, but warn
+          # so correction PRs migrate toward the generator/FAQ shape.
           if blank?(a['family']) && blank?(a['given']) && blank?(a['literal'])
             error "  author[#{i}] missing family/given"
+          elsif blank?(a['family']) && !blank?(a['given']) && blank?(a['literal'])
+            warn_msg "  author[#{i}] mononym should use family: #{a['given']} " \
+                     '(not given-only); bibtex_author form is Name,,'
+          elsif !blank?(a['family']) && blank?(a['given']) && blank?(a['literal'])
+            ok "  author[#{i}] mononym family-only"
           end
         end
       end

@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_document-mononym-authors"
 title: "Document single-name (mononym) author encoding for posts and BibTeX"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -46,24 +46,22 @@ follow-on work can fix remaining known posts (v180, v216) and tighten
 
 ## Acceptance Criteria
 
-- [ ] FAQ (proceedings.mlr.press / site source) states mononym encoding
+- [x] FAQ (proceedings.mlr.press / site source) states mononym encoding
       for both the display `author` field and the BibTeX/`bibtex_author`
       field
-- [ ] Guidance matches PMLR spec “Lastname, Firstnames” and papersite
+- [x] Guidance matches PMLR spec “Lastname, Firstnames” and papersite
       generator behaviour (`lib/mlresearch.rb` `splitauthors`)
-- [ ] Explicitly discourages `{ }, {Name}` and space-only `family: " "`
-- [ ] Short cross-link or note from papersite docs/README or CIP-0009
+- [x] Explicitly discourages `{ }, {Name}` and space-only `family: " "`
+- [x] Short cross-link or note from papersite docs/README or CIP-0009
       compression target if FAQ lives outside this repo
-- [ ] Known remaining bad posts (v180, v216) listed as follow-on, not
+- [x] Known remaining bad posts (v180, v216) listed as follow-on, not
       blocked on this docs task
 
 ## Implementation Notes
 
-- FAQ source may live in `mlresearch.github.io` rather than papersite;
-  update whichever repo owns `faq.html`.
-- Optional later: warn in `check_posts` when `given` is set and `family`
-  is blank (invert today’s lenient mononym allowance toward family-only).
-- Optional later: fleet or one-off PRs for v180/v216 Mausam entries.
+- FAQ source lives in `mlresearch.github.io/faq.html`.
+- Validator follow-up: `2026-10-04_check-posts-mononym-family`.
+- Volume cleanup for v180/v216 applied locally alongside this work.
 
 ## Related
 
@@ -81,3 +79,8 @@ follow-on work can fix remaining known posts (v180, v216) and tighten
 Task created after v119 mononym discussion: family-only is correct;
 FAQ lacks guidance; local scan found remaining `given: Mausam` on v180
 and v216.
+
+### 2026-10-04 (later)
+
+Completed: FAQ mononym paragraph + editor cross-note; papersite README
+posts section links to FAQ and notes `check_posts` warn policy.

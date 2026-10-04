@@ -73,8 +73,8 @@ else
 fi
 rm -rf "$TMP"
 
-# --- soak-learned pass fixtures (LaTeX fold, placeholders, legacy URLs) ---
-for fix in posts_title_fold posts_software_placeholder; do
+# --- soak-learned pass fixtures (LaTeX fold, placeholders, legacy URLs, mononym) ---
+for fix in posts_title_fold posts_software_placeholder posts_mononym_ok; do
   TMP=$(mktemp -d)
   cp -R "$FIXTURES/$fix" "$TMP/vol"
   set +e
@@ -84,6 +84,25 @@ for fix in posts_title_fold posts_software_placeholder; do
   assert_eq "check_posts $fix exit" "$rc" "0"
   rm -rf "$TMP"
 done
+
+# --- inverted mononym warns but does not fail (warn-first policy) ---
+TMP=$(mktemp -d)
+cp -R "$FIXTURES/posts_mononym_inverted" "$TMP/vol"
+set +e
+ruby "$CHECK" -d "$TMP/vol" >/tmp/check_posts_mononym_warn.txt 2>&1
+rc=$?
+set -e
+assert_eq "check_posts posts_mononym_inverted exit" "$rc" "0"
+if grep -qi "mononym should use family" /tmp/check_posts_mononym_warn.txt; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: inverted mononym warns"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [posts_mononym_inverted missing mononym warning]")
+  echo "  ✗ FAIL: posts_mononym_inverted missing mononym warning"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/check_posts_mononym_warn.txt; fi
+fi
+rm -rf "$TMP"
 
 # --- failure classes ---
 for pair in \

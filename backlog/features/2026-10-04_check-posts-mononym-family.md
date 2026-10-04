@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_check-posts-mononym-family"
 title: "Tighten check_posts mononym rule to prefer family-only authors"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -43,33 +43,27 @@ supported; do not force them through the family field incorrectly.
 
 ## Acceptance Criteria
 
-- [ ] Decision recorded: warn vs error for inverted mononym
-      (`given` set, `family` blank)
-- [ ] `check_posts` implements that decision with a clear message pointing
+- [x] Decision recorded: warn vs error for inverted mononym
+      (`given` set, `family` blank) — **warn first** (exit 0)
+- [x] `check_posts` implements that decision with a clear message pointing
       at family-only + `Name,,`
-- [ ] Unit/fixture coverage for: correct mononym, inverted mononym,
+- [x] Unit/fixture coverage for: correct mononym, inverted mononym,
       normal Given/Family, and bibtex `Name,,` consistency
-- [ ] Existing soak / known-bad volumes (e.g. v180, v216) either fixed
+- [x] Existing soak / known-bad volumes (e.g. v180, v216) either fixed
       first or explicitly allowlisted / graded so CI does not surprise
-- [ ] Docs task `2026-10-04_document-mononym-authors` linked or completed
+- [x] Docs task `2026-10-04_document-mononym-authors` linked or completed
       so editor-facing guidance matches the checker
 
 ## Implementation Notes
 
-Relevant code today (`lib/check_posts.rb`):
+Policy chosen: **warn** on inverted mononym so historical posts do not
+fail CI until cleaned; promote to error later if desired.
 
-- Author map check allows blank family when given present
-- Bibtex consistency uses `fam.empty? ? given : fam` as the match token
+Fixtures: `tests/fixtures/posts_mononym_ok`,
+`tests/fixtures/posts_mononym_inverted`.
 
-Suggested approach:
-
-1. Add a dedicated check (or extend the author loop) for inverted mononym
-2. Prefer **warn** first if fleet cleanup is incomplete; promote to
-   **error** once remaining posts are fixed
-3. Align messages with FAQ wording once published
-
-Follow-on data cleanup (separate or same PR series): v180, v216 Mausam
-posts still use `given: Mausam`.
+v180 `sharma22a` and v216 `sharma23c` updated locally to family-only +
+`Mausam,,`.
 
 ## Related
 
@@ -86,3 +80,8 @@ posts still use `given: Mausam`.
 Task created as the validator follow-up to the mononym documentation
 backlog; current checker is intentionally lenient the wrong way for
 single-name authors.
+
+### 2026-10-04 (later)
+
+Implemented warn-first inverted-mononym check; added fixtures + smoke
+tests; fixed v180/v216 Mausam posts locally.
