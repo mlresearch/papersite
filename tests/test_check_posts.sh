@@ -139,7 +139,8 @@ TMP=$(mktemp -d)
 cp -R "$FIXTURES/clean_volume" "$TMP/v996"
 (
   cd "$TMP/v996"
-  git init -q
+  # Pin initial branch: CI runners often still default git init to "master".
+  git init -q -b main
   git config user.email "test@example.com"
   git config user.name "Test"
   git add -A
