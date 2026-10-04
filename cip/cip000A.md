@@ -3,7 +3,7 @@ author: "Neil D. Lawrence"
 created: "2026-10-04"
 id: "000A"
 last_updated: "2026-10-04"
-status: "Proposed"
+status: "In Progress"
 compressed: false
 related_requirements: []
 related_cips: ["0004", "0007", "0008", "0009"]
@@ -30,8 +30,8 @@ title: "Fleet rollout — distribute papersite changes across volume repositorie
 ## Status
 
 - [x] Proposed - Initial idea documented
-- [ ] Accepted - Approved, ready to start work
-- [ ] In Progress - Actively being implemented
+- [x] Accepted - Approved, ready to start work
+- [x] In Progress - Actively being implemented
 - [ ] Implemented - Work complete, awaiting verification
 - [ ] Closed - Verified and complete
 - [ ] Rejected - Will not be implemented
@@ -243,13 +243,21 @@ First campaigns touch [REQ-0005](../requirements/req0005_post-yaml-edits-validat
 ## Implementation Status
 
 - [x] CIP Proposed as **general** fleet mechanism (not pmlint-only)
-- [ ] Accepted after review
-- [ ] Fleet tool (`inventory` / `plan` / `apply` / `status`)
-- [ ] Campaign config schema + `fleet/` (or equivalent) docs
-- [ ] Campaign `pmlint-posts-ci` complete
-- [ ] Campaign `pmlint-intake-ci` complete
-- [ ] New-volume templates updated
+- [x] Accepted (2026-10-04); backlog tasks created
+- [ ] Fleet tool `inventory` / `plan`
+  → `backlog/features/2026-10-04_pmfleet-inventory-plan.md`
+- [ ] Fleet tool `apply --open-prs` / `status`
+  → `backlog/features/2026-10-04_pmfleet-apply-status.md`
+- [ ] Campaign config schema + `fleet/` docs
+  → `backlog/documentation/2026-10-04_fleet-campaign-schema-docs.md`
+- [ ] Campaign `pmlint-posts-ci` (config, pilot, bulk)
+  → `backlog/infrastructure/2026-10-04_fleet-campaign-pmlint-posts.md`
+- [ ] Campaign `pmlint-intake-ci` (config, pilot, bulk)
+  → `backlog/infrastructure/2026-10-04_fleet-campaign-pmlint-intake.md`
+- [ ] New-volume templates (`create_volume` / checked-in examples)
+  → `backlog/features/2026-10-04_fleet-new-volume-templates.md`
 - [ ] Checklist for “next campaign”
+  → `backlog/documentation/2026-10-04_fleet-next-campaign-checklist.md`
 - [ ] CIP Closed (tool stable; further campaigns via backlog)
 
 ## References
