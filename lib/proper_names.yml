@@ -1,0 +1,131 @@
+# Proper names and acronyms that should keep their capitals in BibTeX titles.
+#
+# Used by CIP-000B title bracing checks (intake). Matching is whole-word only;
+# the checker does not auto-grow this list.
+#
+# A stem is considered protected in a title if any of these appear:
+#   - {X}rest   e.g. {B}ayes, {B}ayesian
+#   - {Stem}    e.g. {Bayes}, {SVM}
+#
+# Schema (each list entry):
+#   stem:  string (required) — canonical token to match
+#   kind:  name | acronym     — reporting / docs only
+#   notes: string             — optional curation note
+#
+# Source: curated from cip/cip000B/ scan (2026-10-04), not an auto-dump of
+# Title Case tokens from _posts.
+
+stems:
+  # --- eponyms / proper names ---
+  - stem: Bayes
+    kind: name
+  - stem: Bayesian
+    kind: name
+  - stem: Markov
+    kind: name
+  - stem: Markovian
+    kind: name
+  - stem: Gaussian
+    kind: name
+  - stem: Dirichlet
+    kind: name
+  - stem: Poisson
+    kind: name
+  - stem: Bernoulli
+    kind: name
+  - stem: Laplace
+    kind: name
+  - stem: Fourier
+    kind: name
+  - stem: Hamiltonian
+    kind: name
+  - stem: Langevin
+    kind: name
+  - stem: Riemannian
+    kind: name
+  - stem: Euclidean
+    kind: name
+  - stem: Kalman
+    kind: name
+  - stem: Gibbs
+    kind: name
+  - stem: Metropolis
+    kind: name
+  - stem: Hastings
+    kind: name
+  - stem: Ising
+    kind: name
+  - stem: Boltzmann
+    kind: name
+  - stem: Wasserstein
+    kind: name
+  - stem: Nash
+    kind: name
+  - stem: Pareto
+    kind: name
+  - stem: Hilbert
+    kind: name
+  - stem: Lyapunov
+    kind: name
+  - stem: Lipschitz
+    kind: name
+  - stem: Monte
+    kind: name
+    notes: "Usually Monte Carlo; Carlo listed separately"
+  - stem: Carlo
+    kind: name
+  - stem: Kullback
+    kind: name
+  - stem: Leibler
+    kind: name
+
+  # --- recurring acronyms ---
+  # High-frequency stems included: if capitalised in a title, preserve them.
+  - stem: AI
+    kind: acronym
+  - stem: LLM
+    kind: acronym
+  - stem: ML
+    kind: acronym
+    notes: "Machine learning; short — watch false friends in soak"
+  - stem: MCMC
+    kind: acronym
+  - stem: SGD
+    kind: acronym
+  - stem: SVM
+    kind: acronym
+  - stem: PCA
+    kind: acronym
+  - stem: PAC
+    kind: acronym
+  - stem: POMDP
+    kind: acronym
+  - stem: MDP
+    kind: acronym
+  - stem: GAN
+    kind: acronym
+  - stem: VAE
+    kind: acronym
+  - stem: CNN
+    kind: acronym
+  - stem: RNN
+    kind: acronym
+  - stem: GNN
+    kind: acronym
+  - stem: DAG
+    kind: acronym
+  - stem: ODE
+    kind: acronym
+  - stem: PDE
+    kind: acronym
+  - stem: SVD
+    kind: acronym
+  - stem: KL
+    kind: acronym
+    notes: "Kullback-Leibler abbreviation"
+  - stem: MAP
+    kind: acronym
+    notes: "Maximum a posteriori; short — watch false friends in soak"
+  - stem: EM
+    kind: acronym
+    notes: "Expectation-maximisation; short — watch false friends in soak"
