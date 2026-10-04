@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_check-posts-tests"
 title: "Add fixtures and tests for check_posts / pmlint posts"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -37,10 +37,10 @@ Wire into papersite CI if there is an existing pmlint test job.
 
 ## Acceptance Criteria
 
-- [ ] Fixtures exist under `tests/` for each failure class above plus one good post
-- [ ] Automated test fails on bad fixtures and passes on good
-- [ ] Posts `--check` leaves fixture tree unchanged
-- [ ] Papersite CI runs the new test (or documents how)
+- [x] Fixtures exist under `tests/` for each failure class above plus one good post
+- [x] Automated test fails on bad fixtures and passes on good
+- [x] Posts `--check` leaves fixture tree unchanged
+- [x] Papersite CI runs the new test (or documents how)
 
 ## Implementation Notes
 
@@ -57,3 +57,7 @@ Reuse directory layout conventions from existing volume fixtures. Keep fixtures 
 ### 2026-10-04
 
 Task created as Ready when CIP-0009 was Accepted.
+
+### 2026-10-04
+
+Implemented as part of CIP-0009 v1.

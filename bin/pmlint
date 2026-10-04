@@ -5,8 +5,10 @@
 #
 # USAGE:
 #   cd ~/mlresearch/v350   # or r0, r201, …
-#   pmlint --check         # volume id inferred from directory / git remote
+#   pmlint --check         # intake: BibTeX + PDFs (pre-publication)
 #   pmlint --fix
+#   pmlint posts --check   # published volumes: validate _posts YAML
+#   pmlint posts --check --changed
 #   pmlint --check v350    # explicit id (also accepts bare 350 → v350)
 #   pmlint --check r0 proceedings.bib
 #
@@ -16,6 +18,7 @@
 #   PAPERSITE_ROOT       Override papersite checkout
 #   PMLINT_SKIP_UPDATE=1   Skip git fetch / fast-forward (CI / offline)
 #   PMLINT_CACHE_DIR     Cache clone path (default: ~/.local/share/papersite)
+#   PMLINT_DIFF_BASE     Git ref for posts --changed (default HEAD^)
 #
 # Exit codes:
 #   0  All checks passed
@@ -26,38 +29,54 @@ set -euo pipefail
 
 DEFAULT_CACHE="${PMLINT_CACHE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/papersite}"
 MODE="check"
+SCOPE="intake"   # intake | posts
 UNICODE_CHECK=0
 FORCE=0
+CHANGED=0
+DIFF_BASE=""
 VOLUME_ARG=""
 BIBFILE=""
+POST_FILES=()
 
 usage() {
   cat <<'EOF'
-Usage: pmlint [--check|--fix] [--unicode] [--force] [VOLUME] [BIBFILE]
+Usage:
+  pmlint [--check|--fix] [--unicode] [--force] [VOLUME] [BIBFILE]
+  pmlint posts --check [--changed] [--base REF] [VOLUME] [POST_FILES...]
 
+Intake (default — pre-publication BibTeX / PDF checks):
   --check     Read-only validation (default). Does not modify the volume tree.
   --fix       Apply safe non-interactive BibTeX repairs (percent escaping),
               then re-check.
-  --unicode   Also run tidy_bib_unicode --strict (output only under /tmp;
-              never under the volume tree).
-  --force     Run even if the volume looks already published (gh-pages present).
-  -h, --help  Show this help.
+  --unicode   Also run tidy_bib_unicode --strict (output only under /tmp).
+  --force     Run intake even if the volume looks already published.
+
+Posts (published volumes — FAQ _posts YAML corrections):
+  posts --check     Validate _posts/*.md YAML / frontmatter / consistency
+  --changed         Only posts changed vs --base / PMLINT_DIFF_BASE / HEAD^
+  --base REF        Diff base for --changed
 
 VOLUME is optional when the current directory (or origin repo name) is
 vNNN or rNNN (rereleases). A bare number means v<number>.
 
-If origin (or local) has a gh-pages branch — the usual signal that the volume
-has been published — pmlint exits 0 without checking, unless --force.
+Intake: if origin (or local) has a gh-pages branch, pmlint exits 0 without
+checking, unless --force. Use `pmlint posts --check` for published volumes.
 
 Environment:
   PAPERSITE_ROOT      Papersite checkout (optional)
   PMLINT_SKIP_UPDATE=1  Skip git fetch / fast-forward
   PMLINT_CACHE_DIR    Cache clone (default: ~/.local/share/papersite)
+  PMLINT_DIFF_BASE    Default git ref for posts --changed
 
 Install once:
   bash path/to/papersite/bin/install-pmlint
 EOF
 }
+
+if [[ "${1:-}" == "posts" ]]; then
+  SCOPE="posts"
+  shift
+fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -65,6 +84,15 @@ while [[ $# -gt 0 ]]; do
     --fix) MODE="fix"; shift ;;
     --unicode) UNICODE_CHECK=1; shift ;;
     --force) FORCE=1; shift ;;
+    --changed) CHANGED=1; shift ;;
+    --base)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --base requires a git ref" >&2
+        exit 1
+      fi
+      DIFF_BASE="$2"
+      shift 2
+      ;;
     -h|--help) usage; exit 0 ;;
     -*)
       echo "ERROR: Unknown option: $1" >&2
@@ -72,13 +100,25 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      if [[ -z "$VOLUME_ARG" ]]; then
-        VOLUME_ARG="$1"
-      elif [[ -z "$BIBFILE" ]]; then
-        BIBFILE="$1"
+      if [[ "$SCOPE" == "posts" ]]; then
+        if [[ "$1" == *.md || "$1" == _posts/* || "$1" == */_posts/* ]]; then
+          POST_FILES+=("$1")
+        elif [[ -z "$VOLUME_ARG" && ( "$1" =~ ^[0-9]+$ || "$1" =~ ^[vr][0-9]+$ ) ]]; then
+          VOLUME_ARG="$1"
+        elif [[ -z "$VOLUME_ARG" ]]; then
+          VOLUME_ARG="$1"
+        else
+          POST_FILES+=("$1")
+        fi
       else
-        echo "ERROR: Unexpected argument: $1" >&2
-        exit 1
+        if [[ -z "$VOLUME_ARG" ]]; then
+          VOLUME_ARG="$1"
+        elif [[ -z "$BIBFILE" ]]; then
+          BIBFILE="$1"
+        else
+          echo "ERROR: Unexpected argument: $1" >&2
+          exit 1
+        fi
       fi
       shift
       ;;
@@ -124,18 +164,20 @@ infer_volume_id() {
 }
 
 VOLUME=""
-if [[ -n "$VOLUME_ARG" ]]; then
-  if ! VOLUME="$(normalize_volume_id "$VOLUME_ARG")"; then
-    echo "ERROR: Volume must be vNNN, rNNN, or a bare number (got: $VOLUME_ARG)" >&2
-    usage >&2
-    exit 1
-  fi
-else
-  if ! VOLUME="$(infer_volume_id)"; then
-    echo "ERROR: Could not infer volume id from directory or git remote." >&2
-    echo "       Run from a vNNN/rNNN repo, or pass the id explicitly." >&2
-    usage >&2
-    exit 1
+if [[ "$SCOPE" != "posts" ]]; then
+  if [[ -n "$VOLUME_ARG" ]]; then
+    if ! VOLUME="$(normalize_volume_id "$VOLUME_ARG")"; then
+      echo "ERROR: Volume must be vNNN, rNNN, or a bare number (got: $VOLUME_ARG)" >&2
+      usage >&2
+      exit 1
+    fi
+  else
+    if ! VOLUME="$(infer_volume_id)"; then
+      echo "ERROR: Could not infer volume id from directory or git remote." >&2
+      echo "       Run from a vNNN/rNNN repo, or pass the id explicitly." >&2
+      usage >&2
+      exit 1
+    fi
   fi
 fi
 
@@ -320,6 +362,81 @@ self_update "$ROOT"
 
 LIB="$ROOT/lib"
 BIN="$ROOT/bin"
+
+# Resolve volume for posts without requiring a .bib / intake id when cwd has _posts.
+if [[ "$SCOPE" == "posts" ]]; then
+  if [[ -n "$VOLUME_ARG" ]]; then
+    VOLUME="$(normalize_volume_id "$VOLUME_ARG")" || {
+      echo "ERROR: Invalid volume id: $VOLUME_ARG (expected vNNN, rNNN, or bare number)" >&2
+      exit 1
+    }
+    VOL_DIR="$(resolve_volume_dir "$VOLUME")"
+  elif [[ -d "_posts" ]]; then
+    VOLUME="${VOLUME_ARG:-$(basename "$(pwd)")}"
+    VOL_DIR="$(pwd)"
+  else
+    VOLUME="$(
+      if [[ -n "$VOLUME_ARG" ]]; then
+        normalize_volume_id "$VOLUME_ARG"
+      else
+        infer_volume_id
+      fi
+    )" || {
+      echo "ERROR: Could not infer volume id; pass vNNN or run from a volume directory with _posts/" >&2
+      exit 1
+    }
+    VOL_DIR="$(resolve_volume_dir "$VOLUME")"
+  fi
+
+  if [[ "$MODE" != "check" ]]; then
+    echo "ERROR: pmlint posts only supports --check (got --${MODE})" >&2
+    exit 1
+  fi
+
+  echo "pmlint mode=posts/--check volume=${VOLUME}"
+  echo "  papersite: $ROOT"
+  echo "  volume:    $VOL_DIR"
+
+  set +e
+  section "Check: check_posts (_posts YAML)"
+  POST_ARGS=(-d "$VOL_DIR")
+  if [[ "$CHANGED" -eq 1 ]]; then
+    POST_ARGS+=(--changed)
+    if [[ -n "$DIFF_BASE" ]]; then
+      POST_ARGS+=(--base "$DIFF_BASE")
+    fi
+  fi
+  if [[ ${#POST_FILES[@]} -gt 0 ]]; then
+    POST_ARGS+=("${POST_FILES[@]}")
+  fi
+  ruby "$LIB/check_posts.rb" "${POST_ARGS[@]}"
+  record_stage "check_posts" $?
+  set -e
+  print_rollup
+  echo
+  if [[ "$FAILED" -eq 0 ]]; then
+    echo "pmlint posts: PASSED"
+    exit 0
+  else
+    cat >&2 <<EOF
+pmlint posts: FAILED
+
+How to fix
+----------
+Edit the reported _posts/*.md files so YAML frontmatter is valid and matches
+the paper schema (layout, title, author, id, pdf; extras as {label, link}).
+Display author/title should stay consistent with bibtex_author / tex_title
+when those fields are present.
+
+Re-check:
+  pmlint posts --check
+
+Docs: https://github.com/mlresearch/papersite#lint-published-posts
+EOF
+    exit 1
+  fi
+fi
+
 VOL_DIR="$(resolve_volume_dir "$VOLUME")"
 
 echo "pmlint mode=$MODE volume=$VOLUME"

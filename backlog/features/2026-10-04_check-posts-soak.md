@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_check-posts-soak"
 title: "Soak check_posts on real published volume _posts; triage false positives"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -31,11 +31,11 @@ Goal: confidence that the default rules are strict enough for correction PRs wit
 
 ## Acceptance Criteria
 
-- [ ] Ran against at least three published volumes' `_posts` (record which)
-- [ ] False positives classified; validator or docs adjusted as needed
-- [ ] True positives either filed/fixed or explicitly deferred with reason
-- [ ] Short note in CIP-0009 progress (or this task) on soak results
-- [ ] Green light recorded before opening a fleet-rollout CIP
+- [x] Ran against at least three published volumes' `_posts` (record which)
+- [x] False positives classified; validator or docs adjusted as needed
+- [x] True positives either filed/fixed or explicitly deferred with reason
+- [x] Short note in CIP-0009 progress (or this task) on soak results
+- [x] Green light recorded before opening a fleet-rollout CIP
 
 ## Implementation Notes
 
@@ -52,3 +52,15 @@ Use local clones or sparse checkouts; do not require pushing workflows yet. Pref
 ### 2026-10-04
 
 Task created as Ready when CIP-0009 was Accepted.
+
+### 2026-10-04
+
+Implemented as part of CIP-0009 v1.
+
+Soak results (all PASSED, 0 errors after LaTeX/Unicode normalisation tweaks):
+
+- `v304` — 79 posts (local `_posts`)
+- `v16` — 12 posts (`gh-pages` archive)
+- `v283` — 120 posts (`gh-pages` archive; drove `{\ss}` / `\sqrtT` / `\i` handling)
+
+Green light for a future fleet-rollout CIP.

@@ -53,13 +53,36 @@ A bare number still works (`304` → `v304`).
 `--check` must not modify the volume tree. `--fix` only applies non-interactive
 `tidy_bibtex --fix-percent` (not Unicode map edits or PDF moves).
 
-If the volume already has a **gh-pages** branch (published site), `pmlint` exits
-successfully without checking. Use `--force` to lint a published volume anyway.
+If the volume already has a **gh-pages** branch (published site), intake
+`pmlint` exits successfully without checking. Use `--force` to run intake
+anyway, or use **posts** mode for FAQ-style `_posts` edits:
+
+```bash
+# On the branch that holds _posts/ (often gh-pages)
+pmlint posts --check
+pmlint posts --check --changed          # only posts changed vs HEAD^
+pmlint posts --check --changed --base origin/gh-pages
+```
 
 **PR CI:** volume repositories can copy
 [`.github/workflows/pmlint-volume-example.yml`](.github/workflows/pmlint-volume-example.yml)
-and adjust as needed. Papersite itself runs `tests/test_pmlint.sh` via
-`.github/workflows/test-pmlint.yml`.
+(intake) and/or
+[`.github/workflows/pmlint-posts-volume-example.yml`](.github/workflows/pmlint-posts-volume-example.yml)
+(`_posts` corrections). Papersite runs `tests/test_pmlint.sh` and
+`tests/test_check_posts.sh` via `.github/workflows/test-pmlint.yml`.
+
+### Lint published posts
+
+After publication, citation fixes go in `_posts/*.md` (not BibTeX). Validate with:
+
+```bash
+cd ~/mlresearch/v304   # checkout with _posts present
+pmlint posts --check
+```
+
+Checks: YAML/frontmatter fences, required keys (`layout`, `title`, `author`,
+`id`, `pdf`), `extras` shape, display vs `bibtex_author` / `tex_title`
+consistency, and non-printable characters.
 
 ### Classic workflow steps
 

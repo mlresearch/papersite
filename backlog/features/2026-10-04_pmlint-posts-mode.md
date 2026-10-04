@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_pmlint-posts-mode"
 title: "Wire pmlint posts --check mode (keep intake skip on published)"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -34,11 +34,11 @@ Document CLI in root `README.md`. Self-update / `PAPERSITE_ROOT` resolution stay
 
 ## Acceptance Criteria
 
-- [ ] `pmlint posts --check` invokes check_posts and exits `0`/`1`
-- [ ] Intake `pmlint --check` still skips published volumes unless `--force`
-- [ ] `--check` posts mode is non-mutating
-- [ ] Optional `--changed` documented (implement if straightforward for CI)
-- [ ] README documents posts vs intake modes
+- [x] `pmlint posts --check` invokes check_posts and exits `0`/`1`
+- [x] Intake `pmlint --check` still skips published volumes unless `--force`
+- [x] `--check` posts mode is non-mutating
+- [x] Optional `--changed` documented (implement if straightforward for CI)
+- [x] README documents posts vs intake modes
 
 ## Implementation Notes
 
@@ -55,3 +55,7 @@ Prefer explicit `posts` subcommand/flag over silently changing default `--check`
 ### 2026-10-04
 
 Task created as Ready when CIP-0009 was Accepted.
+
+### 2026-10-04
+
+Implemented as part of CIP-0009 v1.

@@ -1,7 +1,7 @@
 ---
 id: "0005"
 title: "Post-publication paper YAML edits are validated before merge"
-status: "In Progress"
+status: "Implemented"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -61,3 +61,5 @@ HOW (tooling, CLI flags, workflow wiring) belongs in CIP-0009. Fleet enablement 
 Requirement recorded; CIP-0009 proposed as the HOW.
 
 CIP-0009 Accepted; backlog tasks created. Status → In Progress.
+
+CIP-0009 Implemented (`pmlint posts --check`); soak on v304 and v16 clean. Status → Implemented. Fleet enablement still open.

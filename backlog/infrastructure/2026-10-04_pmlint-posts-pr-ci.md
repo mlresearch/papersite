@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_pmlint-posts-pr-ci"
 title: "Add example GitHub Actions workflow for pmlint posts on _posts PRs"
-status: "Ready"
+status: "Completed"
 priority: "Medium"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -31,11 +31,11 @@ Fleet install into every existing volume repo is **out of scope** (separate CIP 
 
 ## Acceptance Criteria
 
-- [ ] Example workflow under papersite `.github/` for posts mode
-- [ ] Path filter (or equivalent) so job targets `_posts` correction PRs
-- [ ] Job fails when posts lint fails
-- [ ] README documents how a volume enables the workflow
-- [ ] Intake-only example behaviour for unpublished volumes remains clear
+- [x] Example workflow under papersite `.github/` for posts mode
+- [x] Path filter (or equivalent) so job targets `_posts` correction PRs
+- [x] Job fails when posts lint fails
+- [x] README documents how a volume enables the workflow
+- [x] Intake-only example behaviour for unpublished volumes remains clear
 
 ## Implementation Notes
 
@@ -51,3 +51,7 @@ Published volumes often keep `_posts` on `gh-pages`; workflow docs must say whic
 ### 2026-10-04
 
 Task created as Ready when CIP-0009 was Accepted.
+
+### 2026-10-04
+
+Implemented as part of CIP-0009 v1.

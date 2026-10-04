@@ -1,7 +1,7 @@
 ---
 id: "2026-10-04_check-posts-validator"
 title: "Implement check_posts validator (YAML parse, schema, consistency, non-printables)"
-status: "Ready"
+status: "Completed"
 priority: "High"
 created: "2026-10-04"
 last_updated: "2026-10-04"
@@ -35,12 +35,12 @@ Read-only: report errors with file + field; exit non-zero on failure. No auto-re
 
 ## Acceptance Criteria
 
-- [ ] Library/CLI can scan a `_posts/` directory and exit `0`/`1`
-- [ ] Invalid YAML and missing required keys produce actionable errors
-- [ ] Wrong `extras` / `author` shapes fail; optional keys may be absent
-- [ ] Consistency checks run only when BibTeX snapshot fields are present
-- [ ] Non-printable characters in text fields fail the check
-- [ ] Does not require a `.bib` file on the volume
+- [x] Library/CLI can scan a `_posts/` directory and exit `0`/`1`
+- [x] Invalid YAML and missing required keys produce actionable errors
+- [x] Wrong `extras` / `author` shapes fail; optional keys may be absent
+- [x] Consistency checks run only when BibTeX snapshot fields are present
+- [x] Non-printable characters in text fields fail the check
+- [x] Does not require a `.bib` file on the volume
 
 ## Implementation Notes
 
@@ -56,3 +56,7 @@ Reuse patterns from `lib/check_volume.rb` for reporting. Schema ground truth: CI
 ### 2026-10-04
 
 Task created as Ready when CIP-0009 was Accepted.
+
+### 2026-10-04
+
+Implemented as part of CIP-0009 v1.

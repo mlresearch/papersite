@@ -1,8 +1,8 @@
 # Regression Tests — Volume Checker
 
 This directory contains regression tests for `lib/check_volume.rb`, the
-pre-publication validation script for PMLR volumes, and smoke tests for
-`bin/pmlint`.
+pre-publication validation script for PMLR volumes, smoke tests for
+`bin/pmlint`, and `_posts` YAML checks (`lib/check_posts.rb` / `pmlint posts`).
 
 ## Running the Tests
 
@@ -11,11 +11,13 @@ pre-publication validation script for PMLR volumes, and smoke tests for
 bash tests/test_check_volume.sh
 bash tests/test_create_volume_keys.sh
 bash tests/test_pmlint.sh
+bash tests/test_check_posts.sh
 
 # Show every individual assertion (useful when adding new tests)
 bash tests/test_check_volume.sh --verbose
 bash tests/test_create_volume_keys.sh --verbose
 bash tests/test_pmlint.sh --verbose
+bash tests/test_check_posts.sh --verbose
 ```
 
 Exit code `0` means all assertions passed; `1` means at least one failed.
