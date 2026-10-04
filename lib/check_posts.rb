@@ -23,6 +23,11 @@ require 'yaml'
 require 'uri'
 require 'open3'
 require 'date'
+begin
+  require 'bibtex'
+rescue LoadError
+  # Optional until bin/pmlint / CI installs bibtex-ruby; parse_bibtex_authors handles nil.
+end
 
 module Colour
   def self.red(s)    "\e[31m#{s}\e[0m" end
@@ -251,24 +256,7 @@ class PostsChecker
     bib = data['bibtex_author']
     authors = data['author']
     if bib.is_a?(String) && !bib.strip.empty? && authors.is_a?(Array)
-      bib_norm = normalize_name_blob(bib)
-      missing = []
-      authors.each do |a|
-        next unless a.is_a?(Hash)
-        fam = a['family'].to_s.strip
-        given = a['given'].to_s.strip
-        # Prefer family match; for mononyms / blank family, require given in bibtex
-        token = fam.empty? ? given : fam
-        next if token.empty?
-        # Skip pure punctuation / page-range garbage (volume data bugs handled separately)
-        next if token.match?(/\A[=0-9\s\-]+\z/)
-        missing << token unless bib_norm.include?(normalize_token(token))
-      end
-      if missing.empty?
-        ok '  author families match bibtex_author'
-      else
-        error "  author family not found in bibtex_author: #{missing.join(', ')}"
-      end
+      check_author_bibtex_consistency(authors, bib)
     end
 
     title = data['title']
@@ -284,6 +272,99 @@ class PostsChecker
         error "    tex_title: #{ntt[0, 80].inspect}"
       end
     end
+  end
+
+  # Parse bibtex_author with bibtex-ruby and compare structured names to author[].
+  # Catches Given/Family swaps that a family-substring check would miss (e.g. Lee
+  # appearing inside "Ryan Lee T." while bibtex still has family Z.).
+  def check_author_bibtex_consistency(authors, bib)
+    parsed = parse_bibtex_authors(bib)
+    if parsed.nil?
+      error '  could not parse bibtex_author with BibTeX (install bibtex-ruby)'
+      return
+    end
+
+    yaml_names = authors.select { |a| a.is_a?(Hash) }
+    if yaml_names.length != parsed.length
+      error "  author count #{yaml_names.length} != bibtex_author count #{parsed.length}"
+      return
+    end
+
+    mismatches = []
+    yaml_names.each_with_index do |a, i|
+      y_fam = name_part(a, 'family')
+      y_given = name_part(a, 'given')
+      # literal: org names — compare against bibtex family/literal blob
+      if !blank?(a['literal'])
+        lit = normalize_token(a['literal'])
+        b = parsed[i]
+        b_blob = normalize_token([b['prefix'], b['family'], b['given']].compact.join(' '))
+        mismatches << "##{i}: literal #{a['literal'].inspect}" unless lit == b_blob
+        next
+      end
+      next if y_fam.empty? && y_given.empty?
+
+      b_fam = name_part(parsed[i], 'family')
+      b_given = name_part(parsed[i], 'given')
+
+      # Warn-first mononym policy: given-only YAML vs family-only BibTeX (or
+      # the reverse) already warns on author[]; treat the non-empty tokens as
+      # matching so we do not fail twice for the same encoding quirk.
+      y_mono = mononym_token(y_given, y_fam)
+      b_mono = mononym_token(b_given, b_fam)
+      if y_mono && b_mono
+        mismatches << "##{i}: YAML #{format_name(y_given, y_fam)} vs BibTeX #{format_name(b_given, b_fam)}" unless y_mono == b_mono
+        next
+      end
+
+      if y_fam != b_fam || y_given != b_given
+        mismatches << "##{i}: YAML #{format_name(y_given, y_fam)} vs BibTeX #{format_name(b_given, b_fam)}"
+      end
+    end
+
+    if mismatches.empty?
+      ok '  author matches bibtex_author (BibTeX-parsed)'
+    else
+      error '  author / bibtex_author mismatch after BibTeX parse:'
+      mismatches.each { |m| error "    #{m}" }
+    end
+  end
+
+  def parse_bibtex_authors(bib_string)
+    return nil unless defined?(BibTeX)
+    wrapped = "@misc{__pmlint_authors__, author = {#{bib_string}}}"
+    bib = BibTeX.parse(wrapped)
+    entry = bib['__pmlint_authors__']
+    return nil if entry.nil? || entry.author.nil?
+
+    entry.author.map do |name|
+      {
+        'family' => name.family.to_s,
+        'given' => name.given.to_s,
+        'prefix' => name.prefix.to_s,
+        'suffix' => name.suffix.to_s
+      }
+    end
+  rescue StandardError
+    nil
+  end
+
+  def name_part(h, key)
+    normalize_token(h[key].to_s)
+  end
+
+  # Non-empty token when exactly one of given/family is set (BibTeX Name,, or inverted).
+  def mononym_token(given_norm, family_norm)
+    return given_norm if !given_norm.empty? && family_norm.empty?
+    return family_norm if !family_norm.empty? && given_norm.empty?
+
+    nil
+  end
+
+  def format_name(given_norm, family_norm)
+    # norms are already alnum-folded; show for messages from raw would be nicer,
+    # but folded tokens are enough to see Lee vs Z.
+    "given=#{given_norm.inspect} family=#{family_norm.inspect}"
   end
 
   def utf8_string(str)

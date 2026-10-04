@@ -108,7 +108,8 @@ rm -rf "$TMP"
 for pair in \
   "posts_bad_yaml:invalid YAML" \
   "posts_bad_extras:extras must be a list" \
-  "posts_author_mismatch:family not found in bibtex_author" \
+  "posts_author_mismatch:author count" \
+  "posts_author_swap:author / bibtex_author mismatch" \
   "posts_missing_pdf:missing required key: pdf" \
   "posts_control_char:non-printable" \
   "posts_title_mismatch:title and tex_title diverge"

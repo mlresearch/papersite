@@ -397,6 +397,13 @@ if [[ "$SCOPE" == "posts" ]]; then
   echo "  papersite: $ROOT"
   echo "  volume:    $VOL_DIR"
 
+  # check_posts parses bibtex_author via bibtex-ruby; ensure gem on CI runners
+  # that only install Ruby (existing volume workflows have no bundle step).
+  if ! ruby -e 'require "bibtex"' >/dev/null 2>&1; then
+    section "Setup: install bibtex-ruby"
+    gem install bibtex-ruby -v '~> 6.0' --no-document
+  fi
+
   set +e
   section "Check: check_posts (_posts YAML)"
   POST_ARGS=(-d "$VOL_DIR")
@@ -426,7 +433,8 @@ How to fix
 Edit the reported _posts/*.md files so YAML frontmatter is valid and matches
 the paper schema (layout, title, author, id, pdf; extras as {label, link}).
 Display author/title should stay consistent with bibtex_author / tex_title
-when those fields are present.
+when those fields are present. Author lists are compared after BibTeX parse
+of bibtex_author (family/given), not by substring.
 
 Re-check:
   pmlint posts --check
