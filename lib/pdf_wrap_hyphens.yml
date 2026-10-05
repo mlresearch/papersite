@@ -1,0 +1,162 @@
+# PDF line-wrap hyphen repair lists
+#
+# Used by lib/pdf_wrap_hyphens.rb (check_volume + tidy_bibtex --fix-wrap-hyphens).
+# Edit this file to curate join-vs-keep decisions; do not hardcode lists in Ruby.
+#
+# Pattern matched in BibTeX text: letter(s), ASCII "-", space, lowercase…
+#   knowl- edge          → join (TeX hyphenation point, or default)
+#   state- of-the-art    → keep hyphen (right already hyphenated)
+#   semi- supervised     → keep hyphen (right token in compound_right)
+#   in- variant          → join (TeX overrides function_left)
+#   to- program          → drop hyphen, keep space (function_left; not a TeX break)
+#
+# Decision order: compound continuation / compound_right → TeX join →
+# function_left → default join. Missing TeX files fail open (default join).
+# Disable with tex_hyphenation.enabled: false or PMLR_DISABLE_TEX_HYPHEN=1.
+#
+# See backlog 2026-10-05_pdf-wrap-hyphens-yaml-tex-soak.
+
+# Vendored Liang patterns (lib/hyphenation/; see NOTICE there). Paths are
+# relative to lib/ unless absolute.
+tex_hyphenation:
+  enabled: true
+  patterns: hyphenation/hyph-en-us.pat.txt
+  exceptions: hyphenation/hyph-en-us.hyp.txt
+  left_min: 2
+  right_min: 3
+
+# Left tokens that are function words, not fragments. Erroneous hyphen before
+# the next word: "to- program" → "to program" (not "toprogram").
+function_left:
+  - a
+  - an
+  - and
+  - as
+  - at
+  - by
+  - for
+  - from
+  - in
+  - into
+  - of
+  - on
+  - onto
+  - or
+  - the
+  - to
+  - upon
+  - with
+
+# Right-hand halves of common hyphenated compounds in ML/stats abstracts.
+# Prefer listing the right side over left prefixes: short prefixes like
+# re-/co-/multi- are also common mid-word syllable breaks
+# ("re- lationship", "multi- ple", "co- efficient").
+compound_right:
+  - agent
+  - agents
+  - armed
+  - art
+  - asymptotic
+  - aware
+  - based
+  - box
+  - case
+  - cases
+  - cell
+  - cells
+  - centered
+  - centred
+  - class
+  - classes
+  - conditioned
+  - confidence
+  - constrained
+  - convex
+  - concave
+  - crafted
+  - critical
+  - dependent
+  - dimensional
+  - distribution
+  - distributions
+  - driven
+  - end
+  - established
+  - exploitation
+  - exploration
+  - fidelity
+  - form
+  - forms
+  - free
+  - gaussian
+  - grained
+  - graph
+  - graphs
+  - head
+  - heads
+  - hop
+  - hops
+  - inflated
+  - knowledge
+  - label
+  - labels
+  - layer
+  - layers
+  - learning
+  - level
+  - levels
+  - like
+  - linear
+  - loop
+  - loops
+  - matrix
+  - modal
+  - negative
+  - net
+  - nets
+  - objective
+  - objectives
+  - occurrence
+  - occurrences
+  - optimal
+  - optimality
+  - oriented
+  - parametric
+  - party
+  - parties
+  - passing
+  - policy
+  - policies
+  - positive
+  - processing
+  - processor
+  - prototype
+  - prototypes
+  - sample
+  - samples
+  - scale
+  - sensitive
+  - set
+  - sets
+  - shot
+  - sourced
+  - space
+  - spaces
+  - specific
+  - stage
+  - stages
+  - step
+  - steps
+  - supervised
+  - tailed
+  - task
+  - tasks
+  - theoretic
+  - theoretical
+  - tuned
+  - tuning
+  - type
+  - types
+  - view
+  - views
+  - world

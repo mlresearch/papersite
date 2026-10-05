@@ -2,6 +2,7 @@
 
 require 'optparse'
 require 'yaml'
+require_relative 'pdf_wrap_hyphens'
 
 class BibTeXCleaner
   def initialize
@@ -11,6 +12,7 @@ class BibTeXCleaner
       :quiet => false,
       :interactive => false,
       :fix_percent => false,
+      :fix_wrap_hyphens => false,
       :fix_author_commas => false,
       :fix_all => false,
       :dry_run => false
@@ -39,6 +41,10 @@ class BibTeXCleaner
       
       parser.on("--fix-percent", "Fix unescaped % characters in abstracts and titles") do
         @options[:fix_percent] = true
+      end
+
+      parser.on("--fix-wrap-hyphens", "Fix PDF line-wrap hyphens (e.g. knowl- edge → knowledge)") do
+        @options[:fix_wrap_hyphens] = true
       end
       
       parser.on("--check-author-commas", "Check for empty author fields (double commas) - reports only") do
@@ -71,8 +77,9 @@ class BibTeXCleaner
   def run
     parse_options
 
-    if @options[:dry_run] && (@options[:fix_percent] || @options[:fix_all] || @options[:interactive])
-      STDERR.puts "Error: --dry-run cannot be combined with --fix-percent, --fix-all, or --interactive"
+    mutating = @options[:fix_percent] || @options[:fix_wrap_hyphens] || @options[:fix_all] || @options[:interactive]
+    if @options[:dry_run] && mutating
+      STDERR.puts "Error: --dry-run cannot be combined with --fix-percent, --fix-wrap-hyphens, --fix-all, or --interactive"
       exit 1
     end
     
@@ -152,6 +159,23 @@ class BibTeXCleaner
       percent_issues = find_unescaped_percent(content)
       issues_found.concat(percent_issues)
     end
+
+    # PDF line-wrap hyphens: "knowl- edge" / "state- of-the-art"
+    wrap_issues = find_pdf_wrap_hyphens(content)
+    if wrap_issues.any?
+      issues_found.concat(wrap_issues)
+      if @options[:fix_wrap_hyphens] || @options[:fix_all]
+        if @options[:interactive]
+          if ask_fix("Found #{wrap_issues.length} PDF wrap hyphen(s). Fix them?")
+            content, n = PdfWrapHyphens.fix(content)
+            fixes_applied << "Fixed #{n} PDF wrap hyphen(s)"
+          end
+        else
+          content, n = PdfWrapHyphens.fix(content)
+          fixes_applied << "Fixed #{n} PDF wrap hyphen(s)"
+        end
+      end
+    end
     
     # Check for author/editor field comma issues - report only, don't fix
     if @options[:check_author_commas] || @options[:fix_all]
@@ -220,8 +244,9 @@ class BibTeXCleaner
       if @options[:strict] && fixes_applied.empty?
         STDERR.puts "\nError: Issues found in strict mode and no fixes applied"
         unless @options[:quiet]
-          puts "\nHint: unescaped % can be fixed with:"
-          puts "  pmlint --fix   # or: ruby tidy_bibtex.rb --fix-percent INPUT OUTPUT"
+          puts "\nHint: unescaped % and PDF wrap hyphens can be fixed with:"
+          puts "  pmlint --fix"
+          puts "  # or: ruby tidy_bibtex.rb --fix-percent --fix-wrap-hyphens INPUT OUTPUT"
         end
         exit 1
       end
@@ -244,6 +269,7 @@ class BibTeXCleaner
     if issues_found.any? && fixes_applied.empty? && !@options[:strict]
       puts "\nWarning: Issues found but no fixes applied."
       puts "  - Use --fix-percent or --fix-all to automatically fix unescaped % characters"
+      puts "  - Use --fix-wrap-hyphens or --fix-all for PDF line-wrap hyphens (knowl- edge)"
       puts "  - Unmatched braces in title fields REQUIRE MANUAL REVIEW AND FIXES"
       puts "  - Malformed author fields (space between commas, e.g. \", ,\") REQUIRE MANUAL REVIEW AND FIXES"
       puts "  - Mononym authors (no space between commas, e.g. \"Sukarno,,\") are CORRECT and need no fix"
@@ -253,6 +279,20 @@ class BibTeXCleaner
   end
 
   private
+
+  def find_pdf_wrap_hyphens(content)
+    issues = []
+    PdfWrapHyphens.each_occurrence(content) do |left, right, lineno, _preview|
+      detail = PdfWrapHyphens.decision_detail(left, right)
+      action = case detail[:action]
+               when :keep_hyphen then "keep hyphen/#{detail[:reason]}"
+               when :drop_hyphen then "drop hyphen/#{detail[:reason]}"
+               else "join/#{detail[:reason]}"
+               end
+      issues << "Line #{lineno}: PDF wrap hyphen \"#{left}- #{right}\" (would #{action})"
+    end
+    issues
+  end
 
   def find_unescaped_percent(content)
     issues = []

@@ -20,7 +20,10 @@
 #      punctuation (em dash, curly quotes, etc.) is not flagged
 #  12. No Unicode presentation-form ligatures (ﬀ ﬁ ﬂ ﬃ ﬄ …) — classic PDF
 #      text-extraction artifacts; replace with ASCII ff/fi/fl/ffi/ffl
-#  13. Proper names / acronyms in titles are LaTeX-braced when listed in
+#  13. No PDF line-wrap hyphens ("knowl- edge", "state- of-the-art") — ASCII
+#      hyphen with a following space mid-token from PDF text extraction;
+#      fix with tidy_bibtex --fix-wrap-hyphens
+#  14. Proper names / acronyms in titles are LaTeX-braced when listed in
 #      lib/proper_names.yml (CIP-000B); unknown all-caps tokens warn and can be
 #      offered for addition to the YAML (--add-proper-names)
 #
@@ -31,6 +34,7 @@ require 'optparse'
 require 'set'
 require 'yaml'
 require_relative 'bibtex_keys'
+require_relative 'pdf_wrap_hyphens'
 
 # =============================================================================
 # Colours
@@ -117,6 +121,7 @@ class VolumeChecker
     check_double_braced_pages(content)
     check_non_printable_characters(content)
     check_pdf_extraction_ligatures(content)
+    check_pdf_wrap_hyphens(content)
     check_proper_name_bracing(content)
 
     print_summary
@@ -511,6 +516,44 @@ class VolumeChecker
       ok "  No PDF extraction ligatures found"
     else
       issues.uniq.each { |i| error i }
+    end
+  end
+
+  def check_pdf_wrap_hyphens(content)
+    section "PDF line-wrap hyphens"
+
+    # ASCII "letter- lowercase" almost always means a PDF line-break hyphen was
+    # kept and the newline became a space. Genuine en dashes are Unicode or
+    # LaTeX -- / --- and do not match this pattern. Auto-fix via:
+    #   ruby lib/tidy_bibtex.rb --fix-wrap-hyphens INPUT OUTPUT
+    #   pmlint --fix
+    issues = []
+    current_key = nil
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
+    key_at_line = {}
+
+    content.each_line.with_index(1) do |line, lineno|
+      if (m = line.match(entry_re))
+        current_key = m[2]
+      end
+      key_at_line[lineno] = current_key
+    end
+
+    PdfWrapHyphens.each_occurrence(content) do |left, right, lineno, preview|
+      key = key_at_line[lineno] || '?'
+      detail = PdfWrapHyphens.decision_detail(left, right)
+      action = case detail[:action]
+               when :keep_hyphen then "keep hyphen (#{detail[:reason]})"
+               when :drop_hyphen then "drop hyphen, keep space (#{detail[:reason]})"
+               else "join (#{detail[:reason]})"
+               end
+      issues << "  [#{key}] line #{lineno}: PDF wrap hyphen \"#{left}- #{right}\" — #{action}; fix with tidy_bibtex --fix-wrap-hyphens\n    Context: #{preview}"
+    end
+
+    if issues.empty?
+      ok "  No PDF line-wrap hyphens found"
+    else
+      issues.each { |i| error i }
     end
   end
 

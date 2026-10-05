@@ -1,0 +1,12 @@
+hyph-en-us.pat.txt and hyph-en-us.hyp.txt are American English hyphenation
+patterns from the hyph-utf8 project (TeX Live), derived from Liang's patterns
+(ushyphmax) by Gerard D. C. Kuiken.
+
+Upstream: https://github.com/hyphenation/tex-hyphen
+Licence (from upstream pattern headers): Copying and distribution of this
+file, with or without modification, are permitted in any medium without
+royalty provided the copyright notice and this notice are preserved.
+
+Vendored into papersite so PDF wrap-hyphen repair does not depend on a local
+TeX Live installation. Update from TeX Live's
+texmf-dist/tex/generic/hyph-utf8/patterns/txt/ when refreshing.

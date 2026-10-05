@@ -175,6 +175,50 @@ else
 fi
 rm -rf "$TMP"
 
+# --- --fix wrap hyphens then check ---
+TMP=$(mktemp -d)
+mkdir -p "$TMP/v995"
+cat > "$TMP/v995/proceedings.bib" <<'EOF'
+@Proceedings{WrapFix2026,
+  booktitle = {Proceedings of the Wrap Fix Conference},
+  name = {Wrap Fix Conference 2026},
+  shortname = {WFC},
+  year = {2026},
+  editor = {Editor, A.},
+  start = {1},
+  end = {2},
+  address = {Online},
+  volume = {995},
+  published = {2026-04-06}
+}
+@InProceedings{doe26a,
+  title = {Wrap Hyphen Paper},
+  author = {Doe, Jane},
+  abstract = {To our knowl- edge this is state- of-the-art and semi- supervised.},
+  pages = {1-2},
+  year = {2026},
+  booktitle = {Proceedings of the Wrap Fix Conference},
+  editor = {Editor, A.},
+  volume = {995}
+}
+EOF
+: > "$TMP/v995/doe26a.pdf"
+set +e
+(cd "$TMP/v995" && "$PMLINT" --fix) >/tmp/pmlint_wrap_out.txt 2>&1
+rc=$?
+set -e
+bib="$TMP/v995/proceedings.bib"
+if grep -q 'knowledge' "$bib" && grep -q 'state-of-the-art' "$bib" && grep -q 'semi-supervised' "$bib" && ! grep -qE '[A-Za-z]- [a-z]' "$bib"; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: --fix repaired wrap hyphens"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [--fix did not repair wrap hyphens]")
+  echo "  ✗ FAIL: --fix did not repair wrap hyphens"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_wrap_out.txt; echo '--- bib ---'; cat "$bib"; fi
+fi
+rm -rf "$TMP"
+
 # --- skip when gh-pages present (published volume) ---
 TMP=$(mktemp -d)
 cp -R "$FIXTURES/clean_volume" "$TMP/v996"

@@ -155,6 +155,39 @@ jobs:
           echo "ERROR: Fixed file should pass validation"
           exit 1
         fi
+
+    - name: Test PDF wrap-hyphen fixing
+      run: |
+        mkdir -p test_wrap_hyphens
+        cd test_wrap_hyphens
+
+        cat > wrap.bib << 'EOF'
+        @article{wrap,
+          title = {Wrap Test},
+          abstract = {To our knowl- edge this is state- of-the-art and semi- supervised.},
+          year = {2024}
+        }
+        EOF
+
+        ruby ../lib/tidy_bibtex.rb --fix-wrap-hyphens wrap.bib wrap_fixed.bib
+
+        if grep -q 'knowledge' wrap_fixed.bib \
+          && grep -q 'state-of-the-art' wrap_fixed.bib \
+          && grep -q 'semi-supervised' wrap_fixed.bib \
+          && ! grep -qE '[A-Za-z]- [a-z]' wrap_fixed.bib; then
+          echo "✓ PDF wrap hyphens correctly repaired"
+        else
+          echo "ERROR: PDF wrap hyphens not properly repaired"
+          cat wrap_fixed.bib
+          exit 1
+        fi
+
+        if ruby ../lib/tidy_bibtex.rb --strict --dry-run wrap_fixed.bib; then
+          echo "✓ Fixed wrap-hyphen file passes strict dry-run"
+        else
+          echo "ERROR: Fixed wrap-hyphen file should pass strict dry-run"
+          exit 1
+        fi
         
     - name: Test edge cases
       run: |

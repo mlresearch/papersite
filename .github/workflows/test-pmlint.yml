@@ -23,6 +23,10 @@ jobs:
           gem install test-unit
           ruby test/test_bibtex_cleaner.rb
 
+      - name: Run TeX wrap-hyphen decision tests
+        run: |
+          ruby tests/test_tex_hyphenator.rb
+
       - name: Run pmlint smoke tests
         run: |
           bash tests/test_pmlint.sh --verbose

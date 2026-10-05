@@ -17,6 +17,7 @@
 #   fixtures/v316_original/   — Real lucassen25 entry from v316 before fixes
 #                               (raw U+0002 STX PDF line-break artifacts)
 #   fixtures/pdf_ligatures/   — Synthetic: Unicode ﬁ/ﬂ/ﬃ from PDF extraction
+#   fixtures/pdf_wrap_hyphens/— Synthetic: ASCII "knowl- edge" PDF line-wrap hyphens
 #   fixtures/pdfs_in_subdir/  — Synthetic: PDFs in pdfs/ not root
 #   fixtures/supps_in_subdir/ — Synthetic: supps in supplementary_material/
 #   fixtures/clean_volume/    — Synthetic: all checks should pass
@@ -205,6 +206,7 @@ assert_no_error "clean: no PDF subdir error"     "$OUT" "in subdirectory"
 assert_no_error "clean: no non-ASCII key"        "$OUT" "Non-ASCII character in key"
 assert_no_error "clean: no non-printable chars"  "$OUT" "non-printable character U+"
 assert_no_error "clean: no PDF ligatures"        "$OUT" "PDF ligature"
+assert_no_error "clean: no PDF wrap hyphens"     "$OUT" "PDF wrap hyphen"
 assert_exit_pass "clean exits zero"              "$FIXTURES/clean_volume" 999
 
 # ---------------------------------------------------------------------------
@@ -218,6 +220,19 @@ assert_error "pdf-ligatures: fl (U+FB02)"  "$OUT" "PDF ligature ﬂ (U+FB02)"
 assert_error "pdf-ligatures: attributes to adams10a" "$OUT" "[adams10a]"
 assert_no_error "pdf-ligatures: clean abstract not flagged" "$OUT" "[agovic10a]"
 assert_exit_fail "pdf-ligatures exits non-zero" "$FIXTURES/pdf_ligatures" 888
+
+# ---------------------------------------------------------------------------
+section "pdf_wrap_hyphens — ASCII letter- space lowercase from PDF extraction"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 889 "$FIXTURES/pdf_wrap_hyphens")
+
+assert_error "wrap-hyphens: knowl- edge" "$OUT" 'knowl- edge'
+assert_error "wrap-hyphens: opti- mal"   "$OUT" 'opti- mal'
+assert_error "wrap-hyphens: state- of-the-art" "$OUT" 'state- of-the-art'
+assert_error "wrap-hyphens: attributes to adams10a" "$OUT" "[adams10a]"
+assert_no_error "wrap-hyphens: clean abstract not flagged" "$OUT" "[agovic10a]"
+assert_no_error "wrap-hyphens: en-dash abstract not flagged" "$OUT" "[brown10a]"
+assert_exit_fail "wrap-hyphens exits non-zero" "$FIXTURES/pdf_wrap_hyphens" 889
 
 # ---------------------------------------------------------------------------
 section "v283 original — mojibake C1 controls in title (U+0080/U+009D)"

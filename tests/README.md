@@ -12,6 +12,7 @@ bash tests/test_check_volume.sh
 bash tests/test_create_volume_keys.sh
 bash tests/test_pmlint.sh
 bash tests/test_check_posts.sh
+ruby tests/test_tex_hyphenator.rb   # TeX Liang join signal + wrap decisions
 # covers clean / bad YAML / extras / author mismatch / missing pdf /
 # control chars / title mismatch, plus soak pass fixtures (LaTeX fold,
 # software placeholders, legacy URL shapes)
