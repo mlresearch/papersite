@@ -85,8 +85,9 @@ compound_right:
   - exploitation
   - exploration
   - fidelity
+  # Prefer "form" (closed- form) over "forms" — "per- forms" must join to
+  # "performs", while "closed- form" should keep the hyphen.
   - form
-  - forms
   - free
   - gaussian
   - grained
@@ -98,6 +99,7 @@ compound_right:
   - hops
   - inflated
   - knowledge
+  - known
   - label
   - labels
   - layer

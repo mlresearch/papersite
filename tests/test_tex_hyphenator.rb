@@ -80,6 +80,18 @@ assert_eq 'co- occurrence → keep',
           PdfWrapHyphens.decision_detail('co', 'occurrence')[:action], :keep_hyphen
 assert_eq 'co- ordinate → join',
           PdfWrapHyphens.decision_detail('co', 'ordinate')[:action], :join
+assert_eq 'heterogene- ity--- → join (em-dash run)',
+          PdfWrapHyphens.decision_detail('heterogene', 'ity---')[:action], :join
+assert_eq 'state- of- → keep (mid-compound trailing hyphen)',
+          PdfWrapHyphens.decision_detail('state', 'of-')[:action], :keep_hyphen
+assert_eq 'per- forms → join (forms not compound_right)',
+          PdfWrapHyphens.decision_detail('per', 'forms')[:action], :join
+assert_eq 'closed- form → keep',
+          PdfWrapHyphens.decision_detail('closed', 'form')[:action], :keep_hyphen
+assert_eq 'well- known → keep',
+          PdfWrapHyphens.decision_detail('well', 'known')[:action], :keep_hyphen
+assert_eq 'fix heterogene- ity---',
+          PdfWrapHyphens.fix('heterogene- ity---the')[0], 'heterogeneity---the'
 
 puts
 puts '=== Fail-open without TeX ==='

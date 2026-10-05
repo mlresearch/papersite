@@ -75,11 +75,38 @@ module PdfWrapHyphens
     decision_detail(left, right)[:action]
   end
 
+  # True when +right+ continues a hyphenated compound (e.g. "of-the-art").
+  def compound_continuation?(right)
+    right.match?(/[A-Za-z]-[A-Za-z]/)
+  end
+  module_function :compound_continuation?
+
+  # Split "ity---" → ["ity", "---"]; "of-" → ["of", "-"]; else [right, ""].
+  def split_trailing_dashes(right)
+    if right =~ /\A([A-Za-z]+)(-+)\z/
+      [$1, $2]
+    else
+      [right, '']
+    end
+  end
+  module_function :split_trailing_dashes
+
   # Richer result for check messages: { action:, reason: }
   def decision_detail(left, right)
-    return { action: :keep_hyphen, reason: 'compound continuation' } if right.include?('-')
+    if compound_continuation?(right)
+      return { action: :keep_hyphen, reason: 'compound continuation' }
+    end
 
-    right_token = right[/\A[A-Za-z]+/]
+    letters, dashes = split_trailing_dashes(right)
+
+    # Mid-compound break leaving a single trailing hyphen ("state- of- …").
+    if dashes == '-'
+      return { action: :keep_hyphen, reason: 'compound continuation' }
+    end
+
+    # Syllable before an em-dash run ("heterogene- ity---") → join letters.
+    # Longer dash runs are not compound hyphens.
+    right_token = letters[/\A[A-Za-z]+/]
     unless right_token
       return { action: :join, reason: 'default' }
     end
@@ -116,10 +143,11 @@ module PdfWrapHyphens
         right = Regexp.last_match(2)
         changed = true
         count += 1
+        letters, dashes = split_trailing_dashes(right)
         case decision(left, right)
         when :keep_hyphen then "#{left}-#{right}"
         when :drop_hyphen then "#{left} #{right}"
-        else "#{left}#{right}"
+        else "#{left}#{letters}#{dashes}"
         end
       end
       break unless changed
