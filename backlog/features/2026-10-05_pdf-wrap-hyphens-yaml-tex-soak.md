@@ -1,7 +1,7 @@
 ---
 id: "2026-10-05_pdf-wrap-hyphens-yaml-tex-soak"
 title: "PDF wrap hyphens: YAML lists, TeX join confidence, UAI soak"
-status: "In Progress"
+status: "Completed"
 priority: "High"
 created: "2026-10-05"
 last_updated: "2026-10-05"
