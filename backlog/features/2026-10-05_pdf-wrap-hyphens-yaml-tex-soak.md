@@ -47,7 +47,7 @@ landed; this task finishes the curation pipeline and volume cleanup.
       `compound_right`; Ruby loads from YAML only
 - [x] Optional TeX-pattern join helper documented and gated (no silent
       dependency on a local TeX Live tree; fail open to current rules)
-- [ ] UAI r9–r16 soak: sample false joins/keeps, extend YAML, apply fix
+- [x] UAI r9–r16 soak: sample false joins/keeps, extend YAML, apply fix
       in reissue repos with reviewable diffs
 - [x] Regression coverage for YAML load failure and at least one TeX-
       assisted join case (if TeX path ships)
@@ -95,4 +95,8 @@ TeX join confidence landed:
 - Tests: `tests/test_tex_hyphenator.rb` (wired in
   `.github/workflows/test-pmlint.yml`)
 
-Remaining: UAI r9–r16 soak + YAML expansion from real false positives.
+UAI soak applied and committed in `lawrennd/r9`, `r11`–`r16` (r10 had
+no ASCII wrap hyphens; soft hyphens there are unicode-tidy). Edge cases
+from soak folded back into YAML/decision logic (`ity---` vs `of-`,
+`forms` vs `form`, `known`). Task criteria complete pending any further
+false positives found at volume publish time.
