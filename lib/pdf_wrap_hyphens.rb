@@ -128,14 +128,24 @@ module PdfWrapHyphens
 
     hyphenator = tex_hyphenator
     if hyphenator && hyphenator.break_between?(left, right_token)
-      return join_if_word(left, right_token, 'tex_hyphenation')
+      if dictionary_word?("#{left}#{right_token}")
+        return { action: :join, reason: 'tex_hyphenation' }
+      end
+      # TeX liked the break but the compression is not a word: do not skip
+      # function_left (of- magnitude) or the abbreviation keep (abc- mart).
     end
 
     if function_left.include?(left.downcase)
       return { action: :drop_hyphen, reason: 'function_left' }
     end
 
-    reason = hyphenator ? 'default (no tex break)' : 'default (tex unavailable)'
+    reason = if hyphenator && hyphenator.break_between?(left, right_token)
+               'tex_hyphenation'
+             elsif hyphenator
+               'default (no tex break)'
+             else
+               'default (tex unavailable)'
+             end
     join_if_word(left, right_token, reason)
   end
 
@@ -177,7 +187,7 @@ module PdfWrapHyphens
     if w.end_with?('s') && w.length > 3 && !w.end_with?('ss', 'us', 'is')
       stems << w[0..-2]
     end
-    if w.end_with?('ing') && w.length > 6
+    if w.end_with?('ing') && w.length >= 5
       stem = w[0..-4]
       stems << stem
       stems << "#{stem}e"
@@ -191,6 +201,31 @@ module PdfWrapHyphens
     end
     if w.end_with?('ly') && w.length > 5
       stems << w[0..-3]
+    end
+    if w.end_with?('ity') && w.length > 6
+      stems << w[0..-4]           # optimality → optimal
+      stems << "#{w[0..-4]}e"     # sparsity → sparse (approx)
+    end
+    if w.end_with?('our') && w.length > 5
+      stems << "#{w[0..-4]}or"    # behaviour → behavior
+    end
+    if w.end_with?('ours') && w.length > 6
+      stems << "#{w[0..-5]}or"
+    end
+    if w.end_with?('isation') && w.length > 8
+      stems << "#{w[0..-8]}ization"
+      stems << w[0..-8]
+    end
+    if w.end_with?('ising') && w.length > 6
+      stems << "#{w[0..-6]}ize"
+      stems << "#{w[0..-6]}ise"
+    end
+    if w.end_with?('ises') && w.length > 5
+      stems << "#{w[0..-4]}ize"
+      stems << "#{w[0..-4]}ise"
+    end
+    if w.end_with?('ability') && w.length > 8
+      stems << "#{w[0..-8]}able"  # sustainability → sustainable
     end
     stems
   end

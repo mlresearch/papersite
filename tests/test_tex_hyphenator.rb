@@ -103,6 +103,12 @@ assert_eq 'co- ordinate → join (extras)',
           PdfWrapHyphens.decision_detail('co', 'ordinate')[:action], :join
 assert_eq 'on- line → join (extras)',
           PdfWrapHyphens.decision_detail('on', 'line')[:action], :join
+assert_eq 'op- timality → join (-ity stem)',
+          PdfWrapHyphens.decision_detail('op', 'timality')[:action], :join
+assert_eq 'us- ing → join (using → use)',
+          PdfWrapHyphens.decision_detail('us', 'ing')[:action], :join
+assert_eq 'of- magnitude → drop (function_left after failed TeX join)',
+          PdfWrapHyphens.decision_detail('of', 'magnitude')[:action], :drop_hyphen
 assert 'fix keeps abc-mart',
        PdfWrapHyphens.fix('as abc- mart using')[0].include?('abc-mart')
 assert 'fix does not invent abcmart',

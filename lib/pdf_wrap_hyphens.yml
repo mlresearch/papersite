@@ -38,13 +38,39 @@ dictionary:
     - coordinated
     - coordinates
     - coordinating
+    - artifactual
+    - anytime
+    - autoencoder
+    - autoencoders
+    - autoregressive
+    - behavioural
+    - covariate
+    - covariates
     - dataset
     - datasets
+    - earlier
     - email
     - emails
+    - embedding
+    - embeddings
+    - geomatics
+    - hannan
+    - initialization
+    - initializations
+    - lagrange
+    - mapping
+    - mappings
     - metadata
+    - minimises
+    - modified
+    - multitask
+    - neuroscience
     - offline
     - online
+    - possibilistic
+    - posteriori
+    - submodular
+    - supermodular
     - webpage
     - website
 
