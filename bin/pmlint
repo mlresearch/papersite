@@ -524,9 +524,9 @@ echo "  bib:       $BIB_PATH"
 set +e
 
 if [[ "$MODE" == "fix" ]]; then
-  section "Fix: tidy_bibtex --fix-percent --fix-wrap-hyphens"
-  ruby "$LIB/tidy_bibtex.rb" --fix-percent --fix-wrap-hyphens --quiet "$BIB_PATH" "$BIB_PATH"
-  record_stage "tidy_bibtex --fix-percent --fix-wrap-hyphens" $?
+  section "Fix: tidy_bibtex --fix-percent --fix-wrap-hyphens --fix-textbackslash"
+  ruby "$LIB/tidy_bibtex.rb" --fix-percent --fix-wrap-hyphens --fix-textbackslash --quiet "$BIB_PATH" "$BIB_PATH"
+  record_stage "tidy_bibtex --fix-percent --fix-wrap-hyphens --fix-textbackslash" $?
 fi
 
 section "Check: tidy_bibtex --dry-run --strict --check-author-commas"

@@ -12,6 +12,7 @@
 #   5. Author names are well-formed (Surname, Given format, no all-lowercase)
 #   6. No double backslashes in any field
 #   7. No escaped \$ \{ \} \_ in abstracts/titles
+#   7b. No \textbackslash{} in abstracts/titles (over-escaped "\" → should be \log etc.)
 #   8. No non-ASCII characters in BibTeX keys
 #   9. No double-quote delimited fields containing \" (silently drops entries in bibtex-ruby)
 #  10. No double-braced pages fields (e.g. pages = {{4-24}} renders with literal braces)
@@ -116,6 +117,7 @@ class VolumeChecker
     check_author_names(content)
     check_double_backslashes(content)
     check_escaped_chars(content)
+    check_textbackslash(content)
     check_non_ascii_keys(content)
     check_dq_fields_with_latex_umlauts(content)
     check_double_braced_pages(content)
@@ -378,6 +380,39 @@ class VolumeChecker
 
     if issues.empty?
       ok "  No escaped \\$, \\{, \\}, \\_ found in abstracts/titles"
+    else
+      issues.uniq.each { |i| error i }
+    end
+  end
+
+  def check_textbackslash(content)
+    section "Over-escaped \\textbackslash in abstracts/titles"
+
+    # Conversion artifact: a literal "\" was written as the LaTeX command
+    # \textbackslash{} (e.g. $O(\textbackslash{}log n)$ instead of $O(\log n)$).
+    # Distinct from double-backslash checks — this is a single-backslash command.
+    # Fix: tidy_bibtex --fix-textbackslash  or  pmlint --fix
+    issues = []
+    current_key = nil
+    in_field = false
+    entry_re = /(@\w+)\s*\{\s*([\w-]+)\s*,/i
+
+    content.each_line.with_index(1) do |line, lineno|
+      if (m = line.match(entry_re))
+        current_key = m[2]
+      end
+
+      in_field = true  if line =~ /^\s*(abstract|title)\s*=/i
+      in_field = false if in_field && line.strip.end_with?('},')
+
+      next unless in_field
+      next unless line.match?(/\\textbackslash(?:\{\}|(?![a-zA-Z]))/)
+
+      issues << "  [#{current_key || '?'}] line #{lineno}: \\textbackslash found — over-escaped backslash; use \\ instead (e.g. \\log not \\textbackslash{}log)"
+    end
+
+    if issues.empty?
+      ok "  No \\textbackslash over-escaping found in abstracts/titles"
     else
       issues.uniq.each { |i| error i }
     end

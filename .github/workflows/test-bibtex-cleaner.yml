@@ -188,6 +188,31 @@ jobs:
           echo "ERROR: Fixed wrap-hyphen file should pass strict dry-run"
           exit 1
         fi
+
+    - name: Test textbackslash over-escape fixing
+      run: |
+        mkdir -p test_textbackslash
+        cd test_textbackslash
+
+        cat > tbs.bib << 'EOF'
+        @article{tbs,
+          title = {TBS Test},
+          abstract = {Runtime $O(\textbackslash{}log n)$ in S{\textbackslash{}~a}o Paulo.},
+          year = {2024}
+        }
+        EOF
+
+        ruby ../lib/tidy_bibtex.rb --fix-textbackslash tbs.bib tbs_fixed.bib
+
+        if grep -qF '$O(\log n)$' tbs_fixed.bib \
+          && grep -qF 'S{\~a}o' tbs_fixed.bib \
+          && ! grep -q 'textbackslash' tbs_fixed.bib; then
+          echo "✓ textbackslash over-escapes correctly repaired"
+        else
+          echo "ERROR: textbackslash not properly repaired"
+          cat tbs_fixed.bib
+          exit 1
+        fi
         
     - name: Test edge cases
       run: |

@@ -44,14 +44,15 @@ cd ~/mlresearch/v304
 ```bash
 cd ~/mlresearch/v304
 pmlint --check              # read-only; exit 1 on failure (use in PRs)
-pmlint --fix               # escape % and join PDF wrap hyphens, then re-check
+pmlint --fix               # escape %, wrap hyphens, \\textbackslash → \\, then re-check
 PMLINT_SKIP_UPDATE=1 pmlint --check   # offline / dirty papersite tree
 ```
 
 Volume id is inferred from the repo/directory name (`v350`, `r0`, `r201`, …).
 A bare number still works (`304` → `v304`).
 `--check` must not modify the volume tree. `--fix` only applies non-interactive
-`tidy_bibtex --fix-percent --fix-wrap-hyphens` (not Unicode map edits or PDF moves).
+`tidy_bibtex --fix-percent --fix-wrap-hyphens --fix-textbackslash`
+(not Unicode map edits or PDF moves).
 
 If the volume already has a **gh-pages** branch (published site), intake
 `pmlint` exits successfully without checking. Use `--force` to run intake
@@ -137,13 +138,15 @@ The checker validates:
 | Non-ASCII BibTeX keys | Keys like `miñoza26` that will fail during processing |
 | PDF extraction ligatures | Unicode `ﬀ`/`ﬁ`/`ﬂ`/`ﬃ`/`ﬄ` (U+FB00–FB06) from PDF text extraction — replace with ASCII `ff`/`fi`/`fl`/`ffi`/`ffl` |
 | PDF line-wrap hyphens | ASCII `knowl- edge` / `state- of-the-art` from PDF line breaks — fix with `tidy_bibtex --fix-wrap-hyphens` or `pmlint --fix` |
+| Over-escaped `\textbackslash` | `\textbackslash{}log` instead of `\log` — fix with `tidy_bibtex --fix-textbackslash` or `pmlint --fix` |
 
 The script exits `0` if all checks pass, `1` if any errors are found.
 
 ### Step 2 — BibTeX Cleaning
 
 ```bash
-ruby lib/tidy_bibtex.rb proceedings.bib proceedings.bib --fix-percent --fix-wrap-hyphens
+ruby lib/tidy_bibtex.rb proceedings.bib proceedings.bib \
+  --fix-percent --fix-wrap-hyphens --fix-textbackslash
 ```
 
 ### Step 3 — Volume Creation

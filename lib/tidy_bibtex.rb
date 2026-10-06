@@ -13,6 +13,7 @@ class BibTeXCleaner
       :interactive => false,
       :fix_percent => false,
       :fix_wrap_hyphens => false,
+      :fix_textbackslash => false,
       :fix_author_commas => false,
       :fix_all => false,
       :dry_run => false
@@ -46,6 +47,10 @@ class BibTeXCleaner
       parser.on("--fix-wrap-hyphens", "Fix PDF line-wrap hyphens (e.g. knowl- edge → knowledge)") do
         @options[:fix_wrap_hyphens] = true
       end
+
+      parser.on("--fix-textbackslash", "Fix over-escaped \\textbackslash{} → \\ (e.g. \\log)") do
+        @options[:fix_textbackslash] = true
+      end
       
       parser.on("--check-author-commas", "Check for empty author fields (double commas) - reports only") do
         @options[:check_author_commas] = true
@@ -77,9 +82,10 @@ class BibTeXCleaner
   def run
     parse_options
 
-    mutating = @options[:fix_percent] || @options[:fix_wrap_hyphens] || @options[:fix_all] || @options[:interactive]
+    mutating = @options[:fix_percent] || @options[:fix_wrap_hyphens] ||
+               @options[:fix_textbackslash] || @options[:fix_all] || @options[:interactive]
     if @options[:dry_run] && mutating
-      STDERR.puts "Error: --dry-run cannot be combined with --fix-percent, --fix-wrap-hyphens, --fix-all, or --interactive"
+      STDERR.puts "Error: --dry-run cannot be combined with --fix-percent, --fix-wrap-hyphens, --fix-textbackslash, --fix-all, or --interactive"
       exit 1
     end
     
@@ -176,6 +182,23 @@ class BibTeXCleaner
         end
       end
     end
+
+    # Over-escaped \textbackslash{} → \  (e.g. \textbackslash{}log → \log)
+    textbackslash_issues = find_textbackslash(content)
+    if textbackslash_issues.any?
+      issues_found.concat(textbackslash_issues)
+      if @options[:fix_textbackslash] || @options[:fix_all]
+        if @options[:interactive]
+          if ask_fix("Found #{textbackslash_issues.length} \\textbackslash over-escape(s). Fix them?")
+            content, n = fix_textbackslash(content)
+            fixes_applied << "Fixed #{n} \\textbackslash over-escape(s)"
+          end
+        else
+          content, n = fix_textbackslash(content)
+          fixes_applied << "Fixed #{n} \\textbackslash over-escape(s)"
+        end
+      end
+    end
     
     # Check for author/editor field comma issues - report only, don't fix
     if @options[:check_author_commas] || @options[:fix_all]
@@ -244,9 +267,9 @@ class BibTeXCleaner
       if @options[:strict] && fixes_applied.empty?
         STDERR.puts "\nError: Issues found in strict mode and no fixes applied"
         unless @options[:quiet]
-          puts "\nHint: unescaped % and PDF wrap hyphens can be fixed with:"
+          puts "\nHint: unescaped %, PDF wrap hyphens, and \\textbackslash can be fixed with:"
           puts "  pmlint --fix"
-          puts "  # or: ruby tidy_bibtex.rb --fix-percent --fix-wrap-hyphens INPUT OUTPUT"
+          puts "  # or: ruby tidy_bibtex.rb --fix-percent --fix-wrap-hyphens --fix-textbackslash INPUT OUTPUT"
         end
         exit 1
       end
@@ -270,6 +293,7 @@ class BibTeXCleaner
       puts "\nWarning: Issues found but no fixes applied."
       puts "  - Use --fix-percent or --fix-all to automatically fix unescaped % characters"
       puts "  - Use --fix-wrap-hyphens or --fix-all for PDF line-wrap hyphens (knowl- edge)"
+      puts "  - Use --fix-textbackslash or --fix-all for \\textbackslash{} → \\ (e.g. \\log)"
       puts "  - Unmatched braces in title fields REQUIRE MANUAL REVIEW AND FIXES"
       puts "  - Malformed author fields (space between commas, e.g. \", ,\") REQUIRE MANUAL REVIEW AND FIXES"
       puts "  - Mononym authors (no space between commas, e.g. \"Sukarno,,\") are CORRECT and need no fix"
@@ -292,6 +316,30 @@ class BibTeXCleaner
       issues << "Line #{lineno}: PDF wrap hyphen \"#{left}- #{right}\" (would #{action})"
     end
     issues
+  end
+
+  # Over-escaped backslash written as the LaTeX command \textbackslash.
+  # Prefer consuming optional {}, else require a non-letter boundary so we do not
+  # leave "{}log" behind when replacing \textbackslash{}log → \log.
+  TEXTBACKSLASH_RE = /\\textbackslash(?:\{\}|(?![a-zA-Z]))/
+
+  def find_textbackslash(content)
+    issues = []
+    content.each_line.with_index(1) do |line, lineno|
+      n = line.scan(TEXTBACKSLASH_RE).length
+      next if n.zero?
+      issues << "Line #{lineno}: #{n} \\textbackslash over-escape(s) (would replace with \\)"
+    end
+    issues
+  end
+
+  def fix_textbackslash(content)
+    count = 0
+    fixed = content.gsub(TEXTBACKSLASH_RE) do
+      count += 1
+      '\\'
+    end
+    [fixed, count]
   end
 
   def find_unescaped_percent(content)

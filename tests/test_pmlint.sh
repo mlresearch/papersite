@@ -219,6 +219,50 @@ else
 fi
 rm -rf "$TMP"
 
+# --- --fix textbackslash then check ---
+TMP=$(mktemp -d)
+mkdir -p "$TMP/v994"
+cat > "$TMP/v994/proceedings.bib" <<'EOF'
+@Proceedings{TbsFix2026,
+  booktitle = {Proceedings of the TBS Fix Conference},
+  name = {TBS Fix Conference 2026},
+  shortname = {TBS},
+  year = {2026},
+  editor = {Editor, A.},
+  start = {1},
+  end = {2},
+  address = {Online},
+  volume = {994},
+  published = {2026-04-06}
+}
+@InProceedings{doe26a,
+  title = {Textbackslash Paper},
+  author = {Doe, Jane},
+  abstract = {Runtime $O(\textbackslash{}log n)$ in S{\textbackslash{}~a}o Paulo.},
+  pages = {1-2},
+  year = {2026},
+  booktitle = {Proceedings of the TBS Fix Conference},
+  editor = {Editor, A.},
+  volume = {994}
+}
+EOF
+: > "$TMP/v994/doe26a.pdf"
+set +e
+(cd "$TMP/v994" && "$PMLINT" --fix) >/tmp/pmlint_tbs_out.txt 2>&1
+rc=$?
+set -e
+bib="$TMP/v994/proceedings.bib"
+if grep -qF '$O(\log n)$' "$bib" && grep -qF 'S{\~a}o' "$bib" && ! grep -q 'textbackslash' "$bib"; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: --fix repaired textbackslash"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [--fix did not repair textbackslash]")
+  echo "  ✗ FAIL: --fix did not repair textbackslash"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_tbs_out.txt; echo '--- bib ---'; cat "$bib"; fi
+fi
+rm -rf "$TMP"
+
 # --- skip when gh-pages present (published volume) ---
 TMP=$(mktemp -d)
 cp -R "$FIXTURES/clean_volume" "$TMP/v996"
