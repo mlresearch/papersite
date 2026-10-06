@@ -820,6 +820,9 @@ class VolumeChecker
       puts Colour.green(Colour.bold("  ✓ Volume #{@volume} is ready for publication."))
     else
       puts Colour.red(Colour.bold("  ✗ #{@errors.size} issue(s) must be fixed before publication."))
+      puts
+      puts Colour.bold("  Issues:")
+      @errors.each { |e| puts Colour.red("    - #{e.strip}") }
     end
     puts
   end

@@ -52,6 +52,7 @@ class PostsChecker
     @warnings = []
     @ok = []
     @files_checked = 0
+    @current_rel = nil
   end
 
   def run
@@ -107,6 +108,7 @@ class PostsChecker
 
   def check_file(path)
     rel = path.sub(%r{\A#{Regexp.escape(@vol_dir)}/?}, '')
+    @current_rel = rel
     section rel
     @files_checked += 1
 
@@ -648,7 +650,9 @@ class PostsChecker
 
   def error(msg)
     puts Colour.red('  ✗') + " #{msg}"
-    @errors << msg
+    label = msg.strip
+    label = "#{@current_rel}: #{label}" if @current_rel && !label.start_with?(@current_rel)
+    @errors << label
   end
 
   def fatal(msg)
@@ -670,6 +674,9 @@ class PostsChecker
       puts Colour.green(Colour.bold('  ✓ _posts YAML checks passed.'))
     else
       puts Colour.red(Colour.bold("  ✗ #{@errors.size} issue(s) in _posts — fix before merge."))
+      puts
+      puts Colour.bold('  Issues:')
+      @errors.each { |e| puts Colour.red("    - #{e}") }
     end
     puts
   end

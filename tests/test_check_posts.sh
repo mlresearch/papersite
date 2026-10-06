@@ -137,6 +137,31 @@ do
   rm -rf "$TMP"
 done
 
+# --- failure summary repeats issues after the per-file ticks ---
+TMP=$(mktemp -d)
+cp -R "$FIXTURES/posts_control_char" "$TMP/vol"
+set +e
+ruby "$CHECK" -d "$TMP/vol" >/tmp/check_posts_summary.txt 2>&1
+set -e
+if sed -n '/Issues:/,$p' /tmp/check_posts_summary.txt | grep -qi "non-printable"; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: summary Issues: lists non-printable"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [summary Issues: missing non-printable]")
+  echo "  ✗ FAIL: summary Issues: missing non-printable"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/check_posts_summary.txt; fi
+fi
+if sed -n '/Issues:/,$p' /tmp/check_posts_summary.txt | grep -q "_posts/"; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: summary Issues: include post path"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [summary Issues: missing _posts/ path]")
+  echo "  ✗ FAIL: summary Issues: missing _posts/ path"
+fi
+rm -rf "$TMP"
+
 # --- pmlint posts --fix repairs wrap hyphens / textbackslash then passes ---
 TMP=$(mktemp -d)
 cp -R "$FIXTURES/posts_wrap_hyphens" "$TMP/v991"

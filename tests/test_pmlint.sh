@@ -127,6 +127,15 @@ else
   echo "  ✗ FAIL: stage rollup missing"
   if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_bad_out.txt; fi
 fi
+if sed -n '/Issues:/,$p' /tmp/pmlint_bad_out.txt | grep -q "PDF(s) in subdirectory"; then
+  PASS=$((PASS + 1))
+  if [[ -n "$VERBOSE" ]]; then echo "  ✓ PASS: summary Issues: lists PDF path error"; fi
+else
+  FAIL=$((FAIL + 1))
+  ERRORS+=("FAIL [summary Issues: missing PDF subdirectory error]")
+  echo "  ✗ FAIL: summary Issues: missing PDF subdirectory error"
+  if [[ -n "$VERBOSE" ]]; then cat /tmp/pmlint_bad_out.txt; fi
+fi
 rm -rf "$TMP"
 
 # --- --fix percent then check (mutating only bib) ---
