@@ -2,6 +2,7 @@
 
 require 'set'
 require 'yaml'
+require 'zlib'
 require_relative 'tex_hyphenator'
 
 # PDF text extractors often keep a soft line-break hyphen as ASCII "-" and turn
@@ -23,9 +24,12 @@ require_relative 'tex_hyphenator'
 # Decision order:
 #   1. right contains "-"     → keep hyphen (compound continuation)
 #   2. compound_right match   → keep hyphen
-#   3. TeX break confirms     → join
+#   3. TeX break confirms     → join if word (or long fragments)
 #   4. function_left match    → drop hyphen, keep space
-#   5. default                → join
+#   5. default                → join if word (or long fragments)
+# A proposed join whose compressed form is not an English word keeps the
+# hyphen when either side is short (abbreviations: abc- mart). Long+long
+# OOV still joins (line-wrapped names).
 module PdfWrapHyphens
   CONFIG_PATH = File.expand_path('pdf_wrap_hyphens.yml', __dir__)
   LIB_DIR = __dir__
@@ -48,6 +52,10 @@ module PdfWrapHyphens
 
   def tex_hyphenator
     lists[:tex_hyphenator]
+  end
+
+  def words
+    lists[:words]
   end
 
   # Reload YAML / patterns (tests). Returns self.
@@ -120,7 +128,7 @@ module PdfWrapHyphens
 
     hyphenator = tex_hyphenator
     if hyphenator && hyphenator.break_between?(left, right_token)
-      return { action: :join, reason: 'tex_hyphenation' }
+      return join_if_word(left, right_token, 'tex_hyphenation')
     end
 
     if function_left.include?(left.downcase)
@@ -128,8 +136,65 @@ module PdfWrapHyphens
     end
 
     reason = hyphenator ? 'default (no tex break)' : 'default (tex unavailable)'
-    { action: :join, reason: reason }
+    join_if_word(left, right_token, reason)
   end
+
+  # Keep hyphen for short non-words (abc-mart). Long wraps of names still join.
+  SHORT_JOIN_MAX = 3
+
+  def join_if_word(left, right_token, reason)
+    joined = "#{left}#{right_token}"
+    if dictionary_word?(joined)
+      return { action: :join, reason: reason }
+    end
+    # Short left + not a word: abc- mart, k- means. Long left: names / wraps.
+    if left.length > SHORT_JOIN_MAX
+      return { action: :join, reason: "#{reason}, oov long" }
+    end
+    { action: :keep_hyphen, reason: 'not a dictionary word' }
+  end
+  module_function :join_if_word
+
+  def dictionary_word?(token)
+    w = token.to_s.downcase.gsub(/[^a-z]/, '')
+    return false if w.empty?
+    set = words
+    return false if set.nil? || set.empty?
+    return true if set.include?(w)
+
+    inflection_stems(w).any? { |s| set.include?(s) }
+  end
+  module_function :dictionary_word?
+
+  def inflection_stems(w)
+    stems = []
+    if w.end_with?('ies') && w.length > 5
+      stems << "#{w[0..-4]}y"
+    end
+    if w.end_with?('es') && w.length > 4
+      stems << w[0..-3]
+    end
+    if w.end_with?('s') && w.length > 3 && !w.end_with?('ss', 'us', 'is')
+      stems << w[0..-2]
+    end
+    if w.end_with?('ing') && w.length > 6
+      stem = w[0..-4]
+      stems << stem
+      stems << "#{stem}e"
+      stems << stem[0..-2] if stem.length > 3 && stem[-1] == stem[-2]
+    end
+    if w.end_with?('ed') && w.length > 4
+      stem = w[0..-3]
+      stems << stem
+      stems << "#{stem}e"
+      stems << stem[0..-2] if stem.length > 3 && stem[-1] == stem[-2]
+    end
+    if w.end_with?('ly') && w.length > 5
+      stems << w[0..-3]
+    end
+    stems
+  end
+  module_function :inflection_stems
 
   def keep_hyphen?(left, right)
     decision(left, right) == :keep_hyphen
@@ -215,7 +280,8 @@ module PdfWrapHyphens
     {
       function_left: normalize_token_list(data['function_left'], 'function_left', path),
       compound_right: normalize_token_list(data['compound_right'], 'compound_right', path),
-      tex_hyphenator: load_tex_hyphenator(data['tex_hyphenation'])
+      tex_hyphenator: load_tex_hyphenator(data['tex_hyphenation']),
+      words: load_word_set(data['dictionary'])
     }
   rescue Psych::SyntaxError, Psych::DisallowedClass => e
     raise "YAML error loading #{path}: #{e.message}"
@@ -252,6 +318,38 @@ module PdfWrapHyphens
     )
   end
   module_function :load_tex_hyphenator
+
+  def load_word_set(section)
+    return Set.new if ENV['PMLR_DISABLE_WORD_DICT'] == '1'
+    return Set.new unless section.is_a?(Hash)
+    return Set.new if section['enabled'] == false
+
+    words = Set.new
+    extras = section['extras']
+    if extras.is_a?(Array)
+      extras.each { |t| words.add(t.to_s.strip.downcase) unless t.to_s.strip.empty? }
+    end
+
+    path = resolve_lib_path(section['words'])
+    if path && File.file?(path)
+      io = path.end_with?('.gz') ? Zlib::GzipReader.open(path) : File.open(path)
+      begin
+        io.each_line do |line|
+          w = line.strip.downcase
+          next if w.empty? || !w.match?(/\A[a-z]+\z/)
+          words.add(w)
+        end
+      ensure
+        io.close
+      end
+    elsif path
+      warn "PdfWrapHyphens: word list not found (#{section['words']}); " \
+           "join-confidence check disabled"
+    end
+
+    words
+  end
+  module_function :load_word_set
 
   def resolve_lib_path(rel)
     return nil if rel.nil? || rel.to_s.empty?

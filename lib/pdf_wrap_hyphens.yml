@@ -11,8 +11,11 @@
 #   to- program          → drop hyphen, keep space (function_left; not a TeX break)
 #
 # Decision order: compound continuation / compound_right → TeX join →
-# function_left → default join. Missing TeX files fail open (default join).
-# Disable with tex_hyphenation.enabled: false or PMLR_DISABLE_TEX_HYPHEN=1.
+# function_left → default join. A join is kept only if the compressed form
+# is an English word, or both sides are long (wrapped names / technical
+# terms). Short non-words stay hyphenated (abc- mart → abc-mart, not abcmart).
+# Missing TeX files fail open (default join). Disable TeX with
+# tex_hyphenation.enabled: false or PMLR_DISABLE_TEX_HYPHEN=1.
 #
 # See backlog 2026-10-05_pdf-wrap-hyphens-yaml-tex-soak.
 
@@ -24,6 +27,26 @@ tex_hyphenation:
   exceptions: hyphenation/hyph-en-us.hyp.txt
   left_min: 2
   right_min: 3
+
+# Join-confidence word list (see lib/hyphenation/NOTICE). extras are closed
+# forms Webster lacks that we still want to join (co- ordinate → coordinate).
+dictionary:
+  enabled: true
+  words: hyphenation/words-en.txt.gz
+  extras:
+    - coordinate
+    - coordinated
+    - coordinates
+    - coordinating
+    - dataset
+    - datasets
+    - email
+    - emails
+    - metadata
+    - offline
+    - online
+    - webpage
+    - website
 
 # Left tokens that are function words, not fragments. Erroneous hyphen before
 # the next word: "to- program" → "to program" (not "toprogram").

@@ -10,3 +10,9 @@ royalty provided the copyright notice and this notice are preserved.
 Vendored into papersite so PDF wrap-hyphen repair does not depend on a local
 TeX Live installation. Update from TeX Live's
 texmf-dist/tex/generic/hyph-utf8/patterns/txt/ when refreshing.
+
+words-en.txt.gz is the traditional Unix /usr/share/dict/words list (Webster's
+Second International, public domain), used only as a join-confidence check:
+if compressing a wrap hyphen would not yield an English word, keep the hyphen
+(e.g. abc- mart → abc-mart, not abcmart). Modern closed forms missing from
+Webster (coordinate, online, …) are listed as extras in pdf_wrap_hyphens.yml.

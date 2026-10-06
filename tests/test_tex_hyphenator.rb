@@ -93,6 +93,21 @@ assert_eq 'well- known → keep',
 assert_eq 'fix heterogene- ity---',
           PdfWrapHyphens.fix('heterogene- ity---the')[0], 'heterogeneity---the'
 
+assert_eq 'abc- mart → keep (not a word)',
+          PdfWrapHyphens.decision_detail('abc', 'mart')[:action], :keep_hyphen
+assert_eq 'algo- rithm → join (word)',
+          PdfWrapHyphens.decision_detail('algo', 'rithm')[:action], :join
+assert_eq 'algo- rithms → join (inflected word)',
+          PdfWrapHyphens.decision_detail('algo', 'rithms')[:action], :join
+assert_eq 'co- ordinate → join (extras)',
+          PdfWrapHyphens.decision_detail('co', 'ordinate')[:action], :join
+assert_eq 'on- line → join (extras)',
+          PdfWrapHyphens.decision_detail('on', 'line')[:action], :join
+assert 'fix keeps abc-mart',
+       PdfWrapHyphens.fix('as abc- mart using')[0].include?('abc-mart')
+assert 'fix does not invent abcmart',
+       !PdfWrapHyphens.fix('as abc- mart using')[0].include?('abcmart')
+
 puts
 puts '=== Fail-open without TeX ==='
 ENV['PMLR_DISABLE_TEX_HYPHEN'] = '1'
