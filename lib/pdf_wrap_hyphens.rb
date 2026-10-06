@@ -32,6 +32,9 @@ module PdfWrapHyphens
 
   # letter(s), ASCII hyphen, single space, lowercase continuation
   PATTERN = /([A-Za-z]+)- ([a-z][A-Za-z-]*)/
+  # Same artifact when a YAML/BibTeX line break sits between hyphen and continuation
+  # (e.g. "ap-\n  proximations" → loaded YAML "ap- proximations").
+  MULTILINE_PATTERN = /([A-Za-z]+)-\n[ \t]*([a-z][A-Za-z-]*)/
 
   module_function
 
@@ -143,26 +146,53 @@ module PdfWrapHyphens
         right = Regexp.last_match(2)
         changed = true
         count += 1
-        letters, dashes = split_trailing_dashes(right)
-        case decision(left, right)
-        when :keep_hyphen then "#{left}-#{right}"
-        when :drop_hyphen then "#{left} #{right}"
-        else "#{left}#{letters}#{dashes}"
-        end
+        replacement_for(left, right)
+      end
+      content = content.gsub(MULTILINE_PATTERN) do
+        left = Regexp.last_match(1)
+        right = Regexp.last_match(2)
+        changed = true
+        count += 1
+        replacement_for(left, right)
       end
       break unless changed
     end
     [content, count]
   end
 
+  def replacement_for(left, right)
+    letters, dashes = split_trailing_dashes(right)
+    case decision(left, right)
+    when :keep_hyphen then "#{left}-#{right}"
+    when :drop_hyphen then "#{left} #{right}"
+    else "#{left}#{letters}#{dashes}"
+    end
+  end
+  module_function :replacement_for
+
   # Yield [left, right, line_number, line_preview] for each match.
+  # Includes cross-line wraps (counted on the line that holds the hyphen).
   def each_occurrence(content)
+    # Same-line first
     content.each_line.with_index(1) do |line, lineno|
       line.scan(PATTERN) do |left, right|
         preview = line.strip
         preview = "#{preview[0, 80]}..." if preview.length > 80
         yield left, right, lineno, preview
       end
+    end
+    # Cross-line (YAML folded abstracts): report on the hyphen line
+    offset = 0
+    content.scan(MULTILINE_PATTERN) do
+      left = Regexp.last_match(1)
+      right = Regexp.last_match(2)
+      match_start = Regexp.last_match.begin(0)
+      lineno = content[0...match_start].count("\n") + 1
+      line = content[0...match_start].lines.last.to_s + right
+      preview = line.strip
+      preview = "#{preview[0, 80]}..." if preview.length > 80
+      yield left, right, lineno, preview
+      offset = match_start + 1
     end
   end
 

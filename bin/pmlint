@@ -42,7 +42,7 @@ usage() {
   cat <<'EOF'
 Usage:
   pmlint [--check|--fix] [--unicode] [--force] [VOLUME] [BIBFILE]
-  pmlint posts --check [--changed] [--base REF] [VOLUME] [POST_FILES...]
+  pmlint posts [--check|--fix] [--changed] [--base REF] [VOLUME] [POST_FILES...]
 
 Intake (default — pre-publication BibTeX / PDF checks):
   --check     Read-only validation (default). Does not modify the volume tree.
@@ -53,6 +53,8 @@ Intake (default — pre-publication BibTeX / PDF checks):
 
 Posts (published volumes — FAQ _posts YAML corrections):
   posts --check     Validate _posts/*.md YAML / frontmatter / consistency
+  posts --fix       Repair wrap hyphens / ligatures / \\textbackslash in posts,
+                    then re-check
   --changed         Only posts changed vs --base / PMLINT_DIFF_BASE / HEAD^
   --base REF        Diff base for --changed
 
@@ -60,7 +62,8 @@ VOLUME is optional when the current directory (or origin repo name) is
 vNNN or rNNN (rereleases). A bare number means v<number>.
 
 Intake: if origin (or local) has a gh-pages branch, pmlint exits 0 without
-checking, unless --force. Use `pmlint posts --check` for published volumes.
+checking, unless --force. Use `pmlint posts --check` (or `--fix`) for
+published volumes.
 
 Environment:
   PAPERSITE_ROOT      Papersite checkout (optional)
@@ -388,12 +391,12 @@ if [[ "$SCOPE" == "posts" ]]; then
     VOL_DIR="$(resolve_volume_dir "$VOLUME")"
   fi
 
-  if [[ "$MODE" != "check" ]]; then
-    echo "ERROR: pmlint posts only supports --check (got --${MODE})" >&2
+  if [[ "$MODE" != "check" && "$MODE" != "fix" ]]; then
+    echo "ERROR: pmlint posts supports --check or --fix (got --${MODE})" >&2
     exit 1
   fi
 
-  echo "pmlint mode=posts/--check volume=${VOLUME}"
+  echo "pmlint mode=posts/--${MODE} volume=${VOLUME}"
   echo "  papersite: $ROOT"
   echo "  volume:    $VOL_DIR"
 
@@ -404,8 +407,6 @@ if [[ "$SCOPE" == "posts" ]]; then
     gem install bibtex-ruby -v '~> 6.0' --no-document
   fi
 
-  set +e
-  section "Check: check_posts (_posts YAML)"
   POST_ARGS=(-d "$VOL_DIR")
   if [[ "$CHANGED" -eq 1 ]]; then
     POST_ARGS+=(--changed)
@@ -416,6 +417,17 @@ if [[ "$SCOPE" == "posts" ]]; then
   if [[ ${#POST_FILES[@]} -gt 0 ]]; then
     POST_ARGS+=("${POST_FILES[@]}")
   fi
+
+  if [[ "$MODE" == "fix" ]]; then
+    set +e
+    section "Fix: tidy_posts (wrap hyphens / ligatures / textbackslash)"
+    ruby "$LIB/tidy_posts.rb" --quiet "${POST_ARGS[@]}"
+    record_stage "tidy_posts" $?
+    set -e
+  fi
+
+  set +e
+  section "Check: check_posts (_posts YAML)"
   ruby "$LIB/check_posts.rb" "${POST_ARGS[@]}"
   record_stage "check_posts" $?
   set -e
@@ -435,6 +447,11 @@ the paper schema (layout, title, author, id, pdf; extras as {label, link}).
 Display author/title should stay consistent with bibtex_author / tex_title
 when those fields are present. Author lists are compared after BibTeX parse
 of bibtex_author (family/given), not by substring.
+
+PDF wrap hyphens, ligatures, and over-escaped \\textbackslash in abstract /
+title / tex_title / bibtex_author can be repaired with:
+
+  pmlint posts --fix
 
 Re-check:
   pmlint posts --check

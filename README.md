@@ -61,6 +61,7 @@ anyway, or use **posts** mode for FAQ-style `_posts` edits:
 ```bash
 # On the branch that holds _posts/ (often gh-pages)
 pmlint posts --check
+pmlint posts --fix                # wrap hyphens / ligatures / \\textbackslash, then re-check
 pmlint posts --check --changed          # only posts changed vs HEAD^
 pmlint posts --check --changed --base origin/gh-pages
 ```
@@ -93,6 +94,7 @@ After publication, citation fixes go in `_posts/*.md` (not BibTeX). Validate wit
 ```bash
 cd ~/mlresearch/v304   # checkout with _posts present
 pmlint posts --check
+pmlint posts --fix     # repair PDF wrap hyphens / ligatures / \\textbackslash, then re-check
 ```
 
 Checks: YAML/frontmatter fences, required keys (`layout`, `title`, `author`,
@@ -101,6 +103,8 @@ consistency (with LaTeX/Unicode folding), software URL hygiene (placeholders
 allowed), non-printable characters, and the same PDF/conversion artifacts as
 intake lint on `abstract` / `title` / `tex_title` / `bibtex_author` (wrap
 hyphens, `\textbackslash`, ligatures, escaped `\$`/`\{`/`\}`/`\_`, `\\`).
+`pmlint posts --fix` repairs the artifact classes non-interactively (same
+spirit as intake `pmlint --fix`).
 Single-name authors (mononyms) belong in `family` with empty/absent `given`,
 and in `bibtex_author` as `Name,,` — see the
 [PMLR FAQ](https://proceedings.mlr.press/faq.html) correction section.
