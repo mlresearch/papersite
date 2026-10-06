@@ -112,7 +112,9 @@ for pair in \
   "posts_author_swap:author / bibtex_author mismatch" \
   "posts_missing_pdf:missing required key: pdf" \
   "posts_control_char:non-printable" \
-  "posts_title_mismatch:title and tex_title diverge"
+  "posts_title_mismatch:title and tex_title diverge" \
+  "posts_wrap_hyphens:PDF wrap hyphen" \
+  "posts_textbackslash:textbackslash"
 do
   fix="${pair%%:*}"
   needle="${pair#*:}"

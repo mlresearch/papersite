@@ -98,9 +98,12 @@ pmlint posts --check
 Checks: YAML/frontmatter fences, required keys (`layout`, `title`, `author`,
 `id`, `pdf`), `extras` shape, display vs `bibtex_author` / `tex_title`
 consistency (with LaTeX/Unicode folding), software URL hygiene (placeholders
-allowed), and non-printable characters. Single-name authors (mononyms) belong
-in `family` with empty/absent `given`, and in `bibtex_author` as `Name,,` —
-see the [PMLR FAQ](https://proceedings.mlr.press/faq.html) correction section.
+allowed), non-printable characters, and the same PDF/conversion artifacts as
+intake lint on `abstract` / `title` / `tex_title` / `bibtex_author` (wrap
+hyphens, `\textbackslash`, ligatures, escaped `\$`/`\{`/`\}`/`\_`, `\\`).
+Single-name authors (mononyms) belong in `family` with empty/absent `given`,
+and in `bibtex_author` as `Name,,` — see the
+[PMLR FAQ](https://proceedings.mlr.press/faq.html) correction section.
 `check_posts` warns on inverted `given`-only mononyms.
 
 ### Classic workflow steps

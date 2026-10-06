@@ -3,6 +3,7 @@
 require 'optparse'
 require 'yaml'
 require_relative 'pdf_wrap_hyphens'
+require_relative 'text_field_artifacts'
 
 class BibTeXCleaner
   def initialize
@@ -318,10 +319,9 @@ class BibTeXCleaner
     issues
   end
 
-  # Over-escaped backslash written as the LaTeX command \textbackslash.
   # Prefer consuming optional {}, else require a non-letter boundary so we do not
   # leave "{}log" behind when replacing \textbackslash{}log → \log.
-  TEXTBACKSLASH_RE = /\\textbackslash(?:\{\}|(?![a-zA-Z]))/
+  TEXTBACKSLASH_RE = TextFieldArtifacts::TEXTBACKSLASH_RE
 
   def find_textbackslash(content)
     issues = []

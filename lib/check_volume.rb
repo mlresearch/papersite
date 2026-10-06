@@ -36,6 +36,7 @@ require 'set'
 require 'yaml'
 require_relative 'bibtex_keys'
 require_relative 'pdf_wrap_hyphens'
+require_relative 'text_field_artifacts'
 
 # =============================================================================
 # Colours
@@ -68,18 +69,7 @@ class VolumeChecker
     PMLR JMLR arXiv ARXIV CORL RSS IROS ICRA COLT ALT MIDL CHIL CoRL
   ].to_set
 
-  # Alphabetic Presentation Forms commonly emitted by PDF text extractors when
-  # the source used a ligature glyph. Legitimate typographic æ/œ in names are
-  # not in this set — only the FB0x “fi/ff/fl” family that should be ASCII.
-  PDF_EXTRACTION_LIGATURES = {
-    0xFB00 => ['ﬀ', 'ff'],
-    0xFB01 => ['ﬁ', 'fi'],
-    0xFB02 => ['ﬂ', 'fl'],
-    0xFB03 => ['ﬃ', 'ffi'],
-    0xFB04 => ['ﬄ', 'ffl'],
-    0xFB05 => ['ﬅ', 'st'], # long s + t
-    0xFB06 => ['ﬆ', 'st'],
-  }.freeze
+  PDF_EXTRACTION_LIGATURES = TextFieldArtifacts::PDF_EXTRACTION_LIGATURES
 
   def initialize(options)
     @options   = options
@@ -406,7 +396,7 @@ class VolumeChecker
       in_field = false if in_field && line.strip.end_with?('},')
 
       next unless in_field
-      next unless line.match?(/\\textbackslash(?:\{\}|(?![a-zA-Z]))/)
+      next unless line.match?(TextFieldArtifacts::TEXTBACKSLASH_RE)
 
       issues << "  [#{current_key || '?'}] line #{lineno}: \\textbackslash found — over-escaped backslash; use \\ instead (e.g. \\log not \\textbackslash{}log)"
     end

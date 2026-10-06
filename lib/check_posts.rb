@@ -10,6 +10,9 @@
 #   2. Frontmatter contract (layout, title, author, id, pdf, extras shape)
 #   3. Within-post display vs bibtex_* / tex_title consistency (when present)
 #   4. Non-printable C0/C1 control characters in string fields
+#   5. PDF / conversion artifacts in abstract, title, tex_title, bibtex_author
+#      (wrap hyphens, \textbackslash, ligatures, escaped \$\{ \}, \\\\ ) —
+#      same classes as check_volume on .bib abstracts/titles
 #
 # Usage:
 #   ruby check_posts.rb -d VOLUME_DIR
@@ -28,6 +31,7 @@ begin
 rescue LoadError
   # Optional until bin/pmlint / CI installs bibtex-ruby; parse_bibtex_authors handles nil.
 end
+require_relative 'text_field_artifacts'
 
 module Colour
   def self.red(s)    "\e[31m#{s}\e[0m" end
@@ -131,6 +135,7 @@ class PostsChecker
     check_schema(data, rel)
     check_consistency(data, rel)
     check_strings_for_controls(data, rel, [])
+    check_text_field_artifacts(data, rel)
   end
 
   def extract_frontmatter(raw)
@@ -407,6 +412,24 @@ class PostsChecker
     when Hash
       node.each { |k, v| check_strings_for_controls(v, rel, path + [k.to_s]) }
     end
+  end
+
+  # Same PDF/conversion artifact classes as intake check_volume on .bib
+  # abstract/title — applied to the post fields editors actually edit.
+  TEXT_ARTIFACT_FIELDS = %w[abstract title tex_title bibtex_author].freeze
+
+  def check_text_field_artifacts(data, rel)
+    found = false
+    TEXT_ARTIFACT_FIELDS.each do |field|
+      value = data[field]
+      next unless value.is_a?(String) && !value.strip.empty?
+
+      TextFieldArtifacts.issues_in(value, field: field).each do |msg|
+        error "  #{msg}"
+        found = true
+      end
+    end
+    ok '  no PDF/conversion artifacts in abstract/title/author text' unless found
   end
 
   # Greek / symbol folds used for title comparison (display Unicode ↔ LaTeX names)
