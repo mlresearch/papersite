@@ -13,6 +13,8 @@
 #   5. PDF / conversion artifacts in abstract, title, tex_title, bibtex_author
 #      (wrap hyphens, \textbackslash, ligatures, escaped \$\{ \}, \\\\ ) —
 #      same classes as check_volume on .bib abstracts/titles
+#   6. Sectioned volumes: when _config.yml declares sections, every paper post
+#      must have section matching a declared name exactly (site filter)
 #
 # Usage:
 #   ruby check_posts.rb -d VOLUME_DIR
@@ -53,6 +55,8 @@ class PostsChecker
     @ok = []
     @files_checked = 0
     @current_rel = nil
+    @declared_sections = nil
+    @section_counts = Hash.new(0)
   end
 
   def run
@@ -66,6 +70,11 @@ class PostsChecker
       fatal "_posts/ not found under #{@vol_dir}"
     end
 
+    @declared_sections = load_declared_sections
+    if @declared_sections
+      puts "  Sections:  #{@declared_sections.join(' | ')}"
+    end
+
     files = resolve_files(posts_dir)
     if files.empty?
       fatal 'No _posts/*.md files to check'
@@ -74,6 +83,7 @@ class PostsChecker
     puts
 
     files.each { |path| check_file(path) }
+    check_section_coverage(files.size)
 
     print_summary
     @errors.empty? ? 0 : 1
@@ -135,9 +145,102 @@ class PostsChecker
     end
 
     check_schema(data, rel)
+    check_section_field(data, rel)
     check_consistency(data, rel)
     check_strings_for_controls(data, rel, [])
     check_text_field_artifacts(data, rel)
+  end
+
+  def load_declared_sections
+    cfg_path = File.join(@vol_dir, '_config.yml')
+    return nil unless File.file?(cfg_path)
+
+    raw = File.read(cfg_path, encoding: 'UTF-8')
+    cfg = begin
+      YAML.safe_load(
+        raw,
+        permitted_classes: [Date, Time, Symbol],
+        aliases: true
+      )
+    rescue ArgumentError
+      YAML.safe_load(raw, [Date, Time, Symbol], [], true)
+    end
+    return nil unless cfg.is_a?(Hash)
+    return nil unless cfg.key?('sections')
+
+    secs = cfg['sections']
+    return [] if secs.nil?
+
+    case secs
+    when Array
+      secs.map do |s|
+        if s.is_a?(Hash)
+          (s['name'] || s[:name]).to_s.strip
+        else
+          s.to_s.strip
+        end
+      end.reject(&:empty?)
+    when String
+      secs.split('|').map { |p| p.split('=', 2).first.to_s.strip }.reject(&:empty?)
+    else
+      []
+    end
+  rescue StandardError => e
+    warn_msg "  could not load _config.yml sections: #{e.message}"
+    nil
+  end
+
+  def check_section_field(data, rel)
+    sec = data['section']
+    sec = sec.to_s.strip if sec
+
+    if @declared_sections.nil?
+      if sec && !sec.empty?
+        warn_msg '  section present but _config.yml has no sections list ' \
+                 '(cannot verify name match)'
+      end
+      return
+    end
+
+    if @declared_sections.empty?
+      error '  _config.yml sections list is empty'
+      return
+    end
+
+    if sec.nil? || sec.empty?
+      error "  missing section (volume declares: #{@declared_sections.join(', ')})"
+      return
+    end
+
+    unless @declared_sections.include?(sec)
+      error "  section #{sec.inspect} does not match declared sections " \
+            "(#{@declared_sections.join(', ')}) — exact match required or " \
+            'the paper will not appear on the site'
+      return
+    end
+
+    @section_counts[sec] += 1
+    ok "  section: #{sec}"
+  end
+
+  # Empty declared sections hide whole TOC groups. Only assert coverage when
+  # we scanned the full _posts tree (not --changed / explicit file lists).
+  def check_section_coverage(_n_files)
+    return if @declared_sections.nil? || @declared_sections.empty?
+    return if @options[:changed]
+    return if @options[:explicit_files] && !@options[:explicit_files].empty?
+
+    @current_rel = nil
+    puts
+    puts Colour.cyan('  ── Section coverage')
+    @declared_sections.each do |name|
+      n = @section_counts[name]
+      if n.zero?
+        error "  Declared section #{name.inspect} has no papers — heading will be empty on the site"
+      else
+        ok "  #{name}: #{n} paper(s)"
+      end
+    end
   end
 
   def extract_frontmatter(raw)

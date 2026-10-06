@@ -114,7 +114,8 @@ for pair in \
   "posts_control_char:non-printable" \
   "posts_title_mismatch:title and tex_title diverge" \
   "posts_wrap_hyphens:PDF wrap hyphen" \
-  "posts_textbackslash:textbackslash"
+  "posts_textbackslash:textbackslash" \
+  "posts_sections_mismatch:does not match declared sections"
 do
   fix="${pair%%:*}"
   needle="${pair#*:}"
@@ -136,6 +137,16 @@ do
   fi
   rm -rf "$TMP"
 done
+
+# --- sectioned posts that match _config.yml pass ---
+TMP=$(mktemp -d)
+cp -R "$FIXTURES/posts_sections_ok" "$TMP/vol"
+set +e
+ruby "$CHECK" -d "$TMP/vol" >/tmp/check_posts_sections_ok.txt 2>&1
+rc=$?
+set -e
+assert_eq "check_posts posts_sections_ok exit" "$rc" "0"
+rm -rf "$TMP"
 
 # --- failure summary repeats issues after the per-file ticks ---
 TMP=$(mktemp -d)

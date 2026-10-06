@@ -21,6 +21,10 @@
 #   fixtures/textbackslash/   — Synthetic: \textbackslash{}log over-escaping
 #   fixtures/pdfs_in_subdir/  — Synthetic: PDFs in pdfs/ not root
 #   fixtures/supps_in_subdir/ — Synthetic: supps in supplementary_material/
+#   fixtures/proper_names_ok/ — Synthetic: braced Bayesian/Markov stems; passes
+#   fixtures/sections_ok/     — Synthetic: sections= names match paper section=
+#   fixtures/sections_mismatch/ — Synthetic: "Full paper" vs "Full Papers" (v350)
+#   fixtures/sections_missing/  — Synthetic: sectioned volume, paper missing section=
 #   fixtures/clean_volume/    — Synthetic: all checks should pass
 #                               (includes legitimate UTF-8 punctuation)#
 # Usage:
@@ -307,6 +311,32 @@ assert_no_error "proper-names-ok: no unprotected Bayesian" "$OUT" 'unprotected "
 assert_no_error "proper-names-ok: no unprotected Markov"   "$OUT" 'unprotected "Markov"'
 assert_no_error "proper-names-ok: no unknown FOOBAR"       "$OUT" 'unknown acronym "FOOBAR"'
 assert_exit_pass "proper-names-ok exits zero"              "$FIXTURES/proper_names_ok" 99003
+
+# ---------------------------------------------------------------------------
+section "sections_ok — declared section names match paper section fields"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 991 "$FIXTURES/sections_ok")
+
+assert_no_error "sections-ok: no mismatch" "$OUT" "does not match declared sections"
+assert_no_error "sections-ok: no empty Full Papers" "$OUT" 'Declared section "Full Papers" has no papers'
+assert_exit_pass "sections-ok exits zero" "$FIXTURES/sections_ok" 991
+
+# ---------------------------------------------------------------------------
+section "sections_mismatch — v350-style Full paper vs Full Papers"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 992 "$FIXTURES/sections_mismatch")
+
+assert_error "sections-mismatch: Full paper vs Full Papers" "$OUT" "section = {Full paper} does not match declared sections"
+assert_error "sections-mismatch: empty Full Papers" "$OUT" 'Declared section "Full Papers" has no papers'
+assert_exit_fail "sections-mismatch exits non-zero" "$FIXTURES/sections_mismatch" 992
+
+# ---------------------------------------------------------------------------
+section "sections_missing — paper without section when volume is sectioned"
+# ---------------------------------------------------------------------------
+OUT=$(run_checker 993 "$FIXTURES/sections_missing")
+
+assert_error "sections-missing: doe26a missing section" "$OUT" "[doe26a] missing section"
+assert_exit_fail "sections-missing exits non-zero" "$FIXTURES/sections_missing" 993
 
 # =============================================================================
 # Summary

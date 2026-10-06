@@ -27,6 +27,9 @@
 #  14. Proper names / acronyms in titles are LaTeX-braced when listed in
 #      lib/proper_names.yml (CIP-000B); unknown all-caps tokens warn and can be
 #      offered for addition to the YAML (--add-proper-names)
+#  15. Sectioned proceedings: if @Proceedings has sections = {A|B|…}, every
+#      @InProceedings must have section matching a declared name exactly
+#      (site filters by exact string; mismatches hide papers — v350)
 #
 # Usage:
 #   ruby check_volume.rb -v VOLUME -d DIRECTORY [-b BIBFILE] [--add-proper-names]
@@ -101,6 +104,7 @@ class VolumeChecker
     content = File.read(bib_path, encoding: 'utf-8')
 
     check_proceedings_entry(content)
+    check_section_fields(content)
     check_pdf_locations
     check_supp_locations
     check_pdf_bib_match(content)
@@ -165,6 +169,125 @@ class VolumeChecker
     else
       ok "  published not set (OK at submission; set YYYY-MM-DD when publishing)"
     end
+  end
+
+  # When @Proceedings declares sections, every paper's section= value must
+  # match a declared name exactly. The published site filters by that string;
+  # near-misses (e.g. "Full paper" vs "Full Papers") leave headings empty.
+  def check_section_fields(content)
+    section "Sectioned proceedings"
+
+    declared = extract_declared_sections(content)
+    papers = extract_inproceedings_sections(content)
+
+    if declared.nil?
+      with_section = papers.select { |_k, s| s && !s.strip.empty? }
+      if with_section.empty?
+        ok "  Not a sectioned volume (no sections field)"
+      else
+        with_section.each do |key, sec|
+          error "  [#{key}] has section = {#{sec}} but @Proceedings has no sections field"
+        end
+      end
+      return
+    end
+
+    if declared.empty?
+      error "  sections field is empty — remove it or list names separated by |"
+      return
+    end
+
+    ok "  Declared sections: #{declared.join(' | ')}"
+    counts = Hash.new(0)
+
+    papers.each do |key, sec|
+      if sec.nil? || sec.strip.empty?
+        error "  [#{key}] missing section (volume declares: #{declared.join(', ')})"
+      elsif !declared.include?(sec)
+        error "  [#{key}] section = {#{sec}} does not match declared sections " \
+              "(#{declared.join(', ')}) — exact match required or the paper will not appear"
+      else
+        counts[sec] += 1
+      end
+    end
+
+    declared.each do |name|
+      n = counts[name]
+      if n.zero?
+        error "  Declared section #{name.inspect} has no papers — heading will be empty on the site"
+      else
+        ok "  #{name}: #{n} paper(s)"
+      end
+    end
+  end
+
+  def extract_declared_sections(content)
+    proc_match = content.match(/@Proceedings\s*\{[^,]+,(.*?)^\}/im)
+    return nil unless proc_match
+    block = proc_match[1]
+    return nil unless block =~ /^\s*sections\s*=/i
+
+    raw = braced_field_value(block, 'sections')
+    return [] if raw.nil?
+
+    raw.split('|').map { |part| part.split('=', 2).first.to_s.strip }.reject(&:empty?)
+  end
+
+  def extract_inproceedings_sections(content)
+    papers = []
+    content.scan(/@InProceedings\s*\{\s*([\w-]+)\s*,/i) do
+      key = Regexp.last_match(1)
+      start = Regexp.last_match.end(0)
+      block = entry_body_from(content, start)
+      papers << [key, braced_field_value(block, 'section')]
+    end
+    papers
+  end
+
+  # Body of a BibTeX entry starting after the opening "key," through the
+  # matching top-level closing brace (exclusive).
+  def entry_body_from(content, start)
+    slice = content[start, 200_000] || ''
+    depth = 1
+    end_idx = slice.length
+    prev = nil
+    slice.each_char.with_index do |ch, idx|
+      if ch == '{' && prev != '\\'
+        depth += 1
+      elsif ch == '}' && prev != '\\'
+        depth -= 1
+        if depth.zero?
+          end_idx = idx
+          break
+        end
+      end
+      prev = ch
+    end
+    slice[0...end_idx]
+  end
+
+  def braced_field_value(block, field)
+    m = block.match(/^\s*#{Regexp.escape(field)}\s*=\s*\{/i)
+    return nil unless m
+
+    start = m.end(0)
+    slice = block[start, 50_000] || ''
+    depth = 1
+    end_idx = 0
+    prev = nil
+    slice.each_char.with_index do |ch, idx|
+      if ch == '{' && prev != '\\'
+        depth += 1
+      elsif ch == '}' && prev != '\\'
+        depth -= 1
+        if depth.zero?
+          end_idx = idx
+          break
+        end
+      end
+      prev = ch
+    end
+    slice[0...end_idx].gsub(/\s+/, ' ').strip
   end
 
   def check_pdf_locations
